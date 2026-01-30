@@ -1,6 +1,7 @@
 package sv.com.clip.dictionary.infrastructure
 
 import org.springframework.stereotype.Repository
+import sv.com.clip.dictionary.api.FullWordContextDTO
 import sv.com.clip.dictionary.api.LemmaFoundDTO
 import sv.com.clip.dictionary.api.WordDTO
 import sv.com.clip.dictionary.api.WordTranslationDTO
@@ -53,5 +54,17 @@ class LexicalEntryRepositoryAdapter(
 
   override fun findLemmasByForms(term: String): List<LemmaFoundDTO> {
     return jpaRepository.findLemmasByForms(term)
+  }
+
+  override fun findFullContext(
+    term: String,
+    sourceLexiconId: UUID,
+    targetLexiconId: UUID
+  ): List<FullWordContextDTO> {
+    return jpaRepository.findFullContext(term, sourceLexiconId, targetLexiconId)
+  }
+
+  override fun findFormsByLexicalEntryId(id: UUID): List<String> {
+    return jpaRepository.findFormsByLexicalEntryId(id)
   }
 }

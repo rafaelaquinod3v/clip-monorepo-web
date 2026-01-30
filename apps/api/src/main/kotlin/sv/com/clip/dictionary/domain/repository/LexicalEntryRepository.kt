@@ -1,6 +1,7 @@
 package sv.com.clip.dictionary.domain.repository
 
 import org.jmolecules.ddd.annotation.Repository
+import sv.com.clip.dictionary.api.FullWordContextDTO
 import sv.com.clip.dictionary.api.LemmaFoundDTO
 import sv.com.clip.dictionary.api.WordDTO
 import sv.com.clip.dictionary.api.WordTranslationDTO
@@ -18,4 +19,6 @@ interface LexicalEntryRepository {
   fun saveAll(list: List<LexicalEntry>) : List<LexicalEntry>
   fun findLemmasByForm(term: String): List<String>
   fun findLemmasByForms(term: String): List<LemmaFoundDTO>
+  fun findFullContext(term: String, sourceLexiconId: UUID, targetLexiconId: UUID): List<FullWordContextDTO>
+  fun findFormsByLexicalEntryId(id: UUID) : List<String>
 }

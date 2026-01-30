@@ -4,6 +4,13 @@ CREATE INDEX idx_lexical_lemma ON lexical_entries (lemma);
 -- For the forms search (VERY IMPORTANT)
 CREATE INDEX idx_forms_written_rep ON lexical_entry_forms (written_representation);
 
+-- This allows the DB to jump from ILI -> Lexicon -> Entry in one step
+CREATE INDEX idx_senses_ili_lexicon ON lexical_senses (concept_ili, lexical_entry_id);
+
+-- This makes the "le.lemma OR forms" check fast
+CREATE INDEX idx_le_lemma_lexicon ON lexical_entries (lemma, lexicon_id);
+CREATE INDEX idx_lf_written_rep ON lexical_entry_forms (written_representation);
+
 
 . 
 3. Estrategia de "Caché de Vocabulario" (Control de Costos)

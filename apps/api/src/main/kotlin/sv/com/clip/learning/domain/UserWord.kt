@@ -10,10 +10,13 @@ class UserWord(
   val lemma: String,
   var status: WordStatus = WordStatus.NEW,
   var isManualLexicalEntry: Boolean = false, // si esto es verdadero, se deben llenar los siguientes
-  var targetLemmaAndForms: String? = null,
+  var targetLemma: String? = null,
+  var sourceGloss: String? = null,
   var targetGloss: String? = null,
   var sourceLexicalEntryId: UUID? = null, // referencia ligera (id) al dictionary
   var targetLexicalEntryId: UUID? = null,
+  var sourceForms: String? = null,
+  var targetForms: String? = null,
 ) {
   fun upgradeStatus() {
     this.status = when (status) {

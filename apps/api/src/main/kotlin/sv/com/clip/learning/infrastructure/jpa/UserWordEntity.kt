@@ -22,10 +22,13 @@ class UserWordEntity(
   @Column(name = "status", length = 20)
   var status: WordStatus,
   var isManualLexicalEntry: Boolean = false,
-  var targetLemmaAndForms: String? = null,
+  var targetLemma: String? = null,
+  var sourceGloss: String? = null,
   var targetGloss: String? = null,
   var sourceLexicalEntryId: UUID? = null,
   var targetLexicalEntryId: UUID? = null,
+  var sourceForms: String? = null,
+  var targetForms: String? = null,
 ) {
   fun toDomain() : UserWord {
     return UserWord(
@@ -34,10 +37,13 @@ class UserWordEntity(
       this.lemma,
       this.status,
       this.isManualLexicalEntry,
-      this.targetLemmaAndForms,
+      this.targetLemma,
+      this.sourceGloss,
       this.targetGloss,
       this.sourceLexicalEntryId,
       this.targetLexicalEntryId,
+      this.sourceForms,
+      this.targetForms,
     )
   }
   companion object {
@@ -48,10 +54,13 @@ class UserWordEntity(
         userWord.lemma,
         userWord.status,
         userWord.isManualLexicalEntry,
-        userWord.targetLemmaAndForms,
+        userWord.targetLemma,
+        userWord.sourceGloss,
         userWord.targetGloss,
         userWord.sourceLexicalEntryId,
         userWord.targetLexicalEntryId,
+        userWord.sourceForms,
+        userWord.targetForms,
       )
     }
   }

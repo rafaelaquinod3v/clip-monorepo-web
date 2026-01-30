@@ -3,6 +3,7 @@ package sv.com.clip.dictionary.infrastructure.persistence.repository
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
+import sv.com.clip.dictionary.api.FullWordContextDTO
 import sv.com.clip.dictionary.api.LemmaFoundDTO
 import sv.com.clip.dictionary.api.WordDTO
 import sv.com.clip.dictionary.api.WordTranslationDTO
@@ -96,5 +97,106 @@ interface JpaLexicalEntryEntityRepository : JpaRepository<LexicalEntryEntity, UU
     WHERE le.lemma = :term OR f.writtenRepresentation = :term
     """)
   fun findLemmasByForms(@Param("term") term: String): List<LemmaFoundDTO>
+
+//
+//  @Query("""
+//        SELECT DISTINCT new sv.com.clip.dictionary.api.FullWordContextDTO(
+//            le.lemma,
+//            target_le.lemma,
+//            le.id,
+//            target_le.id,
+//            target_s.definition
+//        )
+//        FROM LexicalEntryEntity le
+//        JOIN le._senses s
+//        LEFT JOIN LexicalEntryEntity target_le ON target_le.lexiconId = :targetLexiconId
+//        LEFT JOIN target_le._senses target_s ON target_s.conceptIli = s.conceptIli
+//        WHERE (le.lemma = :term OR EXISTS (SELECT f FROM le._forms f WHERE f.writtenRepresentation = :term))
+//          AND le.lexiconId = :sourceLexiconId
+//    """)
+//    fun findFullContext(
+//      @Param("term") term: String,
+//      @Param("sourceLexiconId") sourceId: UUID,
+//      @Param("targetLexiconId") targetId: UUID
+//    ): List<FullWordContextDTO>
+
+//  @Query("""
+//    SELECT DISTINCT new sv.com.clip.dictionary.api.FullWordContextDTO(
+//        le.lemma,
+//        target_le.lemma,
+//        le.id,
+//        target_le.id,
+//        target_s.definition
+//    )
+//    FROM LexicalEntryEntity le
+//    JOIN le._senses s
+//
+//    LEFT JOIN LexicalEntryEntity target_le ON target_le.lexiconId = :targetLexiconId
+//        AND EXISTS (
+//            SELECT ts FROM target_le._senses ts
+//            WHERE ts.conceptIli = s.conceptIli
+//        )
+//
+//    LEFT JOIN target_le._senses target_s ON target_s.conceptIli = s.conceptIli
+//    WHERE (le.lemma = :term OR EXISTS (SELECT f FROM le._forms f WHERE f.writtenRepresentation = :term))
+//      AND le.lexiconId = :sourceLexiconId
+//""")
+//  fun findFullContext(
+//    @Param("term") term: String,
+//    @Param("sourceLexiconId") sourceId: UUID,
+//    @Param("targetLexiconId") targetId: UUID
+//  ): List<FullWordContextDTO>
+
+//  @Query("""
+//    SELECT DISTINCT new sv.com.clip.dictionary.api.FullWordContextDTO(
+//        le.lemma,
+//        target_le.lemma,
+//        le.id,
+//        target_le.id,
+//        target_s.definition
+//    )
+//    FROM LexicalEntryEntity le
+//    JOIN le._senses s
+//
+//    LEFT JOIN SenseEntity target_s ON target_s.conceptIli = s.conceptIli
+//        AND target_s.lexicalEntryEntity.lexiconId = :targetLexiconId
+//
+//    LEFT JOIN target_s.lexicalEntryEntity target_le
+//    WHERE (le.lemma = :term OR EXISTS (SELECT f FROM le._forms f WHERE f.writtenRepresentation = :term))
+//      AND le.lexiconId = :sourceLexiconId
+//""", countQuery = "SELECT count(le) FROM LexicalEntryEntity le") // Count query helps Hibernate optimization
+//  fun findFullContext(
+//    @Param("term") term: String,
+//    @Param("sourceLexiconId") sourceId: UUID,
+//    @Param("targetLexiconId") targetId: UUID
+//  ): List<FullWordContextDTO>
+
+  @Query("""
+    SELECT DISTINCT new sv.com.clip.dictionary.api.FullWordContextDTO(
+        le.lemma,
+        target_le.lemma,
+        le.id,
+        target_le.id,
+        target_s.definition,
+        s.definition,
+        "",
+        ""
+    )
+    FROM LexicalEntryEntity le
+    JOIN le._senses s
+    LEFT JOIN SenseEntity target_s ON target_s.conceptIli = s.conceptIli
+         AND target_s.lexicalEntryEntity.lexiconId = :targetLexiconId
+    LEFT JOIN target_s.lexicalEntryEntity target_le
+    WHERE (le.lemma = :term OR EXISTS (SELECT f FROM le._forms f WHERE f.writtenRepresentation = :term))
+      AND le.lexiconId = :sourceLexiconId
+""")
+  fun findFullContext(
+    @Param("term") term: String,
+    @Param("sourceLexiconId") sourceId: UUID,
+    @Param("targetLexiconId") targetId: UUID
+  ): List<FullWordContextDTO>
+
+  @Query("SELECT f.writtenRepresentation FROM FormEntity f WHERE f.lexicalEntryEntity.id = :id")
+  fun findFormsByLexicalEntryId(@Param("id") id: UUID): List<String>
 
 }

@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import sv.com.clip.dictionary.api.FullWordContextDTO
 import sv.com.clip.dictionary.api.LemmaFoundDTO
-import sv.com.clip.dictionary.api.WordDTO
+import sv.com.clip.dictionary.api.LemmaDTO
 import sv.com.clip.dictionary.api.WordTranslationDTO
 import sv.com.clip.dictionary.infrastructure.persistence.jpa.LexicalEntryEntity
 import java.util.UUID
@@ -23,15 +23,37 @@ interface JpaLexicalEntryEntityRepository : JpaRepository<LexicalEntryEntity, UU
         WHERE l.lemma IN :lemmas
   """)
   fun findAllByLemmaInWithDetails(@Param("lemmas") lemmas: Set<String>): Set<LexicalEntryEntity>
+//  @Query("""
+//        SELECT DISTINCT new sv.com.clip.dictionary.api.TermDTO(l.id, l.lemma)
+//        FROM LexicalEntryEntity l
+//        WHERE l.lemma IN :lemmas
+//          AND l.lexiconId = :sourceLexiconId
+//    """)
+//  fun findTermProjections(
+//    @Param("lemmas") lemmas: Set<String>,
+//    @Param("sourceLexiconId") sourceId: UUID
+//  ): List<TermDTO>
+
+  @Query("""
+    SELECT DISTINCT new sv.com.clip.dictionary.api.LemmaDTO(l.id, l.lemma)
+    FROM LexicalEntryEntity l
+    LEFT JOIN l._forms f
+    WHERE l.lexiconId = :sourceLexiconId
+      AND (l.lemma IN :forms OR f.writtenRepresentation IN :forms)
+""")
+  fun findLemmaProjections(
+    @Param("forms") forms: Set<String>,
+    @Param("sourceLexiconId") sourceId: UUID
+  ): List<LemmaDTO>
 
 
   @Query("""
-        SELECT new sv.com.clip.dictionary.api.WordDTO(l.id, l.lemma, s.definition)
+        SELECT new sv.com.clip.dictionary.api.LemmaDTO(l.id, l.lemma)
         FROM LexicalEntryEntity l
         JOIN l._senses s
         WHERE l.lemma IN :lemmas
     """)
-  fun findProjectionsByLemmaIn(@Param("lemmas") lemmas: Set<String>): List<WordDTO>
+  fun findProjectionsByLemmaIn(@Param("lemmas") lemmas: Set<String>): List<LemmaDTO>
 
   @Query("""
     SELECT DISTINCT le FROM LexicalEntryEntity le

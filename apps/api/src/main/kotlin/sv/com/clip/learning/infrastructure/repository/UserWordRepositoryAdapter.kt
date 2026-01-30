@@ -15,7 +15,7 @@ class UserWordRepositoryAdapter(
   }
 
   override fun findAllByLemmaIn(lemmas: Set<String>): List<UserWord> {
-    return jpaUserWordRepository.findAllByLemmaIn(lemmas).map { UserWord(it.id, it.userId, it.lemma, it.status) }
+    return jpaUserWordRepository.findAllByLemmaIn(lemmas).map { it.toDomain() }
   }
 
   override fun save(userWord: UserWord): UserWord {

@@ -3,18 +3,19 @@ package sv.com.clip.dictionary.domain.repository
 import org.jmolecules.ddd.annotation.Repository
 import sv.com.clip.dictionary.api.FullWordContextDTO
 import sv.com.clip.dictionary.api.LemmaFoundDTO
-import sv.com.clip.dictionary.api.WordDTO
+import sv.com.clip.dictionary.api.LemmaDTO
 import sv.com.clip.dictionary.api.WordTranslationDTO
 import sv.com.clip.dictionary.domain.model.LexicalEntry
 import java.util.UUID
 
 @Repository
 interface LexicalEntryRepository {
+  fun findLemmaProjections(forms: Set<String>, sourceLexicalEntryId: UUID): List<LemmaDTO>
   fun save(lexicalEntry: LexicalEntry) : LexicalEntry
   fun findAll() : List<LexicalEntry> // TODO: pagination,
   fun findAllByLemmaIn(lemmas: Set<String>) : List<LexicalEntry>
   fun findAllByLemmaInWithDetails(lemmas: Set<String>) : List<LexicalEntry>
-  fun findProjectionsByLemmaIn(lemmas: Set<String>) : List<WordDTO>
+  fun findProjectionsByLemmaIn(lemmas: Set<String>) : List<LemmaDTO>
   fun findFullDefinition(term: String, sourceLexiconId: UUID, targetLexiconId: UUID): List<WordTranslationDTO>
   fun saveAll(list: List<LexicalEntry>) : List<LexicalEntry>
   fun findLemmasByForm(term: String): List<String>

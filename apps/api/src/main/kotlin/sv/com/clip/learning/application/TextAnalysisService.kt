@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional
 import sv.com.clip.dictionary.api.DictionaryExternal
 import sv.com.clip.learning.application.mapper.toAnalysis
 import sv.com.clip.learning.domain.WordStatus
-import sv.com.clip.learning.domain.events.TermsNotFoundEvent
 import sv.com.clip.learning.domain.repository.UserWordRepository
 import sv.com.clip.learning.infrastructure.UserWordExclusionAdapter
 import java.util.UUID
@@ -71,41 +70,52 @@ class TextAnalysisService(
       .associateBy { it.lemma.lowercase().trim() }
 
     //  -- Consultar datos técnicos al módulo Dictionary
-    val wordDetails = dictionaryExternal.getWords(wordsToQuery)
-
+//    val wordDetails = dictionaryExternal.getWords(wordsToQuery)
+    // 3. OPTIMIZATION: Only query Main Dictionary for words NOT in Personal DB and NOT Excluded
+    val wordsMissingInfo = allUniqueWords.filter {
+      it !in userKnownWords && it !in excluded
+    }.toSet()
+    // Now 'wordDetails' only contains data for truly NEW words
+    val wordDetails = if (wordsMissingInfo.isNotEmpty()) {
+      dictionaryExternal.getFormsLemma(wordsMissingInfo)
+    } else {
+      emptyList()
+    }
     // 5. Clasificar sin crear dependencia circular
 
     // 5. Clasificar con soporte para Diccionario Personal
     val classifiedWords = allUniqueWords.map { rawWord ->
-      val word = rawWord.lowercase().trim() // <--- NORMALIZACIÓN CRUCIAL
+      val form = rawWord.lowercase().trim() // <--- NORMALIZACIÓN CRUCIAL
 
-      val dictEntry = wordDetails.find { it.term.lowercase().trim() == word }
-      val userEntry = userKnownWords[word]
-      val isExcluded = word in excluded
+      val dictEntry = wordDetails.find { it.lemma.lowercase().trim() == form }
+      val userEntry = userKnownWords[form]
+      val isExcluded = form in excluded
 
       when {
         // Si el usuario tiene un registro activo de aprendizaje, manda sobre la exclusión
         userEntry != null -> WordAnalysis(
-          word = word,
-          definition = userEntry.targetGloss ?: dictEntry?.definition ?: "Sin definición",
-          status = userEntry.status
+          term = form,
+          lemma = userEntry.lemma,
+          status = userEntry.status,
+          targetLemma = userEntry.targetLemma ?: ""
         )
 
-        isExcluded -> WordAnalysis(word, "Excluido", WordStatus.IGNORED)
+        isExcluded -> WordAnalysis(form, "Excluido", WordStatus.IGNORED)
 
         // Caso: No está en Dictionary oficial
 
 
         // Caso: No existe en ningún lado
         dictEntry == null ->
-          WordAnalysis(word, "No encontrada", WordStatus.NOT_FOUND)
+          WordAnalysis(form, "No encontrada", WordStatus.NOT_FOUND)
 
         // Caso: Existe en Dictionary oficial
         else ->
           WordAnalysis(
-            word = word,
-            definition = dictEntry.definition,
-            status = WordStatus.NEW
+            term = form,
+            lemma = dictEntry.lemma,
+            status = WordStatus.UNKNOWN,
+            targetLemma = ""
           )
       }
     }
@@ -116,26 +126,27 @@ class TextAnalysisService(
 
     // 7. Detectar palabras que no están en dictDetails ni en excluded
     val notFoundTerms = allUniqueWords.filter { word ->
-      word !in excluded && wordDetails.none { it.term == word }
+      word !in excluded && wordDetails.none { it.lemma == word }
     }.toSet()
 
     // 8. Publicar evento si hay palabras nuevas para el diccionario
     if (notFoundTerms.isNotEmpty()) {
       notFoundTerms.chunked(10).forEach { batch ->
-        eventPublisher.publishEvent(TermsNotFoundEvent(batch.toSet()))
+//        eventPublisher.publishEvent(TermsNotFoundEvent(batch.toSet()))
       }
     }
     return AnalysisResult(classifiedWords, rawText, summary)
   }
   private fun calculateSummary(classified: List<WordAnalysis>, totalTokens: Int): AnalysisSummary {
     val knownCount = classified.count { it.status == WordStatus.KNOWN }
-
+    val learningCount = classified.count { it.status == WordStatus.NEW || it.status == WordStatus.RECOGNIZED || it.status == WordStatus.FAMILIAR || it.status == WordStatus.LEARNED }
+    val unknownCount = classified.count { it.status == WordStatus.UNKNOWN }
     return AnalysisSummary(
       totalWords = totalTokens,
       uniqueWords = classified.size,
       knownCount = knownCount,
-      learningCount = classified.count { it.status == WordStatus.RECOGNIZED || it.status == WordStatus.FAMILIAR },
-      unknownCount = classified.count { it.status == WordStatus.NEW },
+      learningCount = learningCount,
+      unknownCount = unknownCount,
       percentageKnown = if (classified.isNotEmpty()) (knownCount.toDouble() / classified.size) * 100 else 0.0
     )
   }

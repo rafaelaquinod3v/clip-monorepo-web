@@ -10,9 +10,9 @@ fun List<WordTranslationDTO>.toAnalysis(status: WordStatus): WordAnalysis {
   val firstEntry = this.first()
 
   return WordAnalysis(
-    word = firstEntry.sourceLemma,
+    term = firstEntry.sourceLemma,
     // Join all definitions from different senses into one string
-    definition = this.joinToString("; ") { it.targetLemma!! },
+    lemma = this.joinToString("; ") { it.targetLemma!! },
     status = status
   )
 }

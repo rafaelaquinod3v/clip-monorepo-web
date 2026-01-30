@@ -11,6 +11,7 @@ import sv.com.clip.dictionary.api.WordTranslationDTO
 import sv.com.clip.dictionary.domain.queries.LexiconProvider
 import sv.com.clip.dictionary.domain.repository.LexicalEntryRepository
 import sv.com.clip.dictionary.domain.valueObjects.Language
+import sv.com.clip.dictionary.infrastructure.gateways.AiDefinitionService
 import sv.com.clip.dictionary.infrastructure.gateways.LemmatizerService
 
 @Service
@@ -18,6 +19,7 @@ internal class DictionaryService(
   private val lexicalEntryRepository: LexicalEntryRepository,
   private val lexiconProvider: LexiconProvider,
   private val lemmatizerService: LemmatizerService,
+  private val aiService: AiDefinitionService
 ) : DictionaryExternal{
 
   @Transactional(readOnly = true)
@@ -99,6 +101,6 @@ internal class DictionaryService(
   }
 
   override fun generateDefinition(term: String): AiDataDTO? {
-    TODO("Not yet implemented")
+    return aiService.getAiDefinition(term)
   }
 }

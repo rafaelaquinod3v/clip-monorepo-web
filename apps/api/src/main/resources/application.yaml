@@ -8,6 +8,7 @@ spring:
       base-url: http://localhost:11434
       chat:
         options:
+          keep-alive: 5m
           model: gemma2:2b #qwen2.5:1.5b #llama3
           temperature: 0.2 #0.3 # Baja temperatura para traducciones más precisas
   servlet:

@@ -24,16 +24,25 @@ class AddUserWordCommandHandler(
     // Your DictionaryExternal should now return a DTO with targetLemma, targetId, etc.
     val officialData = dictionaryExternal.findFullDefinition(cleanTerm)
 
-    val lemma = officialData?.sourceLemma ?: cleanTerm
+    // NEW: If not found officially, try to get info from AI
+    val aiData = if (officialData == null) dictionaryExternal.generateDefinition(cleanTerm) else null
+
+    val lemma = officialData?.sourceLemma ?: aiData?.sourceLemma ?: cleanTerm
     val sourceId = officialData?.sourceLexicalEntryId // El UUID del diccionario principal
     val targetId = officialData?.targetLexicalEntryId
 
-    // Logic: If Dict has English but no Spanish translation, use AI Fallback
-    val finalTargetLemma = when {
-      officialData?.targetLemma != null -> officialData.targetLemma
-//      sourceId != null -> aiService.getQuickTranslation(lemma) // Gemma 2:2b
-      else -> command.lemma // User's manual entry
-    }
+//    // Logic: If Dict has English but no Spanish translation, use AI Fallback
+//    val finalTargetLemma = when {
+//      officialData?.targetLemma != null -> officialData.targetLemma
+////      sourceId != null -> aiService.getQuickTranslation(lemma) // Gemma 2:2b
+//      else -> command.lemma // User's manual entry
+//    }
+    val finalTargetLemma = officialData?.targetLemma
+      ?: aiData?.targetLemma
+      ?: command.lemma
+
+    val finalTargetGloss = officialData?.targetGloss
+      ?: "No definition found. Added manually."
 
     exclusions.deleteExclusion(command.userId, lemma)
 
@@ -43,7 +52,7 @@ class AddUserWordCommandHandler(
       existing.status = command.status
       existing.targetLemma = finalTargetLemma
 
-      existing.targetGloss = officialData?.targetGloss
+      existing.targetGloss = finalTargetGloss
       existing.sourceGloss = officialData?.sourceGloss
 
       existing.sourceForms = officialData?.sourceForms
@@ -62,7 +71,7 @@ class AddUserWordCommandHandler(
         sourceLexicalEntryId = sourceId,
         targetLexicalEntryId = targetId,
         sourceGloss = officialData?.sourceGloss,
-        targetGloss = officialData?.targetGloss,
+        targetGloss = finalTargetGloss,
         sourceForms = officialData?.sourceForms,
         targetForms = officialData?.targetForms,
         // Es manual solo si NO se encontró en el diccionario oficial

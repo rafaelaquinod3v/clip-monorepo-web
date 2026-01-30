@@ -1,6 +1,6 @@
 package sv.com.clip.dictionary.api
 
 data class AiDataDTO(
-  val targetLemma: String,
-  val targetGloss: String,
+  val sourceLemma: String? = null,
+  val targetLemma: String? = null,
 )

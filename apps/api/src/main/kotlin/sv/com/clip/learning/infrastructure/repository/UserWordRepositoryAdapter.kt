@@ -29,4 +29,8 @@ class UserWordRepositoryAdapter(
   override fun deleteByUserIdAndLemma(userId: UUID, lemma: String) {
     jpaUserWordRepository.deleteByUserIdAndLemma(userId, lemma)
   }
+
+  override fun findById(id: UUID): UserWord? {
+    return jpaUserWordRepository.findById(id)?.get()?.toDomain()
+  }
 }

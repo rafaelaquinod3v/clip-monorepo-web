@@ -1,10 +1,12 @@
 package sv.com.clip.learning.application.usecases
 
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import sv.com.clip.dictionary.api.DictionaryExternal
 import sv.com.clip.learning.domain.UserWord
 import sv.com.clip.learning.domain.commands.AddUserWordCommand
+import sv.com.clip.learning.domain.events.EnrichUserWordWithAiEvent
 import sv.com.clip.learning.domain.repository.UserWordExclusionRepository
 import sv.com.clip.learning.domain.repository.UserWordRepository
 
@@ -13,6 +15,7 @@ class AddUserWordCommandHandler(
   private val userWordRepository: UserWordRepository,
   private val exclusions: UserWordExclusionRepository,
   private val dictionaryExternal: DictionaryExternal,
+  private val eventPublisher: ApplicationEventPublisher,
 ) {
   @Transactional
   fun handle(command: AddUserWordCommand) {
@@ -25,42 +28,35 @@ class AddUserWordCommandHandler(
     val officialData = dictionaryExternal.findFullDefinition(cleanTerm)
 
     // NEW: If not found officially, try to get info from AI
-    val aiData = if (officialData == null) dictionaryExternal.generateDefinition(cleanTerm) else null
+//    val aiData = if (officialData == null) dictionaryExternal.generateAiSourceAndTargetLemma(cleanTerm) else null
 
-    val lemma = officialData?.sourceLemma ?: aiData?.sourceLemma ?: cleanTerm
+    val lemma = officialData?.sourceLemma ?: cleanTerm
     val sourceId = officialData?.sourceLexicalEntryId // El UUID del diccionario principal
     val targetId = officialData?.targetLexicalEntryId
 
-//    // Logic: If Dict has English but no Spanish translation, use AI Fallback
-//    val finalTargetLemma = when {
-//      officialData?.targetLemma != null -> officialData.targetLemma
-////      sourceId != null -> aiService.getQuickTranslation(lemma) // Gemma 2:2b
-//      else -> command.lemma // User's manual entry
-//    }
-    val finalTargetLemma = officialData?.targetLemma
-      ?: aiData?.targetLemma
-      ?: command.lemma
+    val finalTargetLemma = officialData?.targetLemma ?: ""
 
-    val finalTargetGloss = officialData?.targetGloss
-      ?: "No definition found. Added manually."
+    val finalTargetGloss = officialData?.targetGloss ?: "No definition found. Added manually."
 
     exclusions.deleteExclusion(command.userId, lemma)
 
     val existing = userWordRepository.findByUserIdAndLemma(command.userId, lemma)
 
-    if (existing != null) {
-      existing.status = command.status
-      existing.targetLemma = finalTargetLemma
+    val saved = if (existing != null) {
+      existing.apply {
+        status = command.status
+        targetLemma = finalTargetLemma
 
-      existing.targetGloss = finalTargetGloss
-      existing.sourceGloss = officialData?.sourceGloss
+        targetGloss = finalTargetGloss
+        sourceGloss = officialData?.sourceGloss
 
-      existing.sourceForms = officialData?.sourceForms
-      existing.targetForms = officialData?.targetForms
+        sourceForms = officialData?.sourceForms
+        targetForms = officialData?.targetForms
 
-      // Actualizamos el ID por si antes era null y ahora existe en el diccionario
-      existing.sourceLexicalEntryId = sourceId
-      existing.targetLexicalEntryId = targetId
+        // Actualizamos el ID por si antes era null y ahora existe en el diccionario
+        sourceLexicalEntryId = sourceId
+        targetLexicalEntryId = targetId
+      }
       userWordRepository.save(existing)
     }else {
       val newWord = UserWord(
@@ -78,6 +74,9 @@ class AddUserWordCommandHandler(
         isManualLexicalEntry = (sourceId == null),
       )
       userWordRepository.save(newWord)
+    }
+    if(officialData?.targetLemma.isNullOrEmpty()) {
+      eventPublisher.publishEvent(EnrichUserWordWithAiEvent(saved.id, saved.lemma))
     }
   }
 }

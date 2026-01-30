@@ -7,7 +7,7 @@ import java.util.UUID
 class UserWord(
   val id: UUID = UUID.randomUUID(),
   val userId: UUID,
-  val lemma: String,
+  var lemma: String,
   var status: WordStatus = WordStatus.NEW,
   var isManualLexicalEntry: Boolean = false, // si esto es verdadero, se deben llenar los siguientes
   var targetLemma: String? = null,

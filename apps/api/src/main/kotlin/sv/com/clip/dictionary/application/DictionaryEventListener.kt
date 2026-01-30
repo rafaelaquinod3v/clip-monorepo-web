@@ -6,12 +6,11 @@ import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import sv.com.clip.dictionary.domain.model.LexicalEntry
 import sv.com.clip.dictionary.domain.model.LexicalEntryId
-import sv.com.clip.dictionary.domain.model.LexiconId
 import sv.com.clip.dictionary.domain.queries.LexiconProvider
 import sv.com.clip.dictionary.domain.repository.LexicalEntryRepository
 import sv.com.clip.dictionary.domain.valueObjects.Language
 import sv.com.clip.dictionary.domain.valueObjects.PartOfSpeech
-import sv.com.clip.learning.domain.events.WordsNotFoundEvent
+import sv.com.clip.learning.domain.events.TermsNotFoundEvent
 
 @Component
 class DictionaryEventListener(
@@ -22,11 +21,11 @@ class DictionaryEventListener(
   // de forma transaccional y asíncrona (específico de Spring Modulith)
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   @ApplicationModuleListener
-  fun onWordsNotFound(event: WordsNotFoundEvent) {
+  fun onWordsNotFound(event: TermsNotFoundEvent) {
     println("EVENTO RECIBIDO!") // Debería imprimirse inmediatamente
     println("Telemetria") // TODO:
     val lexicon = lexiconProvider.findByLang(Language.EN) ?: return
-    val newEntries = event.words.map { term ->
+    val newEntries = event.terms.map { term ->
         LexicalEntry(
           id = LexicalEntryId.generate(),
           lemma = term,

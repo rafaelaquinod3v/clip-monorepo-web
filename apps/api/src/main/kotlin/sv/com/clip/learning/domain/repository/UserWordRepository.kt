@@ -11,4 +11,5 @@ interface UserWordRepository {
   fun save(userWord: UserWord): UserWord
   fun findAllByUserId(userId: UUID): List<UserWord>
   fun deleteByUserIdAndLemma(userId: UUID, lemma: String)
+  fun findById(id: UUID): UserWord?
 }

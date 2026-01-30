@@ -17,17 +17,23 @@ class UserWordEntity(
   @Id
   val id: UUID,
   val userId: UUID,
-  val lemma: String,
+  @Column(columnDefinition = "TEXT")
+  var lemma: String,
   @Enumerated(EnumType.STRING)
   @Column(name = "status", length = 20)
   var status: WordStatus,
   var isManualLexicalEntry: Boolean = false,
+  @Column(columnDefinition = "TEXT")
   var targetLemma: String? = null,
+  @Column(columnDefinition = "TEXT")
   var sourceGloss: String? = null,
+  @Column(columnDefinition = "TEXT")
   var targetGloss: String? = null,
   var sourceLexicalEntryId: UUID? = null,
   var targetLexicalEntryId: UUID? = null,
+  @Column(columnDefinition = "TEXT")
   var sourceForms: String? = null,
+  @Column(columnDefinition = "TEXT")
   var targetForms: String? = null,
 ) {
   fun toDomain() : UserWord {

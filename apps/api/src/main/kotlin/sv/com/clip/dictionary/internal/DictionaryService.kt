@@ -20,7 +20,7 @@ internal class DictionaryService(
   private val lexiconProvider: LexiconProvider,
   private val lemmatizerService: LemmatizerService,
   private val aiService: AiDefinitionService
-) : DictionaryExternal{
+) : DictionaryExternal {
 
   @Transactional(readOnly = true)
   override fun getWords(terms: Set<String>): List<WordDTO> {
@@ -66,41 +66,91 @@ internal class DictionaryService(
   @Transactional(readOnly = true)
   override fun findFullDefinition(term: String): FullWordContextDTO? {
     val cleanTerm = term.lowercase().trim()
+    val sourceId = lexiconProvider.findByLang(Language.EN)?.id?.uuid ?: return null
+    val targetId = lexiconProvider.findByLang(Language.ES)?.id?.uuid ?: return null
 
-    // 1. Resolve Lexicon IDs (Ideally cached)
-    val sourceId = lexiconProvider.findByLang(Language.EN)?.id?.uuid
-    val targetId = lexiconProvider.findByLang(Language.ES)?.id?.uuid
+    val results = lexicalEntryRepository.findFullContext(cleanTerm, sourceId, targetId)
+    if (results.isEmpty()) return null
 
-    // 2. Query the DB
-    val results = lexicalEntryRepository.findFullContext(cleanTerm, sourceId!!, targetId!!)
-    if(results.isEmpty()) return null
-
-    // 3. Logic: If multiple senses exist, we pick the first one or
-    // group them if you want a joined string.
+    // 1. Group by Source (English Entry)
     val merged = results.groupBy { it.sourceLexicalEntryId }
       .map { (_, variations) ->
         val first = variations.first()
+
+        // KEY FIX: Extract ALL unique target lemmas/ids found for this English word
+        val allTargetLemmas = variations.mapNotNull { it.targetLemma }.distinct()
+        val allTargetIds = variations.mapNotNull { it.targetLexicalEntryId }.distinct()
+
         first.copy(
+          // Join all Spanish translations: "miel, cariño"
+          targetLemma = allTargetLemmas.joinToString(", "),
           sourceGloss = variations.mapNotNull { it.sourceGloss }.distinct().joinToString("; "),
-          targetGloss = variations.mapNotNull { it.targetGloss }.distinct().joinToString("; ")
+          targetGloss = variations.mapNotNull { it.targetGloss }.distinct().joinToString("; "),
+          // We keep the first ID for forms, or better yet, handle multiple below
+          targetLexicalEntryId = allTargetIds.firstOrNull()
         )
       }.firstOrNull()
 
-    // 3. Enrich with Source Forms (e.g., "bank (banks, banking)")
-    val sForms = lexicalEntryRepository.findFormsByLexicalEntryId(merged?.sourceLexicalEntryId!!)
-    merged.sourceForms = "${merged.sourceLemma} (${sForms.joinToString(", ")})"
+    // 2. Source Forms (remains the same)
+    merged?.sourceLexicalEntryId?.let { sId ->
+      val sForms = lexicalEntryRepository.findFormsByLexicalEntryId(sId)
+      merged.sourceForms = "${merged.sourceLemma} (${sForms.joinToString(", ")})"
+    }
 
-    // 2. Fetch Target Forms only if target exists
-    merged.targetLexicalEntryId?.let { targetUuid ->
-      val targetForms = lexicalEntryRepository.findFormsByLexicalEntryId(targetUuid)
-      // Combine Target Lemma + its Forms: "Perro (perros, perra)"
-      merged.targetForms = "${merged.targetLemma} (${targetForms.joinToString(", ")})"
+    // 3. ENRICH MULTIPLE TARGET FORMS
+    // If you want forms for ALL target lemmas found:
+    val allTargetIds = results.mapNotNull { it.targetLexicalEntryId }.distinct()
+    if (allTargetIds.isNotEmpty()) {
+      val allFormsCombined = allTargetIds.map { tId ->
+        val lemma = results.find { it.targetLexicalEntryId == tId }?.targetLemma
+        val forms = lexicalEntryRepository.findFormsByLexicalEntryId(tId)
+        "$lemma (${forms.joinToString(", ")})"
+      }
+      merged?.targetForms = allFormsCombined.joinToString(" | ")
     }
 
     return merged
   }
 
-  override fun generateDefinition(term: String): AiDataDTO? {
+
+//  @Transactional(readOnly = true)
+//  override fun findFullDefinition(term: String): FullWordContextDTO? {
+//    val cleanTerm = term.lowercase().trim()
+//
+//    // 1. Resolve Lexicon IDs (Ideally cached)
+//    val sourceId = lexiconProvider.findByLang(Language.EN)?.id?.uuid
+//    val targetId = lexiconProvider.findByLang(Language.ES)?.id?.uuid
+//
+//    // 2. Query the DB
+//    val results = lexicalEntryRepository.findFullContext(cleanTerm, sourceId!!, targetId!!)
+//    if(results.isEmpty()) return null
+//
+//    // 3. Logic: If multiple senses exist, we pick the first one or
+//    // group them if you want a joined string.
+//    val merged = results.groupBy { it.sourceLexicalEntryId }
+//      .map { (_, variations) ->
+//        val first = variations.first()
+//        first.copy(
+//          sourceGloss = variations.mapNotNull { it.sourceGloss }.distinct().joinToString("; "),
+//          targetGloss = variations.mapNotNull { it.targetGloss }.distinct().joinToString("; ")
+//        )
+//      }.firstOrNull()
+//
+//    // 3. Enrich with Source Forms (e.g., "bank (banks, banking)")
+//    val sForms = lexicalEntryRepository.findFormsByLexicalEntryId(merged?.sourceLexicalEntryId!!)
+//    merged.sourceForms = "${merged.sourceLemma} (${sForms.joinToString(", ")})"
+//
+//    // 2. Fetch Target Forms only if target exists
+//    merged.targetLexicalEntryId?.let { targetUuid ->
+//      val targetForms = lexicalEntryRepository.findFormsByLexicalEntryId(targetUuid)
+//      // Combine Target Lemma + its Forms: "Perro (perros, perra)"
+//      merged.targetForms = "${merged.targetLemma} (${targetForms.joinToString(", ")})"
+//    }
+//
+//    return merged
+//  }
+
+  override fun generateAiSourceAndTargetLemma(term: String): AiDataDTO? {
     return aiService.getAiDefinition(term)
   }
 }

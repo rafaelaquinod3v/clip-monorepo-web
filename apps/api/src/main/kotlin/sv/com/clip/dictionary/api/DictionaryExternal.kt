@@ -7,5 +7,5 @@ interface DictionaryExternal {
   fun determineLemma(term: String): String?
   fun determineLemmaInfo(term: String): LemmaFoundDTO?
   fun findFullDefinition(term: String): FullWordContextDTO?
-  fun generateDefinition(term: String): AiDataDTO?
+  fun generateAiSourceAndTargetLemma(term: String): AiDataDTO?
 }

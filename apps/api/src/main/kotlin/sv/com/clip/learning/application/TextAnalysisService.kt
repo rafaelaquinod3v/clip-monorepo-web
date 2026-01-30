@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional
 import sv.com.clip.dictionary.api.DictionaryExternal
 import sv.com.clip.learning.application.mapper.toAnalysis
 import sv.com.clip.learning.domain.WordStatus
-import sv.com.clip.learning.domain.events.WordsNotFoundEvent
+import sv.com.clip.learning.domain.events.TermsNotFoundEvent
 import sv.com.clip.learning.domain.repository.UserWordRepository
 import sv.com.clip.learning.infrastructure.UserWordExclusionAdapter
 import java.util.UUID
@@ -122,7 +122,7 @@ class TextAnalysisService(
     // 8. Publicar evento si hay palabras nuevas para el diccionario
     if (notFoundTerms.isNotEmpty()) {
       notFoundTerms.chunked(10).forEach { batch ->
-        eventPublisher.publishEvent(WordsNotFoundEvent(batch.toSet()))
+        eventPublisher.publishEvent(TermsNotFoundEvent(batch.toSet()))
       }
     }
     return AnalysisResult(classifiedWords, rawText, summary)

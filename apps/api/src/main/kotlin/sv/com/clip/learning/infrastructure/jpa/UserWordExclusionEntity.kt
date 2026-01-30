@@ -13,5 +13,5 @@ class UserWordExclusionEntity(
   val id: UUID,
   val userId: UUID,
   @Column(nullable = false)
-  val term: String, // store always as lowercase
+  val lemma: String, // store always as lowercase
 ) {}

@@ -4,5 +4,5 @@ import java.util.UUID
 
 data class AddUserWordExclusionCommand(
   val userId: UUID,
-  val term: String,
+  val lemma: String,
 )

@@ -5,6 +5,6 @@ import sv.com.clip.learning.infrastructure.jpa.UserWordExclusionEntity
 import java.util.UUID
 
 interface JpaUserWordExclusionRepository : JpaRepository<UserWordExclusionEntity, UUID> {
-  fun findAllByTermIn(words: Set<String>) : Set<UserWordExclusionEntity>
-  fun deleteByTerm(term: String)
+  fun findAllByLemmaIn(lemmas: Set<String>) : Set<UserWordExclusionEntity>
+  fun deleteByLemma(lemma: String)
 }

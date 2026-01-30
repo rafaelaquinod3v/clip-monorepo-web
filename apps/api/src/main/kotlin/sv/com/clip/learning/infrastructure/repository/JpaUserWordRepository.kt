@@ -5,8 +5,8 @@ import sv.com.clip.learning.infrastructure.jpa.UserWordEntity
 import java.util.UUID
 
 interface JpaUserWordRepository : JpaRepository<UserWordEntity, UUID> {
-  fun findAllByTermIn(terms: Set<String>) : List<UserWordEntity>
-  fun deleteByUserIdAndTerm(userId: UUID, term: String)
-  fun findByUserIdAndTerm(userId: UUID, term: String)
-  fun findByTerm(term: String): UserWordEntity?
+  fun findAllByLemmaIn(lemmas: Set<String>) : List<UserWordEntity>
+  fun deleteByUserIdAndLemma(userId: UUID, lemma: String)
+  fun findByUserIdAndLemma(userId: UUID, lemma: String)
+  fun findByLemma(lemma: String): UserWordEntity?
 }

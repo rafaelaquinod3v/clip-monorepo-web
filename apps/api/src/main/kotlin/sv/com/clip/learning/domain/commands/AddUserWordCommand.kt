@@ -5,6 +5,6 @@ import java.util.UUID
 
 data class AddUserWordCommand(
   val userId: UUID,
-  val term: String,
+  val lemma: String,
   val status: WordStatus,
 )

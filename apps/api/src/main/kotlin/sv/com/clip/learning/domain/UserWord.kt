@@ -7,16 +7,13 @@ import java.util.UUID
 class UserWord(
   val id: UUID = UUID.randomUUID(),
   val userId: UUID,
-  val term: String,
+  val lemma: String,
   var status: WordStatus = WordStatus.NEW,
-  val isManualLexicalEntry: Boolean = false, // si esto es verdadero, se deben llenar los siguientes
-  var customDefinition: String? = null,
-  val lexicalEntryId: UUID? = null, // referencia ligera (id) al dictionary
-  val sourceLanguage: String? = null,
-  val targetLanguage: String? = null,
-  val phoneticIpa: String? = null,
-  val audioUrl: String? = null,
-  var translations: MutableList<String> = mutableListOf()
+  var isManualLexicalEntry: Boolean = false, // si esto es verdadero, se deben llenar los siguientes
+  var targetLemmaAndForms: String? = null,
+  var targetGloss: String? = null,
+  var sourceLexicalEntryId: UUID? = null, // referencia ligera (id) al dictionary
+  var targetLexicalEntryId: UUID? = null,
 ) {
   fun upgradeStatus() {
     this.status = when (status) {

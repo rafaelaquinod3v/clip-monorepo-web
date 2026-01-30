@@ -74,6 +74,11 @@ dependencies {
   implementation("com.opencsv:opencsv:5.9")
   compileOnly("org.projectlombok:lombok")
   annotationProcessor("org.projectlombok:lombok")
+  // Core de Lucene (contiene CharTermAttribute)
+  implementation("org.apache.lucene:lucene-core:9.12.1")
+  // Módulo de análisis (contiene EnglishAnalyzer)
+  implementation("org.apache.lucene:lucene-analysis-common:9.12.1")
+
 
   // --- Testing ---
   testImplementation("org.springframework.modulith:spring-modulith-starter-test")

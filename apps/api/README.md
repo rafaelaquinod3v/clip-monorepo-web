@@ -1,9 +1,9 @@
-ALTER TABLE event_publication
-ALTER COLUMN serialized_event TYPE TEXT;
+-- For the direct lemma search
+CREATE INDEX idx_lexical_lemma ON lexical_entries (lemma);
 
--- También es recomendable ampliar el listener_id si usas nombres de paquetes largos
-ALTER TABLE event_publication
-ALTER COLUMN listener_id TYPE VARCHAR(512);
+-- For the forms search (VERY IMPORTANT)
+CREATE INDEX idx_forms_written_rep ON lexical_entry_forms (written_representation);
+
 
 . 
 3. Estrategia de "Caché de Vocabulario" (Control de Costos)

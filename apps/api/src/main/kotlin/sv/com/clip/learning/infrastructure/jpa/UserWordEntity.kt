@@ -9,6 +9,7 @@ import jakarta.persistence.Table
 import sv.com.clip.learning.domain.UserWord
 import sv.com.clip.learning.domain.WordStatus
 import java.util.UUID
+import kotlin.String
 
 @Entity
 @Table(name = "user_words")
@@ -16,17 +17,42 @@ class UserWordEntity(
   @Id
   val id: UUID,
   val userId: UUID,
-  val term: String,
+  val lemma: String,
   @Enumerated(EnumType.STRING)
   @Column(name = "status", length = 20)
-  val status: WordStatus,
+  var status: WordStatus,
+  var isManualLexicalEntry: Boolean = false,
+  var targetLemmaAndForms: String? = null,
+  var targetGloss: String? = null,
+  var sourceLexicalEntryId: UUID? = null,
+  var targetLexicalEntryId: UUID? = null,
 ) {
   fun toDomain() : UserWord {
-    return UserWord(this.id, this.userId, this.term, this.status)
+    return UserWord(
+      this.id,
+      this.userId,
+      this.lemma,
+      this.status,
+      this.isManualLexicalEntry,
+      this.targetLemmaAndForms,
+      this.targetGloss,
+      this.sourceLexicalEntryId,
+      this.targetLexicalEntryId,
+    )
   }
   companion object {
     fun fromDomain(userWord : UserWord) : UserWordEntity {
-      return UserWordEntity(userWord.id, userWord.userId, userWord.term, userWord.status)
+      return UserWordEntity(
+        userWord.id,
+        userWord.userId,
+        userWord.lemma,
+        userWord.status,
+        userWord.isManualLexicalEntry,
+        userWord.targetLemmaAndForms,
+        userWord.targetGloss,
+        userWord.sourceLexicalEntryId,
+        userWord.targetLexicalEntryId,
+      )
     }
   }
 }

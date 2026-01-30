@@ -4,6 +4,7 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import sv.com.clip.dictionary.api.DictionaryExternal
+import sv.com.clip.learning.application.mapper.toAnalysis
 import sv.com.clip.learning.domain.WordStatus
 import sv.com.clip.learning.domain.events.WordsNotFoundEvent
 import sv.com.clip.learning.domain.repository.UserWordRepository
@@ -17,6 +18,33 @@ class TextAnalysisService(
   private val exclusionAdapter: UserWordExclusionAdapter,
   private val eventPublisher: ApplicationEventPublisher,
 ) {
+
+  @Transactional // TODO: event count most searched to add to dictionary later
+  fun analyzeSingleWord(userId: UUID, text: String): WordAnalysis {
+
+    val cleanText = text.lowercase().trim()
+    // 1. Intentar obtener el lemma oficial desde la tabla de 'forms'
+    // Si no existe, usamos el cleanText como lemma por defecto
+    val lemma = dictionaryExternal.determineLemma(cleanText) ?: cleanText
+
+    // 2. Prioridad: Diccionario Personal (usando el mejor lemma disponible)
+    userWordRepository.findByUserIdAndLemma(userId, lemma)?.let {
+      return it.toAnalysis()
+    }
+
+    // 3. Diccionario Principal + ILI
+    val dictEntries = dictionaryExternal.getFullDefinition(lemma)
+    if (dictEntries.isNotEmpty()) {
+      return dictEntries.toAnalysis(WordStatus.NEW)
+    }
+
+    // 4. Fallback: IA Local (Gemma 2:2b)
+    // Publicamos evento para trackeo si es necesario
+//    eventPublisher.publishEvent(WordNotFoundEvent(cleanText))
+
+//    return aiService.analyzeWithGemma(cleanText)
+    return WordAnalysis(text, text, WordStatus.NEW)
+  }
 
   @Transactional
   fun analyzeText(userId: UUID, rawText: String): AnalysisResult {
@@ -38,9 +66,9 @@ class TextAnalysisService(
 //    val userKnownWords = userWordRepository.findByUserIdAndWordIdIn(userId, wordsInText)
 //      .associateBy { it.wordId }
     println("UserId: $userId")
-    val userKnownWords = userWordRepository.findAllByTermIn(wordsToQuery) // TODO: userId
+    val userKnownWords = userWordRepository.findAllByLemmaIn(wordsToQuery) // TODO: userId
 //      .associateBy { it.lexicalEntryId }
-      .associateBy { it.term.lowercase().trim() }
+      .associateBy { it.lemma.lowercase().trim() }
 
     //  -- Consultar datos técnicos al módulo Dictionary
     val wordDetails = dictionaryExternal.getWords(wordsToQuery)
@@ -51,7 +79,7 @@ class TextAnalysisService(
     val classifiedWords = allUniqueWords.map { rawWord ->
       val word = rawWord.lowercase().trim() // <--- NORMALIZACIÓN CRUCIAL
 
-      val dictEntry = wordDetails.find { it.word.lowercase().trim() == word }
+      val dictEntry = wordDetails.find { it.term.lowercase().trim() == word }
       val userEntry = userKnownWords[word]
       val isExcluded = word in excluded
 
@@ -59,7 +87,7 @@ class TextAnalysisService(
         // Si el usuario tiene un registro activo de aprendizaje, manda sobre la exclusión
         userEntry != null -> WordAnalysis(
           word = word,
-          definition = userEntry.customDefinition ?: dictEntry?.definition ?: "Sin definición",
+          definition = userEntry.targetGloss ?: dictEntry?.definition ?: "Sin definición",
           status = userEntry.status
         )
 
@@ -88,7 +116,7 @@ class TextAnalysisService(
 
     // 7. Detectar palabras que no están en dictDetails ni en excluded
     val notFoundTerms = allUniqueWords.filter { word ->
-      word !in excluded && wordDetails.none { it.word == word }
+      word !in excluded && wordDetails.none { it.term == word }
     }.toSet()
 
     // 8. Publicar evento si hay palabras nuevas para el diccionario

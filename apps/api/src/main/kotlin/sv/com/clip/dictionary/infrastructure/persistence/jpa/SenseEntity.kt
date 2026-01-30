@@ -26,7 +26,7 @@ class SenseEntity(
   // DDD: Referencia a otro agregado por ID (Concept.ili)
   // Suponiendo que ConceptIli es otra value class o un String (iliId)
     @Column(name = "concept_ili", nullable = false)
-  val conceptIli: String,
+  val conceptIli: String, //TODO: add index to DB
 
     @Column(columnDefinition = "TEXT")
   val gloss: String? = null,

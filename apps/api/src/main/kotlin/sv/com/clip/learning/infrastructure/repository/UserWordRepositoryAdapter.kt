@@ -10,12 +10,12 @@ import java.util.UUID
 class UserWordRepositoryAdapter(
   private val jpaUserWordRepository : JpaUserWordRepository
 ) : UserWordRepository {
-  override fun findByUserIdAndTerm(userId: UUID, term: String): UserWord? {
-    return jpaUserWordRepository.findByTerm(term)?.toDomain()
+  override fun findByUserIdAndLemma(userId: UUID, lemma: String): UserWord? {
+    return jpaUserWordRepository.findByLemma(lemma)?.toDomain()
   }
 
-  override fun findAllByTermIn(terms: Set<String>): List<UserWord> {
-    return jpaUserWordRepository.findAllByTermIn(terms).map { UserWord(it.id, it.userId, it.term, it.status) }
+  override fun findAllByLemmaIn(lemmas: Set<String>): List<UserWord> {
+    return jpaUserWordRepository.findAllByLemmaIn(lemmas).map { UserWord(it.id, it.userId, it.lemma, it.status) }
   }
 
   override fun save(userWord: UserWord): UserWord {
@@ -26,7 +26,7 @@ class UserWordRepositoryAdapter(
     TODO("Not yet implemented")
   }
 
-  override fun deleteByUserIdAndTerm(userId: UUID, term: String) {
-    jpaUserWordRepository.deleteByUserIdAndTerm(userId, term)
+  override fun deleteByUserIdAndLemma(userId: UUID, lemma: String) {
+    jpaUserWordRepository.deleteByUserIdAndLemma(userId, lemma)
   }
 }

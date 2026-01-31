@@ -13,7 +13,7 @@ class RemoveUserWordExclusionCommandHandler(
 ) {
   @Transactional
   fun handle(command: RemoveUserWordExclusionCommand) {
-    val cleanTerm: String = command.term.lowercase().trim()
+    val cleanTerm = command.term.lowercase().trim()
 
     val lemma = external.determineLemma(cleanTerm) ?: cleanTerm
 

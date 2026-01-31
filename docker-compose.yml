@@ -18,5 +18,13 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5050:80"
+  chatterbox-tts:
+    image: travisvn/chatterbox-tts-api:latest
+    container_name: chatterbox-api
+    ports:
+      - "5123:5123"
+    environment:
+      - DEVICE=cpu  # Cambia a 'cuda' si tienes GPU NVIDIA
+    restart: unless-stopped
 volumes:
   postgres_data:

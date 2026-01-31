@@ -2,6 +2,7 @@ package sv.com.clip.learning.infrastructure.repository
 
 import org.springframework.stereotype.Repository
 import sv.com.clip.learning.domain.UserWord
+import sv.com.clip.learning.domain.WordStatus
 import sv.com.clip.learning.domain.repository.UserWordRepository
 import sv.com.clip.learning.infrastructure.jpa.UserWordEntity
 import java.util.UUID
@@ -27,7 +28,15 @@ class UserWordRepositoryAdapter(
   }
 
   override fun deleteByUserIdAndLemma(userId: UUID, lemma: String) {
-    jpaUserWordRepository.deleteByUserIdAndLemma(userId, lemma)
+    jpaUserWordRepository.deleteByLemma(lemma)
+  }
+
+  override fun updateUserWordStatus(
+    userId: UUID,
+    lemma: String,
+    status: WordStatus
+  ) {
+    jpaUserWordRepository.updateUserWordStatus(userId, lemma, status)
   }
 
   override fun findById(id: UUID): UserWord? {

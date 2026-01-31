@@ -4,15 +4,13 @@ import sv.com.clip.dictionary.api.WordTranslationDTO
 import sv.com.clip.learning.application.WordAnalysis
 import sv.com.clip.learning.domain.WordStatus
 
-// In your Learning module mappers
-fun List<WordTranslationDTO>.toAnalysis(status: WordStatus): WordAnalysis {
-  // We assume all entries in the list are for the same word (e.g., 'bank')
-  val firstEntry = this.first()
+fun List<WordTranslationDTO>.toAnalysis(term: String, lemma: String, status: WordStatus): WordAnalysis {
 
   return WordAnalysis(
-    term = firstEntry.sourceLemma,
+    term = term,
     // Join all definitions from different senses into one string
-    lemma = this.joinToString("; ") { it.targetLemma!! },
-    status = status
+    lemma = lemma,
+    status = status,
+    targetLemma = this.joinToString("; ") { it.targetLemma!! },
   )
 }

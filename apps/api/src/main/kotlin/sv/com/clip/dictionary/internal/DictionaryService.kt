@@ -31,15 +31,6 @@ internal class DictionaryService(
     val sourceId = lexiconProvider.findByLang(Language.EN)?.id?.uuid
 
     return lexicalEntryRepository.findLemmaProjections(forms, sourceId!!)
-//    return entities
-//      .groupBy { it.term } // Agrupar por el texto del lemma
-//      .map { (word, variations) ->
-//        val firstEntity = variations.first()
-//        TermDTO(
-//          id = firstEntity.id,
-//          term = word,
-//        )
-//    }
  }
 
   override fun lemmatize(term: String): String {

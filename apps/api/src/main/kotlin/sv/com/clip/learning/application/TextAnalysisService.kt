@@ -28,13 +28,13 @@ class TextAnalysisService(
 
     // 2. Prioridad: Diccionario Personal (usando el mejor lemma disponible)
     userWordRepository.findByUserIdAndLemma(userId, lemma)?.let {
-      return it.toAnalysis()
+      return it.toAnalysis(cleanText)
     }
 
     // 3. Diccionario Principal + ILI
     val dictEntries = dictionaryExternal.getFullDefinition(lemma)
     if (dictEntries.isNotEmpty()) {
-      return dictEntries.toAnalysis(WordStatus.NEW)
+      return dictEntries.toAnalysis(cleanText, lemma, WordStatus.UNKNOWN)
     }
 
     // 4. Fallback: IA Local (Gemma 2:2b)
@@ -42,7 +42,7 @@ class TextAnalysisService(
 //    eventPublisher.publishEvent(WordNotFoundEvent(cleanText))
 
 //    return aiService.analyzeWithGemma(cleanText)
-    return WordAnalysis(text, text, WordStatus.NEW)
+    return WordAnalysis(text, text, WordStatus.UNKNOWN)
   }
 
   @Transactional
@@ -66,22 +66,19 @@ class TextAnalysisService(
 //      .associateBy { it.wordId }
     println("UserId: $userId")
     val userKnownWords = userWordRepository.findAllByLemmaIn(wordsToQuery) // TODO: userId
-//      .associateBy { it.lexicalEntryId }
       .associateBy { it.lemma.lowercase().trim() }
 
-    //  -- Consultar datos técnicos al módulo Dictionary
-//    val wordDetails = dictionaryExternal.getWords(wordsToQuery)
-    // 3. OPTIMIZATION: Only query Main Dictionary for words NOT in Personal DB and NOT Excluded
+    // -- Consultar datos técnicos al módulo Dictionary
+    //    Only query Main Dictionary for words NOT in Personal DB and NOT Excluded
     val wordsMissingInfo = allUniqueWords.filter {
       it !in userKnownWords && it !in excluded
     }.toSet()
-    // Now 'wordDetails' only contains data for truly NEW words
+
     val wordDetails = if (wordsMissingInfo.isNotEmpty()) {
       dictionaryExternal.getFormsLemma(wordsMissingInfo)
     } else {
       emptyList()
     }
-    // 5. Clasificar sin crear dependencia circular
 
     // 5. Clasificar con soporte para Diccionario Personal
     val classifiedWords = allUniqueWords.map { rawWord ->
@@ -103,9 +100,6 @@ class TextAnalysisService(
         isExcluded -> WordAnalysis(form, "Excluido", WordStatus.IGNORED)
 
         // Caso: No está en Dictionary oficial
-
-
-        // Caso: No existe en ningún lado
         dictEntry == null ->
           WordAnalysis(form, "No encontrada", WordStatus.NOT_FOUND)
 
@@ -167,6 +161,4 @@ class TextAnalysisService(
         .map { it.trim() }
         .filter { it.length > 1 } // Opcional: ignorar letras sueltas como "a" o "y" según tu lógica
   }
-
-
 }

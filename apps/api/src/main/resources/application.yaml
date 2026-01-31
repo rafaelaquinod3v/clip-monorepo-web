@@ -1,3 +1,5 @@
+chatterbox:
+  url: http://localhost:5123/v1/audio/speech
 server:
   tomcat:
     max-swallow-size: -1 # Permitir que el servidor "trague" la solicitud aunque exceda el límite

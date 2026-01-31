@@ -21,6 +21,8 @@ services:
   chatterbox-tts:
     image: travisvn/chatterbox-tts-api:latest
     container_name: chatterbox-api
+    profiles:
+      - tts-manual
     ports:
       - "5123:5123"
     environment:

@@ -1,6 +1,5 @@
 package sv.com.clip.learning.application
 
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import sv.com.clip.dictionary.api.DictionaryExternal
@@ -15,7 +14,7 @@ class TextAnalysisService(
   private val userWordRepository: UserWordRepository,
   private val dictionaryExternal: DictionaryExternal,
   private val exclusionAdapter: UserWordExclusionAdapter,
-  private val eventPublisher: ApplicationEventPublisher,
+//  private val eventPublisher: ApplicationEventPublisher,
 ) {
 
   @Transactional // TODO: event count most searched to add to dictionary later

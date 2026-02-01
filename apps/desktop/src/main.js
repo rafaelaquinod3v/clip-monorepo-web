@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const path = require('path');
 
 function createWindow() {
@@ -8,8 +8,9 @@ function createWindow() {
     // Optional: Add a native icon for Windows (.ico)
     // icon: path.join(__dirname, 'assets/icon.ico'), 
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'app', 'preload.js'),
     }
   });
 
@@ -42,8 +43,13 @@ app.whenReady().then(() => {
   
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
-
+  
+  ipcMain.handle('ping', () => 'pong')
   createWindow();
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
 });
 
 // Windows specific: Quit when all windows are closed

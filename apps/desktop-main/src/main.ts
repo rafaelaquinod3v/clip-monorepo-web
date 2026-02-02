@@ -18,7 +18,7 @@ function createWindow() {
   if (isDev) {
     win.loadURL('http://localhost:4200');
   } else {
-    win.loadFile(path.join(__dirname, '../frontend-app/browser/index.html'));
+    win.loadFile(path.join(__dirname, '../frontend-app/browser/index.html')); // TODO: conf
   }
 }
 

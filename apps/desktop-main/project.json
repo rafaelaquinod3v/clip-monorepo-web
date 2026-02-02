@@ -37,6 +37,18 @@
         }
       }
     },
+    "make": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "npx electron-builder build --config apps/desktop-main/electron-builder.json"
+        ]
+      },
+      "dependsOn": [
+        { "target": "build", "projects": "self" },
+        { "target": "build", "projects": "frontend-app" }
+      ]
+    },
     "serve": {
       "executor": "nx:run-commands",
       "options": {

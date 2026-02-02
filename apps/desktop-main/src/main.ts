@@ -18,7 +18,13 @@ function createWindow() {
   if (isDev) {
     win.loadURL('http://localhost:4200');
   } else {
-    win.loadFile(path.join(__dirname, '../frontend-app/browser/index.html')); // TODO: conf
+   //const indexPath = path.join(__dirname, '../../desktop-ui/browser/index.html');
+  const indexPath = path.join(
+    app.getAppPath(), // monorepo fix
+    'dist/apps/desktop-ui/browser/index.html'
+  );
+    console.log('Buscando index en:', indexPath); // Esto te ayudará a debuguear
+    win.loadFile(indexPath); // TODO: conf
   }
 }
 

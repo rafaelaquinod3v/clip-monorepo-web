@@ -46,7 +46,7 @@
       },
       "dependsOn": [
         { "target": "build", "projects": "self" },
-        { "target": "build", "projects": "frontend-app" }
+        { "target": "build", "projects": "desktop-ui" }
       ]
     },
     "serve": {

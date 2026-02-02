@@ -3,6 +3,8 @@ npx nx serve desktop-ui
 npx nx build desktop-main --watch
 npx nx serve desktop-main
 
+npx nx run desktop-main:make // run as admin
+
 
 # ClipMonorepo
 

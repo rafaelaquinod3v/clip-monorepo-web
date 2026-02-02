@@ -1,0 +1,22 @@
+{
+  "appId": "sv.com.clip.desktop",
+  "productName": "Clip BackOffice",
+  "directories": {
+    "output": "dist/packages",
+    "buildResources": "build"
+  },
+  "files": [
+    "dist/apps/desktop-main/**/*",
+    "dist/apps/desktop-ui/browser/**/*",
+    "package.json"
+  ],
+  "win": {
+    "target": "portable"
+  },
+  "mac": {
+    "target": "dmg"
+  },
+  "extraMetadata": {
+    "main": "dist/apps/desktop-main/main.js"
+  }
+}

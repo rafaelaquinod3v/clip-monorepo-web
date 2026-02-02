@@ -60,6 +60,9 @@ dependencies {
   implementation("org.springframework.modulith:spring-modulith-events-api")
   runtimeOnly("org.springframework.modulith:spring-modulith-starter-jpa")
 
+  // --- Spring Security
+  implementation("org.springframework.boot:spring-boot-starter-security")
+
   // --- JMolecules (DDD) ---
   implementation(platform("org.jmolecules:jmolecules-bom:2025.0.2"))
   implementation("org.jmolecules:jmolecules-ddd")

@@ -12,8 +12,13 @@ async function navegar(view) {
     if (!contenedor) return;
 
     try {
-        const response = await fetch(`./app/views/${view}.html`);
-        const html = await response.text();
+        //const response = await fetch(`./app/views/${view}.html`);
+/*         const html = await response.text();
+        contenedor.innerHTML = html; */
+          // Llamamos al puente seguro
+        const html = await window.electronAPI.cargarVista(view);
+        
+        // Inyectamos el contenido
         contenedor.innerHTML = html;
         
         if(view === 'inicio') {

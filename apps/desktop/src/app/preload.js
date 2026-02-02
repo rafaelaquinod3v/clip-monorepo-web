@@ -7,4 +7,9 @@ contextBridge.exposeInMainWorld('versions', {
   electron: () => process.versions.electron,
   
   ping: () => ipcRenderer.invoke('ping'),
-})
+});
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  // Definimos una función que el renderer podrá llamar
+  cargarVista: (nombre) => ipcRenderer.invoke('obtener-vista', nombre)
+});

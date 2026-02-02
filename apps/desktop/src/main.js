@@ -1,5 +1,6 @@
 const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -44,7 +45,21 @@ app.whenReady().then(() => {
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
   
-  ipcMain.handle('ping', () => 'pong')
+  ipcMain.handle('ping', () => 'pong');
+
+  // Escuchamos la petición de "obtener-vista"
+  ipcMain.handle('obtener-vista', async (event, nombreVista) => {
+    try {
+      // Construimos la ruta absoluta de forma segura
+      const ruta = path.join(__dirname, 'app', 'views', `${nombreVista}.html`);
+      const contenido = fs.readFileSync(ruta, 'utf8');
+      return contenido;
+    } catch (error) {
+      return `<h1>Error 404</h1><p>No se encontró la vista: ${nombreVista}</p>`;
+    }
+  });
+
+
   createWindow();
 
   app.on('activate', () => {

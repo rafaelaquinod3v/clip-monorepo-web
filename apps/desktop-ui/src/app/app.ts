@@ -31,4 +31,9 @@ export class App implements OnInit {
     const respuesta = await window.electronAPI.invokeAction('pedir-datos', { id: 1 });
     console.log(respuesta);
   }
+
+/*   async solicitarConfig() {
+    const config = await this.electronService.invoke('get-config');
+    console.log('Configuración recibida:', config);
+  } */
 }

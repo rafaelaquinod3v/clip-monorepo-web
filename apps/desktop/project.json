@@ -9,6 +9,20 @@
       "options": {
         "command": "npx electron apps/desktop/src/main.js"
       }
+    },
+    "package": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx electron-forge package",
+        "cwd": "apps/desktop"
+      }
+    },
+    "make": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx electron-forge make",
+        "cwd": "apps/desktop"
+      }
     }
   }
 }

@@ -52,3 +52,5 @@ __screenshots__/
 build
 
 python_utils/venv/
+
+apps/desktop/out/

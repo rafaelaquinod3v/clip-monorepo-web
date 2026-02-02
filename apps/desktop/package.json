@@ -10,5 +10,8 @@
   "license": "MIT",
   "devDependencies": {
     "electron": "40.1.0"
+  },
+  "config": {
+    "forge": "./forge.config.js"
   }
 }

@@ -10,4 +10,13 @@ import { NxWelcome } from './nx-welcome';
 })
 export class App {
   protected title = 'desktop-ui';
+  enviarMensaje() {
+    console.log('msg')
+    window.electronAPI.sendData('mensaje-canal', 'Hola desde Angular');
+  }
+
+  async obtenerInfo() {
+    const respuesta = await window.electronAPI.invokeAction('pedir-datos', { id: 1 });
+    console.log(respuesta);
+  }
 }

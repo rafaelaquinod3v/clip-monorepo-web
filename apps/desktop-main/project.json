@@ -15,7 +15,10 @@
         "bundle": false,
         "main": "apps/desktop-main/src/main.ts",
         "tsConfig": "apps/desktop-main/tsconfig.app.json",
-        "assets": ["apps/desktop-main/src/assets"],
+        "assets": [
+          "apps/desktop-main/src/assets",
+          "apps/desktop-main/src/preload.js"
+        ],
         "generatePackageJson": true,
         "esbuildOptions": {
           "sourcemap": true,

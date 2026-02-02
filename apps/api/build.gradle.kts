@@ -63,6 +63,9 @@ dependencies {
 
   // --- Spring Security
   implementation("org.springframework.boot:spring-boot-starter-security")
+  implementation("io.jsonwebtoken:jjwt-api:0.12.5")
+  runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
+  runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
 
   // --- JMolecules (DDD) ---
   implementation(platform("org.jmolecules:jmolecules-bom:2025.0.2"))

@@ -69,3 +69,13 @@ ipcMain.handle('pedir-datos', async (event, data) => {
   // Lo que retornes aquí llegará como respuesta al await de Angular
   return resultado; 
 });
+
+// // Ejemplo: Enviar un mensaje cada 5 segundos
+setInterval(() => {
+  win.webContents.send('canal-notificaciones', 'Notificación desde el sistema MAIN!!');
+}, 5000);
+
+// Ejemplo: Enviar tras completar una tarea
+/* function tareaCompletada() {
+  win.webContents.send('canal-notificaciones', { status: 'success', id: 123 });
+} */

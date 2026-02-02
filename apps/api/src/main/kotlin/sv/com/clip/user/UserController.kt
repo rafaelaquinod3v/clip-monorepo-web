@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 @RestController
 @RequestMapping("/api/users")
@@ -17,6 +18,7 @@ class UserController(
   fun register(@RequestBody user: User): User {
     // Encriptar la contraseña antes de guardar
     user.password = passwordEncoder.encode(user.password)!!
+    user.id = UUID.randomUUID()
     return userRepository.save(user)
   }
 

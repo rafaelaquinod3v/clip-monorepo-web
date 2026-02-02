@@ -12,11 +12,14 @@ import kotlin.String
 @Entity
 @Table(name = "users")
 class User(
-  @Id
-  var id: UUID,
   @Column(unique = true)
   val username: String,
   var password: String,
   @ElementCollection(fetch = FetchType.EAGER)
-  val roles: Set<String> = setOf("ROLE_USER")
-) {}
+  var roles: MutableSet<String> = mutableSetOf("ROLE_USER"),
+  @Id
+  var id: UUID? = UUID.randomUUID(),
+) {
+  // Constructor vacío requerido por Hibernate/JPA
+  constructor() : this("", "", mutableSetOf("ROLE_USER"), UUID.randomUUID())
+}

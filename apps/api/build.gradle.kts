@@ -32,6 +32,7 @@ dependencies {
   implementation("org.jetbrains.kotlin:kotlin-reflect")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin") // Corregido: antes tenías tools.jackson
 
+
   // --- IA / DJL (Configuración para evitar "Función Incorrecta" en WSL) ---
   implementation(platform("ai.djl:bom:0.31.1"))
   implementation("ai.djl:api")

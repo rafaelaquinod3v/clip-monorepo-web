@@ -23,6 +23,7 @@
             ".js": ".js"
           }
         }
+
       },
       "configurations": {
         "development": {},
@@ -35,6 +36,29 @@
           }
         }
       }
+    },
+/*     "serve": {
+      "executor": "@nx/js:node",
+      "options": {
+        "buildTarget": "electron-main:build",
+        "runtimeArgs": ["."] 
+      }
+    },
+    "execute": {
+       "executor": "nx:run-commands",
+       "options": {
+         "command": "npx electron dist/apps/desktop-main/src/main.ts"
+       }
+    }, */
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx electron dist/apps/electron-main/main.js",
+        "readyWhen": "Done"
+      },
+      "dependsOn": [
+        { "target": "build", "params": "forward" }
+      ]
     },
     "prune-lockfile": {
       "dependsOn": ["build"],
@@ -61,7 +85,7 @@
       "dependsOn": ["prune-lockfile", "copy-workspace-modules"],
       "executor": "nx:noop"
     },
-    "serve": {
+    "_serve": {
       "continuous": true,
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",

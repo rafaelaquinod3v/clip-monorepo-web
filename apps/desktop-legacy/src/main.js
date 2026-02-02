@@ -7,7 +7,7 @@ function createWindow() {
     width: 900,
     height: 700,
     // Optional: Add a native icon for Windows (.ico)
-    // icon: path.join(__dirname, 'assets/icon.ico'), 
+    icon: path.join(__dirname, 'src', 'icon.ico'), 
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,

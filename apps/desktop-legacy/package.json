@@ -1,7 +1,7 @@
 {
-  "name": "desktop",
+  "name": "desktop-legacy",
   "version": "1.0.0",
-  "description": "Desktop Clip English",
+  "description": "Desktop Clip English - Proyecto JS Puro",
   "main": "src/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

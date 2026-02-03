@@ -2,10 +2,26 @@ import { app, BrowserWindow, ipcMain, net } from 'electron';
 import * as path from 'path';
 import { safeStorage } from 'electron';
 const axios = require('axios');
-import Store from 'electron-store';
+import type Store from 'electron-store';
+//import Store from 'electron-store';
 //const Store = require('electron-store');
-const store = new Store();
 
+/* interface StorageSchema {
+  auth_token: string;
+} */
+
+//const store = new Store<StorageSchema>();
+interface AppStorage {
+  auth_token?: string;
+  //theme?: string;
+}
+
+// Use the specific type instead of 'any'
+let store: Store<AppStorage>;
+async function initStore() {
+  const StoreClass = (await import('electron-store')).default;
+  store = new StoreClass<AppStorage>();
+}
 let win: BrowserWindow;
 // En desarrollo carga la URL de nx serve, en prod el archivo físico
 //const isDev = !app.isPackaged;
@@ -45,7 +61,8 @@ function createWindow() {
 
 //app.on('ready', createWindow);
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  await initStore();
   createWindow()
 
   app.on('activate', () => {
@@ -125,6 +142,7 @@ ipcMain.handle('get-users', async (event, token: string) => {
 //ipcMain.handle('get-store', (event, key) => store.get(key));
 
 ipcMain.handle('login-request', async (event, credentials) => {
+  if (!store) await initStore(); // Seguridad extra
   console.log(credentials);
   // 1. Call Spring Boot to get the token
   const response = await axios.post('http://localhost:8080/api/users/login', credentials);
@@ -134,8 +152,7 @@ ipcMain.handle('login-request', async (event, credentials) => {
   // 2. Encrypt and Save locally
   const encryptedToken = safeStorage.encryptString(token);
   console.log(encryptedToken);
-  //store.set('auth_token', encryptedToken.toString('latin1'));
-
+  (store as any).set('auth_token', encryptedToken.toString('latin1'));
   return { success: true };
 });
 /* 
@@ -149,9 +166,9 @@ ipcMain.handle('get-protected-data', async () => {
 
 
 // // Ejemplo: Enviar un mensaje cada 5 segundos
-setInterval(() => {
+/* setInterval(() => {
   win.webContents.send('canal-notificaciones', 'Notificación desde el sistema MAIN!!');
-}, 5000);
+}, 5000); */
 
 // Ejemplo: Enviar tras completar una tarea
 /* function tareaCompletada() {

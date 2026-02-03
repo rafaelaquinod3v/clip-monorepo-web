@@ -1,4 +1,4 @@
-package sv.com.clip.user
+package sv.com.clip.config
 
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -14,9 +14,9 @@ import org.springframework.web.filter.OncePerRequestFilter
 class JwtFilter(private val jwtService: JwtService) : OncePerRequestFilter() {
 
   override fun doFilterInternal(
-    request: HttpServletRequest,
-    response: HttpServletResponse,
-    filterChain: FilterChain
+      request: HttpServletRequest,
+      response: HttpServletResponse,
+      filterChain: FilterChain
   ) {
     val authHeader = request.getHeader("Authorization")
 
@@ -36,9 +36,9 @@ class JwtFilter(private val jwtService: JwtService) : OncePerRequestFilter() {
       val authorities = roles.map { SimpleGrantedAuthority(it) } // Los convertimos para Spring
 
       val authToken = UsernamePasswordAuthenticationToken(
-        username,
-        null,
-        authorities // <--- Ahora pasamos la lista de roles real
+          username,
+          null,
+          authorities // <--- Ahora pasamos la lista de roles real
       )
       // Aquí podrías cargar roles reales desde la DB si los necesitas
 /*      val authToken = UsernamePasswordAuthenticationToken(

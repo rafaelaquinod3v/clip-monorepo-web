@@ -1,4 +1,4 @@
-package sv.com.clip.user
+package sv.com.clip.config
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys

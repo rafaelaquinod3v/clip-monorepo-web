@@ -34,6 +34,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: 800,
     height: 600,
+    show: false,
     webPreferences: {
 /*       nodeIntegration: true,
       contextIsolation: false, funcionando */ 
@@ -43,7 +44,9 @@ function createWindow() {
       nodeIntegration: false  // Recomendado por seguridad
     }
   });
-
+  win.once('ready-to-show', () => {
+    win.show(); // Show only when the UI is painted
+  });
 
 
   if (isDev) {
@@ -74,6 +77,7 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
+
 
 ipcMain.on('mensaje-canal', (event, data) => {
   console.log('¡Mensaje recibido en el Proceso Principal!', data);  
@@ -184,8 +188,33 @@ ipcMain.handle('check-auth', () => {
     const token = safeStorage.decryptString(buffer);
     console.log("safeStorage token " + token)
     // Optional: Check if token is expired here using a JWT library
+    if (!token || isTokenExpired(token)) {
+      // Clean up the store if it's expired
+      (store as any).delete('auth_token'); 
+      return { isAuthenticated: false, reason: 'expired' };
+    }
     return { isAuthenticated: !!token };
   } catch (e) {
     return { isAuthenticated: false };
   }
 });
+
+
+// apps/desktop-main/src/main.ts
+
+function isTokenExpired(token: string): boolean {
+  try {
+    // 1. Split the token and get the payload (index 1)
+    const base64Payload = token.split('.')[1];
+    // 2. Decode Base64 to string, then parse to JSON
+    const payload = JSON.parse(Buffer.from(base64Payload, 'base64').toString());
+
+    // 3. 'exp' is in seconds, Date.now() is in milliseconds
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    return payload.exp < currentTime;
+  } catch (error) {
+    // If decoding fails, treat it as expired/invalid
+    return true;
+  }
+}

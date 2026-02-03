@@ -6,6 +6,27 @@ npx nx serve desktop-main
 npx nx run desktop-main:make // run as admin
 
 
+
+// auth.guard.ts
+@Injectable({ providedIn: 'root' })
+export class AuthGuard implements CanActivate {
+  constructor(private router: Router) {}
+
+  async canActivate(): Promise<boolean> {
+    // We check the secure store in Electron via our bridge
+    const result = await window.electronAPI.invokeAction('check-auth');
+    
+    if (result.isAuthenticated) {
+      return true;
+    } else {
+      this.router.navigate(['/login']);
+      return false;
+    }
+  }
+}
+
+
+
 # ClipMonorepo
 
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>

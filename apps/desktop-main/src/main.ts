@@ -1,5 +1,9 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, net } from 'electron';
 import * as path from 'path';
+import { safeStorage } from 'electron';
+const axios = require('axios');
+const Store = require('electron-store');
+const store = new Store();
 
 let win: BrowserWindow;
 // En desarrollo carga la URL de nx serve, en prod el archivo físico
@@ -69,6 +73,76 @@ ipcMain.handle('pedir-datos', async (event, data) => {
   // Lo que retornes aquí llegará como respuesta al await de Angular
   return resultado; 
 });
+
+/* ipcMain.handle('get-users', async () => {
+  return new Promise((resolve, reject) => {
+    const request = net.request('http://localhost:8080/api/users/list');
+    request.on('response', (response) => {
+      let data = '';
+      response.on('data', (chunk) => { data += chunk; });
+      response.on('end', () => { resolve(JSON.parse(data)); });
+    });
+    request.on('error', (err) => reject(err));
+    request.end();
+  });
+}); */
+// apps/desktop-main/src/main.ts
+ipcMain.handle('get-users', async (event, token: string) => {
+  return new Promise((resolve, reject) => {
+    // 1. Setup the request
+    const request = net.request({
+      method: 'GET',
+      protocol: 'http:',
+      hostname: 'localhost',
+      port: 8080,
+      path: '/api/users/list'
+    });
+
+    // 2. Inject the JWT Token
+    request.setHeader('Authorization', `Bearer ${token}`);
+    request.setHeader('Content-Type', 'application/json');
+
+    request.on('response', (response) => {
+      let data = '';
+      response.on('data', (chunk) => { data += chunk; });
+      response.on('end', () => {
+        if (response.statusCode === 200) {
+          resolve(JSON.parse(data));
+        } else {
+          reject(`Backend Error: ${response.statusCode}`);
+        }
+      });
+    });
+
+    request.on('error', (err) => reject(err));
+    request.end();
+  });
+});
+
+// apps/desktop-main/src/main.ts
+ipcMain.on('set-store', (event, key, val) => store.set(key, val));
+ipcMain.handle('get-store', (event, key) => store.get(key));
+
+ipcMain.handle('login', async (event, credentials) => {
+  // 1. Call Spring Boot to get the token
+  const response = await axios.post('http://localhost:8080/api/users/login', credentials);
+  const token = response.data.jwt;
+
+  // 2. Encrypt and Save locally
+  const encryptedToken = safeStorage.encryptString(token);
+  store.set('auth_token', encryptedToken.toString('latin1'));
+
+  return { success: true };
+});
+
+ipcMain.handle('get-protected-data', async () => {
+  // 3. Retrieve and Decrypt when needed for an API call
+  const encrypted = Buffer.from(store.get('auth_token'), 'latin1');
+  const token = safeStorage.decryptString(encrypted);
+
+  // Use the token for your net.request/axios call...
+});
+
 
 // // Ejemplo: Enviar un mensaje cada 5 segundos
 setInterval(() => {

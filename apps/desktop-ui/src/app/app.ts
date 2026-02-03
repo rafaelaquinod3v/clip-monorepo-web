@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NxWelcome } from './nx-welcome';
 import { ElectronService } from './services/electron-service';
-
+import { User } from './User'
 @Component({
   imports: [NxWelcome, RouterModule],
   selector: 'app-root',
@@ -11,6 +11,7 @@ import { ElectronService } from './services/electron-service';
 })
 export class App implements OnInit {
   mensajes: string[] = [];
+  users: User[] = [];
   electron = inject(ElectronService);
   ngOnInit(): void {
 /*     window.electronAPI.receiveData('canal-notificaciones', (data) => {
@@ -31,6 +32,21 @@ export class App implements OnInit {
     const respuesta = await window.electronAPI.invokeAction('pedir-datos', { id: 1 });
     console.log(respuesta);
   }
+
+/*   async cargarUsuarios() {
+    this.users = await this.electron.invoke<User[]>('get-users');
+  } */
+  // app.component.ts
+  async loadUsers() {
+     const myToken = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzcwMDc1OTc4LCJleHAiOjE3NzAxNjIzNzh9.3uIdnZlYmzmBvMLEsPl5a_foMVDwlkU7cUpmC5nZpFk'; // Get this from your AuthService/LocalStorage
+    try {
+      const users = await this.electron.invoke('get-users', myToken);
+      console.log('Users authorized:', users);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    }
+  }
+
 
 /*   async solicitarConfig() {
     const config = await this.electronService.invoke('get-config');

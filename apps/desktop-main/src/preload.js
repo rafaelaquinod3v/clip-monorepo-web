@@ -12,5 +12,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () => ipcRenderer.removeListener(channel, subscription);
   },
 
-  invokeAction: (channel, data) => ipcRenderer.invoke(channel, data)
+  invokeAction: (channel, data) => ipcRenderer.invoke(channel, data),
+  setStore: (key, val) => ipcRenderer.send('set-store', key, val),
+  getStore: (key) => ipcRenderer.invoke('get-store', key)
 });

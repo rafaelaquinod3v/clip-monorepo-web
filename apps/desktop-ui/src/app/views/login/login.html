@@ -1,1 +1,15 @@
-<p>login works!</p>
+<!-- login.component.html -->
+<div class="login-container">
+  <form class="login-card" (submit)="onLogin($event)">
+    <h2>Login</h2>
+    <div class="field">
+      <input type="text" name="user" placeholder=" " required #user>
+      <label>Username</label>
+    </div>
+    <div class="field">
+      <input type="password" name="pass" placeholder=" " required #pass>
+      <label>Password</label>
+    </div>
+    <button type="submit">Get Token</button>
+  </form>
+</div>

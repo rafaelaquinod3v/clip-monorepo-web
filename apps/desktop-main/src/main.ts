@@ -124,17 +124,20 @@ ipcMain.handle('get-users', async (event, token: string) => {
 //ipcMain.on('set-store', (event, key, val) => store.set(key, val));
 //ipcMain.handle('get-store', (event, key) => store.get(key));
 
-/* ipcMain.handle('login', async (event, credentials) => {
+ipcMain.handle('login-request', async (event, credentials) => {
+  console.log(credentials);
   // 1. Call Spring Boot to get the token
   const response = await axios.post('http://localhost:8080/api/users/login', credentials);
-  const token = response.data.jwt;
-
+  console.log(response);
+  const token = response.data.token;
+  console.log(token);
   // 2. Encrypt and Save locally
   const encryptedToken = safeStorage.encryptString(token);
-  store.set('auth_token', encryptedToken.toString('latin1'));
+  console.log(encryptedToken);
+  //store.set('auth_token', encryptedToken.toString('latin1'));
 
   return { success: true };
-}); */
+});
 /* 
 ipcMain.handle('get-protected-data', async () => {
   // 3. Retrieve and Decrypt when needed for an API call

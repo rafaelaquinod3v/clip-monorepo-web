@@ -15,20 +15,29 @@ export class App implements OnInit {
   electron = inject(ElectronService);
   router = inject(Router);
   async ngOnInit() {
-    const result: any = await this.electron.invoke('check-auth');
-    console.log(result);
-    if(result.isAuthenticated){
-      this.router.navigate(['/dashboard']);
-    }else {
-      this.router.navigate(['/login']);
+    try {
+      const result: any = await this.electron.invoke('check-auth');
+      console.log(result);
+      if(result.isAuthenticated){
+        this.router.navigate(['/dashboard']);
+      }else {
+        this.router.navigate(['/login']);
+      }
+    }finally {
+      // Una vez que el router terminó de navegar, revelamos la ventana
+      // Usamos un pequeño timeout de 50ms para asegurar que el DOM se pintó
+      setTimeout(() => {
+        this.electron.send('ready-to-reveal', true);
+      }, 50);
     }
+
 /*     window.electronAPI.receiveData('canal-notificaciones', (data) => {
       console.log('Mensaje recibido en Angular:', data);
     }); */
-    this.electron.on<string>('canal-notificaciones').subscribe((msg) => {
+/*     this.electron.on<string>('canal-notificaciones').subscribe((msg) => {
       this.mensajes.push(msg);
       console.log('Nuevo mensaje de Electron:', msg);
-    })
+    }) */
   }
   protected title = 'desktop-ui';
   enviarMensaje() {

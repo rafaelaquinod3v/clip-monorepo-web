@@ -44,10 +44,33 @@ function createWindow() {
       nodeIntegration: false  // Recomendado por seguridad
     }
   });
-  win.once('ready-to-show', () => {
+  
+/*   win.once('ready-to-show', () => {
     win.show(); // Show only when the UI is painted
-  });
+  }); */
+ipcMain.on('ready-to-reveal', (_, ready) => {
+  //console.log(event);
+  console.log(ready);
+  if (win) {
+    win.maximize();
+    win.show();
+    win.focus();
+  }
+});
 
+
+  win.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'Escape') {
+      // 1. If it's in actual Full Screen (covers taskbar)
+      if (win.isFullScreen()) {
+        win.setFullScreen(false);
+      } 
+      // 2. If it's just Maximized (standard window fill)
+      else if (win.isMaximized()) {
+        win.unmaximize();
+      }
+    }
+  });
 
   if (isDev) {
     win.loadURL('http://localhost:4200');
@@ -159,6 +182,28 @@ ipcMain.handle('login-request', async (event, credentials) => {
   (store as any).set('auth_token', encryptedToken.toString('latin1'));
   return { success: true };
 });
+
+// apps/desktop-main/src/main.ts
+
+ipcMain.handle('logout-request', async () => {
+  try {
+    // 1. Remove the token
+    (store as any).delete('auth_token');
+
+    // 2. Reset window size (optional)
+/*     if (win.isMaximized() || win.isFullScreen()) {
+      win.unmaximize();
+      win.setFullScreen(false);
+      win.setSize(800, 600); // Back to original size
+      win.center();
+    } */
+
+    return { success: true };
+  } catch (error) {
+    return { success: false, error };
+  }
+});
+
 /* 
 ipcMain.handle('get-protected-data', async () => {
   // 3. Retrieve and Decrypt when needed for an API call
@@ -218,3 +263,6 @@ function isTokenExpired(token: string): boolean {
     return true;
   }
 }
+ipcMain.handle('set-fullscreen', (event, shouldBeFull) => {
+  win.setFullScreen(shouldBeFull);
+});

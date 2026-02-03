@@ -41,7 +41,7 @@ function createWindow() {
   if (isDev) {
     win.loadURL('http://localhost:4200');
   } else {
-    const indexPath = path.join(app.getAppPath(), 'dist/apps/desktop-ui/browser/index.html');
+    const indexPath = path.join(app.getAppPath(), 'dist/apps/desktop-ui/browser/index.html'); //TODO: verify
     win.loadFile(indexPath);
   }
 }

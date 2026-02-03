@@ -2,7 +2,8 @@ import { app, BrowserWindow, ipcMain, net } from 'electron';
 import * as path from 'path';
 import { safeStorage } from 'electron';
 const axios = require('axios');
-const Store = require('electron-store');
+import Store from 'electron-store';
+//const Store = require('electron-store');
 const store = new Store();
 
 let win: BrowserWindow;
@@ -120,10 +121,10 @@ ipcMain.handle('get-users', async (event, token: string) => {
 });
 
 // apps/desktop-main/src/main.ts
-ipcMain.on('set-store', (event, key, val) => store.set(key, val));
-ipcMain.handle('get-store', (event, key) => store.get(key));
+//ipcMain.on('set-store', (event, key, val) => store.set(key, val));
+//ipcMain.handle('get-store', (event, key) => store.get(key));
 
-ipcMain.handle('login', async (event, credentials) => {
+/* ipcMain.handle('login', async (event, credentials) => {
   // 1. Call Spring Boot to get the token
   const response = await axios.post('http://localhost:8080/api/users/login', credentials);
   const token = response.data.jwt;
@@ -133,15 +134,15 @@ ipcMain.handle('login', async (event, credentials) => {
   store.set('auth_token', encryptedToken.toString('latin1'));
 
   return { success: true };
-});
-
+}); */
+/* 
 ipcMain.handle('get-protected-data', async () => {
   // 3. Retrieve and Decrypt when needed for an API call
   const encrypted = Buffer.from(store.get('auth_token'), 'latin1');
   const token = safeStorage.decryptString(encrypted);
 
   // Use the token for your net.request/axios call...
-});
+}); */
 
 
 // // Ejemplo: Enviar un mensaje cada 5 segundos

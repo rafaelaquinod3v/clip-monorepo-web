@@ -174,3 +174,18 @@ ipcMain.handle('get-protected-data', async () => {
 /* function tareaCompletada() {
   win.webContents.send('canal-notificaciones', { status: 'success', id: 123 });
 } */
+
+ipcMain.handle('check-auth', () => {
+  const encrypted = (store as any).get('auth_token');
+  if (!encrypted) return { isAuthenticated: false };
+
+  try {
+    const buffer = Buffer.from(encrypted, 'latin1');
+    const token = safeStorage.decryptString(buffer);
+    console.log("safeStorage token " + token)
+    // Optional: Check if token is expired here using a JWT library
+    return { isAuthenticated: !!token };
+  } catch (e) {
+    return { isAuthenticated: false };
+  }
+});

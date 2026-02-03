@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ElectronService } from './services/electron-service';
+import { Router } from '@angular/router';
 import { User } from './User'
 @Component({
   imports: [RouterModule],
@@ -12,7 +13,15 @@ export class App implements OnInit {
   mensajes: string[] = [];
   users: User[] = [];
   electron = inject(ElectronService);
-  ngOnInit(): void {
+  router = inject(Router);
+  async ngOnInit() {
+    const result: any = await this.electron.invoke('check-auth');
+    console.log(result);
+    if(result.isAuthenticated){
+      this.router.navigate(['/dashboard']);
+    }else {
+      this.router.navigate(['/login']);
+    }
 /*     window.electronAPI.receiveData('canal-notificaciones', (data) => {
       console.log('Mensaje recibido en Angular:', data);
     }); */

@@ -1,22 +1,30 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FileOmwService } from '../services/file-omw-service';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
-import { ProgressOmwService } from '../services/progress-omw-service';
-
+import { ProgressOmwService } from '../../services/progress-omw-service';
+import { FileOmwService } from '../../services/file-omw-service';
+import { RouterModule } from '@angular/router';
+import { AuthService } from '../../services/auth-service';
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
-  selectedLang: string = 'EN'; 
+  selectedLang = 'EN'; 
   selectedFile: File | null = null;
-  progress: number = 0;
-  mensaje: string = '';
+  progress = 0;
+  mensaje = '';
   progressData: any = null;
-  constructor(private fileService: FileOmwService, private cd: ChangeDetectorRef, private progressOmwService: ProgressOmwService) {}
+  fileService = inject(FileOmwService);
+  cd = inject(ChangeDetectorRef);
+  auth = inject(AuthService);
+  progressOmwService = inject(ProgressOmwService);
+  
+  onLogout(){
+    this.auth.logout();
+  }
 
   onFileSelected(event: any) {
     const file = event.target.files[0];

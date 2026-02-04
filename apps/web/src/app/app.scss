@@ -1,0 +1,10 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%; /* Ayuda a que el 100% de los hijos funcione mejor */
+  overflow: hidden; /* Evita scroll en la raíz si es una app de una sola página */
+}
+
+* {
+  box-sizing: border-box; /* Asegura que padding no sume al tamaño */
+}

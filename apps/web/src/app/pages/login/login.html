@@ -1,0 +1,21 @@
+<div class="login-container">
+  <div class="login-card">
+    <h2>Login</h2>
+    <form (submit)="onLogin($event)">
+      <div class="input-group">
+        <input type="text" name="user" required #user>
+        <span class="highlight"></span>
+        <span class="bar"></span>
+        <label for="user">Username</label>
+      </div>
+      
+      <div class="input-group">
+        <input type="password" name="pass" required #pass>
+        <span class="highlight"></span>
+        <span class="bar"></span>
+        <label for="pass">Password</label>
+      </div>
+      <button type="submit" class="btn-material">Sign In</button>
+    </form>
+  </div>
+</div>

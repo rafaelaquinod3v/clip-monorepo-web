@@ -12,17 +12,13 @@ export class AuthService {
   private client = inject(HttpClient);
   private router = inject(Router);
   login(credentials: any) {
-    //const request = 
-   return this.client.post(apiUrl, credentials).pipe(tap((response: any) => {
+    return this.client.post(apiUrl, credentials).pipe(tap((response: any) => {
       localStorage.setItem('token', response.token);
     }));
-/*     request.subscribe((response) => {
-      console.log(response);
-    }); */
   }
+
   logout() {
     localStorage.removeItem('token');
     this.router.navigate(['/login']);
   }
-
 }

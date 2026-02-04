@@ -32,6 +32,7 @@ dependencies {
   implementation("org.jetbrains.kotlin:kotlin-reflect")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin") // Corregido: antes tenías tools.jackson
 
+
   // --- IA / DJL (Configuración para evitar "Función Incorrecta" en WSL) ---
   implementation(platform("ai.djl:bom:0.31.1"))
   implementation("ai.djl:api")
@@ -59,6 +60,12 @@ dependencies {
   implementation("org.springframework.modulith:spring-modulith-starter-core")
   implementation("org.springframework.modulith:spring-modulith-events-api")
   runtimeOnly("org.springframework.modulith:spring-modulith-starter-jpa")
+
+  // --- Spring Security
+  implementation("org.springframework.boot:spring-boot-starter-security")
+  implementation("io.jsonwebtoken:jjwt-api:0.12.5")
+  runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
+  runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
 
   // --- JMolecules (DDD) ---
   implementation(platform("org.jmolecules:jmolecules-bom:2025.0.2"))

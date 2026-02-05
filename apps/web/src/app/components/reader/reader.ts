@@ -102,6 +102,10 @@ export class Reader {
         // Play it immediately
         const audio = new Audio();
         audio.src = url;
+        // Release the URL as soon as the browser has finished loading the data
+        audio.oncanplaythrough = () => {
+            window.URL.revokeObjectURL(url);
+        };
         audio.play();
       },
         error: (err) => console.log('Error obteniendo audio ', err)
@@ -192,9 +196,10 @@ export class Reader {
     const newStatus = statusMap[key];
     if (!newStatus) return;
 
+    console.log("new Status: " + newStatus);
     if (currentInfo?.status === 'UNKNOWN') {
       // Si es desconocida, llamamos al endpoint de "crear"
-      this.learning.addUserWord({term: word, status: newStatus}).subscribe({
+      this.learning.addUserWord({term: word, statusCode: key}).subscribe({
     next: () => {
       // 2. Since response is empty, we update the Signal manually
       this.analysisData.update(currentList => 
@@ -222,7 +227,7 @@ export class Reader {
       }); */
     } else {
       // Si ya existe, llamamos al endpoint de "actualizar status"
-      this.learning.updateUserWordStatus({term: word, status: newStatus}).subscribe({
+      this.learning.updateUserWordStatus({term: word, statusCode: key}).subscribe({
     next: () => {
       // 2. Since response is empty, we update the Signal manually
       this.analysisData.update(currentList => 

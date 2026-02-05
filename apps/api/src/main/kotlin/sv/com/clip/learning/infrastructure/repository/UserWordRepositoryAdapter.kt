@@ -12,7 +12,7 @@ class UserWordRepositoryAdapter(
   private val jpaUserWordRepository : JpaUserWordRepository
 ) : UserWordRepository {
   override fun findByUserIdAndLemma(userId: UUID, lemma: String): UserWord? {
-    return jpaUserWordRepository.findByLemma(lemma)?.toDomain()
+    return jpaUserWordRepository.findByUserIdAndLemma(userId, lemma)?.toDomain()
   }
 
   override fun findAllByLemmaIn(lemmas: Set<String>): List<UserWord> {
@@ -24,11 +24,11 @@ class UserWordRepositoryAdapter(
   }
 
   override fun findAllByUserId(userId: UUID): List<UserWord> {
-    TODO("Not yet implemented")
+    return jpaUserWordRepository.findAllByUserId(userId).map { it.toDomain() }
   }
 
   override fun deleteByUserIdAndLemma(userId: UUID, lemma: String) {
-    jpaUserWordRepository.deleteByLemma(lemma)
+    jpaUserWordRepository.deleteByUserIdAndLemma(userId, lemma)
   }
 
   override fun updateUserWordStatus(

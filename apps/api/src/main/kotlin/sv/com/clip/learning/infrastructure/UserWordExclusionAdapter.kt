@@ -13,7 +13,7 @@ class UserWordExclusionAdapter(
   override fun findExclusions(
     userId: UUID, //TODO: use this
   ): Set<String> {
-    return exclusionRepository.findAll().map { it.lemma }.toSet()
+    return exclusionRepository.findAllByUserId(userId).map { it.lemma }.toSet()
   }
 
   override fun saveExclusion(userId: UUID, lemma: String) {
@@ -21,7 +21,7 @@ class UserWordExclusionAdapter(
   }
 
   override fun deleteExclusion(userId: UUID, lemma: String) {
-    exclusionRepository.deleteByLemma(lemma)
+    exclusionRepository.deleteByUserIdAndLemma(userId, lemma)
   }
 
   override fun isExcluded(userId: UUID, lemma: String): Boolean {

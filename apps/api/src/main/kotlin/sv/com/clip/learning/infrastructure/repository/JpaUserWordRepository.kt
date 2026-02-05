@@ -10,11 +10,12 @@ import java.util.*
 
 interface JpaUserWordRepository : JpaRepository<UserWordEntity, UUID> {
   fun findAllByLemmaIn(lemmas: Set<String>) : List<UserWordEntity>
+  fun findAllByUserId(userId: UUID): List<UserWordEntity>
   fun deleteByUserIdAndLemma(userId: UUID, lemma: String)
-  fun deleteByLemma(lemma: String)
-  fun findByUserIdAndLemma(userId: UUID, lemma: String)
-  fun findByLemma(lemma: String): UserWordEntity?
+  //fun deleteByLemma(lemma: String)
+  fun findByUserIdAndLemma(userId: UUID, lemma: String): UserWordEntity?
+  //fun findByLemma(lemma: String): UserWordEntity?
   @Modifying
-  @Query("update UserWordEntity set status = :status where lemma = :lemma")
-  fun updateUserWordStatus(userId: UUID, @Param("lemma") lemma: String, @Param("status") status: WordStatus)
+  @Query("update UserWordEntity set status = :status where lemma = :lemma and userId = :userId")
+  fun updateUserWordStatus(@Param("userId") userId: UUID, @Param("lemma") lemma: String, @Param("status") status: WordStatus)
 }

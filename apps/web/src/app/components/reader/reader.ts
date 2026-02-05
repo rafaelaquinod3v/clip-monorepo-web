@@ -22,7 +22,8 @@ interface WordAnalysis {
 })
 export class Reader implements OnInit {
   ngOnInit(): void {
-    this.fetchAudio();
+    //this.fetchAudio();
+    this.speech.synthesize(this.textModel().text).subscribe();
   }
   analyze = inject(AnalyzeText);
   learning = inject(LearningService);

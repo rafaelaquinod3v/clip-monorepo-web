@@ -1,16 +1,30 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
+export interface WordAlignment {
+  term: string;
+  start: number;
+  end: number;
+}
+
+export interface TtsResponse {
+  audio: string; // Base64 string
+  alignment: WordAlignment[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class SpeechService {
   private http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/audio/speak';
+  private readonly apiUrl = 'http://localhost:8080/api/audio';
 
   speak(text: string) {
-    return this.http.get(`${this.apiUrl}?text=${text}`, {
+    return this.http.get(`${this.apiUrl}/speak?text=${text}`, {
       responseType: 'blob'
     });
-  }  
+  }
+  synthesize(text: string) {
+    return this.http.get(`${this.apiUrl}/synthesize?text=${text}`);
+  }
 }

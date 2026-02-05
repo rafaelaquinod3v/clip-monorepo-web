@@ -6,9 +6,12 @@ import org.springframework.stereotype.Service
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.Base64
 
 @Service
-class TtsService {
+class TtsService(
+  private val recognizerService: RecognizerService,
+) {
 
   private val tts: OfflineTts
   private val sampleRate = 22050
@@ -46,11 +49,12 @@ class TtsService {
 
   fun generateWav(text: String): ByteArray {
     val audio = tts.generate(text)
+
     val samples = audio.samples // This is a FloatArray
 
     if (samples.isEmpty()) return ByteArray(0)
-
-    val out = ByteArrayOutputStream()
+    return convertSamplesToWav(samples, sampleRate)
+/*    val out = ByteArrayOutputStream()
 
     // 1. Write WAV Header (44 bytes)
     writeWavHeader(out, samples.size, sampleRate)
@@ -63,7 +67,7 @@ class TtsService {
     }
 
     out.write(buffer.array())
-    return out.toByteArray()
+    return out.toByteArray()*/
   }
 
   private fun writeWavHeader(out: ByteArrayOutputStream, numSamples: Int, sampleRate: Int) {
@@ -89,6 +93,87 @@ class TtsService {
     header.putInt(dataSize)
 
     out.write(header.array())
+  }
+
+  fun generateAudioWithSync(text: String): Map<String, Any> {
+    if (text.isBlank()) {
+      return mapOf("audio" to "", "alignment" to emptyList<Any>())
+    }
+    // 1. GENERATE AUDIO ONCE
+    val audio = tts.generate(text)
+    val samples = audio?.samples ?: floatArrayOf()
+    val sampleRate = audio?.sampleRate ?: 22050
+    if (samples.isEmpty()) {
+      return mapOf("audio" to "", "alignment" to emptyList<Any>())
+    }
+    // 2. GET TIMESTAMPS (using the already generated samples)
+// Inside generateAudioWithSync
+    val paddedSamples = FloatArray(samples.size + 8000) // Add ~0.3s of silence
+    samples.copyInto(paddedSamples)
+
+    val recognitionResult = recognizerService.getTimestampsFromAudio(paddedSamples, sampleRate)
+
+
+    // 3. CONVERT SAMPLES TO WAV BYTES (reuse your existing logic)
+    val wavBytes = convertSamplesToWav(samples, sampleRate)
+
+    // 4. ENCODE TO BASE64
+    val audioBase64 = Base64.getEncoder().encodeToString(wavBytes)
+
+    // 6. PROTECT ALIGNMENT MAPPING
+    // We check if tokens and timestamps actually exist and have the same size
+    val totalDuration = samples.size.toDouble() / sampleRate
+    val tokens = recognitionResult.tokens
+    val timestamps = recognitionResult.timestamps
+
+    val alignment = if (timestamps.isNotEmpty()) {
+      // Use real timestamps if available
+      tokens.mapIndexed { i, token ->
+        mapOf(
+          "word" to token,
+          "start" to recognitionResult.timestamps[i],
+          "end" to recognitionResult.timestamps.getOrElse(i + 1) { (recognitionResult.timestamps[i] + 0.1).toFloat() }
+        )
+      }
+    } else {
+      // FALLBACK: Distribute tokens found by Whisper linearly across total duration
+      val totalChars = tokens.sumOf { it.length }.toDouble()
+      var currentTime = 0.0
+
+      tokens.map { token ->
+        // Duration proportional to word length relative to total audio length
+        val wordDuration = (token.length / totalChars) * totalDuration
+        val start = currentTime
+        val end = currentTime + wordDuration
+        currentTime = end
+
+        mapOf(
+          "term" to token,
+          "start" to start,
+          "end" to end
+        )
+      }
+    }
+
+   // val wavBytes = convertSamplesToWav(samples, sampleRate)
+
+    return mapOf(
+      "audio" to audioBase64,
+      "alignment" to alignment
+    )
+  }
+
+  // Refactor your existing generateWav logic into a helper that takes samples
+  private fun convertSamplesToWav(samples: FloatArray, sampleRate: Int): ByteArray {
+    val out = ByteArrayOutputStream()
+    writeWavHeader(out, samples.size, sampleRate)
+    val buffer = ByteBuffer.allocate(samples.size * 2).order(ByteOrder.LITTLE_ENDIAN)
+    for (sample in samples) {
+      val s = (sample * 32767).toInt().coerceIn(-32768, 32767)
+      buffer.putShort(s.toShort())
+    }
+    out.write(buffer.array())
+    return out.toByteArray()
   }
 }
 

@@ -18,4 +18,10 @@ class AudioController(private val ttsService: TtsService) {
 
     return ResponseEntity(wavData, headers, HttpStatus.OK)
   }
+
+  @GetMapping("/synthesize")
+  fun synthesize(@RequestParam text: String): ResponseEntity<Map<String, Any>> {
+    val result = ttsService.generateAudioWithSync(text)
+    return ResponseEntity.ok(result)
+  }
 }

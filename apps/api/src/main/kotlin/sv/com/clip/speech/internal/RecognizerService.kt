@@ -51,11 +51,11 @@ class RecognizerService {
   }
 
 
-  fun getTimestampsFromAudio(samples: FloatArray, sampleRate: Int): OfflineRecognizerResult {
+  fun getTimestampsFromAudio(samples: FloatArray, sampleRate: Float): OfflineRecognizerResult {
     val stream = recognizer.createStream()
 
 
-    stream.acceptWaveform(samples, sampleRate)
+    stream.acceptWaveform(samples, sampleRate.toInt())
 
     recognizer.decode(stream)
     val result = recognizer.getResult(stream)

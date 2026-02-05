@@ -14,7 +14,7 @@ class TtsService(
 ) {
 
   private val tts: OfflineTts
-  private val sampleRate = 22050
+  private val sampleRate = 22050.0f
 
   init {
     val modelResource = ClassPathResource("models/en_US-amy-low.onnx").file.absolutePath
@@ -70,7 +70,7 @@ class TtsService(
     return out.toByteArray()*/
   }
 
-  private fun writeWavHeader(out: ByteArrayOutputStream, numSamples: Int, sampleRate: Int) {
+  private fun writeWavHeader(out: ByteArrayOutputStream, numSamples: Int, sampleRate: Float) {
     val channels = 1
     val byteRate = sampleRate * channels * 2
     val blockAlign = channels * 2
@@ -85,8 +85,8 @@ class TtsService(
     header.putInt(16) // Subchunk1Size
     header.putShort(1.toShort()) // AudioFormat (PCM)
     header.putShort(channels.toShort())
-    header.putInt(sampleRate)
-    header.putInt(byteRate)
+    header.putInt(sampleRate.toInt())
+    header.putInt(byteRate.toInt())
     header.putShort(blockAlign.toShort())
     header.putShort(16.toShort()) // BitsPerSample
     header.put("data".toByteArray())
@@ -102,7 +102,7 @@ class TtsService(
     // 1. GENERATE AUDIO ONCE
     val audio = tts.generate(text)
     val samples = audio?.samples ?: floatArrayOf()
-    val sampleRate = audio?.sampleRate ?: 22050
+    val sampleRate = audio?.sampleRate?.toFloat() ?: 22050.0f
     if (samples.isEmpty()) {
       return mapOf("audio" to "", "alignment" to emptyList<Any>())
     }
@@ -125,24 +125,28 @@ class TtsService(
     val totalDuration = samples.size.toDouble() / sampleRate
     val tokens = recognitionResult.tokens
     val timestamps = recognitionResult.timestamps
+    val paddingStart = 8000.0 / sampleRate  // Exactly 0.3628s
+    val paddingEnd = 400.0 / sampleRate     // Exactly 0.0181s
+    val speakingDuration = totalDuration - paddingStart - paddingEnd
 
     val alignment = if (timestamps.isNotEmpty()) {
       // Use real timestamps if available
       tokens.mapIndexed { i, token ->
         mapOf(
-          "word" to token,
+          "term" to token,
           "start" to recognitionResult.timestamps[i],
-          "end" to recognitionResult.timestamps.getOrElse(i + 1) { (recognitionResult.timestamps[i] + 0.1).toFloat() }
+          "end" to recognitionResult.timestamps.getOrElse(i + 1) { (recognitionResult.timestamps[i] + 0.1).toFloat() },
+          "originalIndex" to i
         )
       }
     } else {
       // FALLBACK: Distribute tokens found by Whisper linearly across total duration
       val totalChars = tokens.sumOf { it.length }.toDouble()
-      var currentTime = 0.0
+      var currentTime = paddingStart
 
-      tokens.map { token ->
+      tokens.mapIndexed { i , token ->
         // Duration proportional to word length relative to total audio length
-        val wordDuration = (token.length / totalChars) * totalDuration
+        val wordDuration = (token.length / totalChars) * speakingDuration
         val start = currentTime
         val end = currentTime + wordDuration
         currentTime = end
@@ -150,7 +154,8 @@ class TtsService(
         mapOf(
           "term" to token,
           "start" to start,
-          "end" to end
+          "end" to end,
+          "originalIndex" to i
         )
       }
     }
@@ -164,7 +169,7 @@ class TtsService(
   }
 
   // Refactor your existing generateWav logic into a helper that takes samples
-  private fun convertSamplesToWav(samples: FloatArray, sampleRate: Int): ByteArray {
+  private fun convertSamplesToWav(samples: FloatArray, sampleRate: Float): ByteArray {
     val out = ByteArrayOutputStream()
     writeWavHeader(out, samples.size, sampleRate)
     val buffer = ByteBuffer.allocate(samples.size * 2).order(ByteOrder.LITTLE_ENDIAN)

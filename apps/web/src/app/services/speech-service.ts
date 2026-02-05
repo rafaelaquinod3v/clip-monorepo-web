@@ -5,6 +5,7 @@ export interface WordAlignment {
   term: string;
   start: number;
   end: number;
+  originalIndex: number;
 }
 
 export interface TtsResponse {

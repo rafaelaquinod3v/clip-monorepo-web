@@ -56,10 +56,19 @@ export class Reader implements OnInit {
     const data = this.syncData();
     // We only want to find the index among the actual words (not spaces)
     // If your words() array includes spaces, you might need a mapping logic
-    const index = data.findIndex(w => currentTime >= w.start && currentTime <= w.end);
+/*     const index = data.findIndex(w => currentTime >= w.start && currentTime <= w.end);
     
     if (index !== this.activeIndex()) {
       this.activeIndex.set(index);
+    } */
+     const currentEntry = data.find(w => 
+      currentTime >= w.start && currentTime <= w.end
+    );
+
+    if (currentEntry) {
+      // 2. Direct mapping: Set the active index to the original index
+      // This will work even if your words() array has spaces/punctuation
+      this.activeIndex.set(currentEntry.originalIndex);
     }
   }
   fetchAudio() {

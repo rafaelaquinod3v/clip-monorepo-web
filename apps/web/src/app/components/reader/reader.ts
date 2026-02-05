@@ -3,6 +3,7 @@ import { form, FormField, required, minLength } from '@angular/forms/signals';
 import { TEST_TTS } from './text.const';
 import { AnalyzeText } from '../../services/analyze-text';
 import { LearningService } from '../../services/learning-service';
+import { SpeechService } from '../../services/speech-service';
 
 // Definimos una interfaz para tener autocompletado y evitar errores
 interface WordAnalysis {
@@ -21,6 +22,7 @@ interface WordAnalysis {
 export class Reader {
   analyze = inject(AnalyzeText);
   learning = inject(LearningService);
+  speech = inject(SpeechService);
   // 1. Crea el modelo de datos (Signal)
   textModel = signal({ text: TEST_TTS });
 
@@ -43,6 +45,20 @@ export class Reader {
           error: (err) => console.log('Error al procesar el text ', err)
         }
       );
+      this.speech.speak(this.textModel().text).subscribe({
+      next: (blob: Blob) => {
+        console.log('Audio blob received:', blob);
+        
+        // Create a URL for the blob
+        const url = window.URL.createObjectURL(blob);
+        
+        // Play it immediately
+        const audio = new Audio();
+        audio.src = url;
+        audio.play();
+      },
+        error: (err) => console.log('Error obteniendo audio ', err)
+      });
     }
   }
   // ---- Interaction ----
@@ -76,6 +92,20 @@ export class Reader {
     // Limpiamos puntuación básica para el análisis
     const cleanWord = word.trim().replace(/[.,!?;:]/g, '');
     if (cleanWord) {
+      this.speech.speak(cleanWord).subscribe({
+      next: (blob: Blob) => {
+        console.log('Audio blob received:', blob);
+        
+        // Create a URL for the blob
+        const url = window.URL.createObjectURL(blob);
+        
+        // Play it immediately
+        const audio = new Audio();
+        audio.src = url;
+        audio.play();
+      },
+        error: (err) => console.log('Error obteniendo audio ', err)
+      });
       this.selectedWord.set(cleanWord);
       console.log('Palabra interactiva:', cleanWord);
       const currentInfo = this.selectedWordInfo();

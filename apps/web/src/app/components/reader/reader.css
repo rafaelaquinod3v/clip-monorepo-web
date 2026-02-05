@@ -12,15 +12,37 @@ textarea {
   padding: 20px;
   border: 1px solid #ddd;
   white-space: pre-wrap; /* Mantiene los \n del backend */
+    /* 1. The core property */
+  text-align: justify;
+
+  /* 2. Important: treat the block correctly */
+  text-justify: inter-word; 
+  
+  /* 3. Ensure the container has enough width to justify */
+  width: 100%; 
+  
+  /* 4. Optional: makes the text look cleaner */
+  line-height: 1.8; 
+
+  /* This ensures \n characters are respected as line breaks */
+  white-space: pre-line; 
+}
+
+.white-space {
+  /* Ensure the spaces are visible and stretchable */
+  display: inline;
 }
 
 .interactive-word {
   cursor: pointer;
-  padding: 2px 4px;
+  /* padding: 2px 4px; */
   border-radius: 4px;
   transition: background 0.2s;
 }
-
+.interactive-word {
+  /* Ensure spans stay on the line and respect spacing */
+  display: inline; 
+}
 .interactive-word:hover {
   background-color: #e0f2fe;
   color: #0369a1;

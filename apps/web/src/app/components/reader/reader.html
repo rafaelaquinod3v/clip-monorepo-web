@@ -30,9 +30,7 @@
         (click)="handleWordClick(word)"
         (keydown.enter)="handleWordClick(word)"
         (keydown.space)="$event.preventDefault(); handleWordClick(word)"
-        (keydown)="handleKeyDown($event, word)">
-        {{ word }}
-        </span>
+        (keydown)="handleKeyDown($event, word)">{{ word.trim() }}</span>
     }
   }
 </div>

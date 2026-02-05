@@ -56,3 +56,9 @@ python_utils/venv/
 apps/desktop-legacy/out/
 apps/desktop/out/*.tar.bz2
 *.onnx
+
+
+# .gitignore
+*.tar.bz2
+*.bin
+**/resources/models/

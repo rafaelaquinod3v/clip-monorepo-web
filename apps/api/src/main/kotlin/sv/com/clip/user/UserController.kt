@@ -40,7 +40,7 @@ class UserController(
     }
 
     // 3. Generar Token
-    val token = jwtService.generateToken(user.username, user.roles.toList())
+    val token = jwtService.generateToken(user.id!!, user.username, user.roles.toList())
 
     return ResponseEntity.ok(LoginResponse(token))
   }

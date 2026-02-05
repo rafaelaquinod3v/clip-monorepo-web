@@ -33,13 +33,15 @@ class JwtFilter(private val jwtService: JwtService) : OncePerRequestFilter() {
     if (username != null && SecurityContextHolder.getContext().authentication == null) {
 
       val roles = jwtService.extractRoles(token) // Extraemos los roles del token
+      val userId = jwtService.extractUserId(token)
       val authorities = roles.map { SimpleGrantedAuthority(it) } // Los convertimos para Spring
-
+      val customUserDetails = CustomUserDetails(userId, username, authorities)/*
       val authToken = UsernamePasswordAuthenticationToken(
           username,
           null,
-          authorities // <--- Ahora pasamos la lista de roles real
-      )
+          authorities
+      )*/
+      val authToken = UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.authorities)
       // Aquí podrías cargar roles reales desde la DB si los necesitas
 /*      val authToken = UsernamePasswordAuthenticationToken(
         username, null, emptyList()

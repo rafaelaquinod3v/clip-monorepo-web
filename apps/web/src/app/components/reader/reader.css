@@ -9,7 +9,7 @@ textarea {
 .text-container {
   line-height: 2;
   font-family: 'Inter', sans-serif;
-  padding: 20px;
+  /* padding: 20px; */
   border: 1px solid #ddd;
   white-space: pre-wrap; /* Mantiene los \n del backend */
     /* 1. The core property */

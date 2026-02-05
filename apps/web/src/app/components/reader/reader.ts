@@ -3,7 +3,7 @@ import { form, FormField, required, minLength } from '@angular/forms/signals';
 import { TEST_TTS } from './text.const';
 import { AnalyzeText } from '../../services/analyze-text';
 import { LearningService } from '../../services/learning-service';
-import { SpeechService } from '../../services/speech-service';
+import { SpeechService, TtsResponse, WordAlignment } from '../../services/speech-service';
 import { AudioPlayer } from '../audio-player/audio-player';
 
 // Definimos una interfaz para tener autocompletado y evitar errores
@@ -23,7 +23,11 @@ interface WordAnalysis {
 export class Reader implements OnInit {
   ngOnInit(): void {
     //this.fetchAudio();
-    this.speech.synthesize(this.textModel().text).subscribe();
+    this.speech.synthesize(this.textModel().text).subscribe((res: any) => {
+      const data: TtsResponse = res;
+      this.syncData.set(data.alignment);
+      this.audioBlob.set(this.base64ToWav(data.audio));
+    });
   }
   analyze = inject(AnalyzeText);
   learning = inject(LearningService);
@@ -31,7 +35,33 @@ export class Reader implements OnInit {
   // 1. Crea el modelo de datos (Signal)
   textModel = signal({ text: TEST_TTS });
   audioBlob = signal<Blob | null>(null);
+  syncData = signal<WordAlignment[]>([]);
+  activeIndex = signal<number>(-1);
+  private base64ToWav(audio: string) : Blob {
+    const byteCharacters = atob(audio);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: 'audio/wav' });
+  }
+  // This runs whenever the player emits a new time
+  handleTimeUpdate(currentTime: number) {
+    if (currentTime === -1) {
+      this.activeIndex.set(-1);
+      return;
+    }
 
+    const data = this.syncData();
+    // We only want to find the index among the actual words (not spaces)
+    // If your words() array includes spaces, you might need a mapping logic
+    const index = data.findIndex(w => currentTime >= w.start && currentTime <= w.end);
+    
+    if (index !== this.activeIndex()) {
+      this.activeIndex.set(index);
+    }
+  }
   fetchAudio() {
     if (this.textForm.text().valid()) {
       this.speech.speak(this.textModel().text).subscribe(blob => {

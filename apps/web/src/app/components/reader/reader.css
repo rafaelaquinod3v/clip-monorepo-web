@@ -48,7 +48,15 @@ textarea {
   color: #0369a1;
   text-decoration: underline;
 }
-
+/* The word currently being spoken */
+.playing {
+  background-color: #fde047; /* Bright Yellow (Tailwind yellow-300) */
+  color: #1a1a1a;            /* Dark text for better contrast */
+  transform: scale(1.05);    /* Subtle "pop" effect */
+  box-shadow: 0 0 8px rgba(253, 224, 71, 0.6);
+  z-index: 10;
+  position: relative;
+}
 .active {
   background-color: #bae6fd;
   font-weight: bold;

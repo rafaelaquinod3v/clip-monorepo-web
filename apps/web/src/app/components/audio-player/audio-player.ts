@@ -1,4 +1,4 @@
-import { Component, effect, input, OnDestroy, signal } from '@angular/core';
+import { Component, effect, input, OnDestroy, output, signal } from '@angular/core';
 
 @Component({
   selector: 'app-audio-player',
@@ -13,6 +13,8 @@ export class AudioPlayer implements OnDestroy {
   isPlaying = signal(false);
   isLoaded = signal(false);
   audioBlob = input<Blob | null>(null);
+  // Emit the current second to the parent
+  timeChange = output<number>();
   private audio = new Audio();
   private currentUrl: string | null = null;
   constructor() {
@@ -48,9 +50,16 @@ export class AudioPlayer implements OnDestroy {
     this.audio.oncanplaythrough = () => {
       this.isLoaded.set(true);
     };
+
+    this.audio.ontimeupdate = () => {
+      // Send the current time to the parent
+      this.timeChange.emit(this.audio.currentTime);
+    };
+    
     /* this.isPlaying.set(false); */
     this.audio.onended = () => {
       this.isPlaying.set(false);
+      this.timeChange.emit(-1); // Reset highlight when finished
     };
 
     /* this.audio.onended = () => this.isPlaying.set(false); */

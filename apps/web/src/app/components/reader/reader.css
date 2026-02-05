@@ -1,0 +1,44 @@
+textarea {
+  width: 100%;       /* Ocupa el 100% del contenedor padre */
+  height: 30dvh;     /* Altura dinámica del viewport (ajusta en móviles) */
+  box-sizing: border-box; /* Evita que el padding rompa el ancho total */
+  resize: vertical;  /* Opcional: permite al usuario ajustar solo la altura */
+}
+
+
+.text-container {
+  line-height: 2;
+  font-family: 'Inter', sans-serif;
+  padding: 20px;
+  border: 1px solid #ddd;
+  white-space: pre-wrap; /* Mantiene los \n del backend */
+}
+
+.interactive-word {
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.interactive-word:hover {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  text-decoration: underline;
+}
+
+.active {
+  background-color: #bae6fd;
+  font-weight: bold;
+}
+
+.interactive-word:focus {
+  outline: 2px solid #0369a1;
+  outline-offset: 2px;
+  background-color: #f0f9ff;
+}
+
+/* Opcional: esconder el outline si el usuario usa el ratón pero dejarlo para teclado */
+.interactive-word:focus:not(:focus-visible) {
+  outline: none;
+}

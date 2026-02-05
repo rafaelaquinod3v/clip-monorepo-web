@@ -1,1 +1,68 @@
-<p>reader works!</p>
+<form (submit)="$event.preventDefault(); sendToApi()">
+  <textarea 
+    [formField]="textForm.text" 
+    placeholder="Escribe tu text..."
+    rows="6">   
+  </textarea>
+
+  <!-- Mostrando errores usando las funciones de estado del Signal -->
+  @if (textForm.text().touched() && textForm.text().errors()) {
+    <p style="color: red;">El mensaje es demasiado corto.</p>
+  }
+
+  <button type="submit" [disabled]="!textForm.text().valid()">
+    Analyze
+  </button>
+</form>
+@if (rawResponse()) {
+<div class="text-container">
+  @for (word of words(); track $index) {
+    @if (word.trim().length === 0) {
+      <!-- Preservamos espacios y saltos de línea -->
+      <span>{{ word }}</span>
+    } @else {
+      <!-- Cada palabra es un elemento interactivo -->
+        <span 
+        class="interactive-word" 
+        role="button"
+        tabindex="0"
+        [class.active]="selectedWord() === word.trim()"
+        (click)="handleWordClick(word)"
+        (keydown.enter)="handleWordClick(word)"
+        (keydown.space)="$event.preventDefault(); handleWordClick(word)">
+        {{ word }}
+        </span>
+    }
+  }
+</div>
+} @else {
+  <p>Escribe algo arriba para analizarlo...</p>
+}
+
+<!-- Panel de info de la palabra seleccionada -->
+<!-- @if (selectedWord()) {
+  <div class="info-panel">
+    <h3>Análisis de: {{ selectedWord() }}</h3>
+    <button (click)="selectedWord.set(null)">Cerrar</button>
+  </div>
+} -->
+
+<!-- Panel de Detalles con el Análisis Filtrado -->
+@if (selectedWordInfo(); as info) {
+  <div class="info-card">
+    <div class="card-header">
+      <h3>{{ info.term }}</h3>
+      <span class="badge">{{ info.lemma }}</span>
+    </div>
+    <p class="definition">{{ info.targetLemma }}</p>
+    <button (click)="selectedWord.set(null)">Cerrar</button>
+  </div>
+} @else if (selectedWord()) {
+  <!-- Caso por si el usuario hace click en una palabra que no tiene análisis -->
+  <div class="info-card">
+    <p>No hay análisis disponible para "{{ selectedWord() }}"</p>
+  </div>
+}
+
+
+

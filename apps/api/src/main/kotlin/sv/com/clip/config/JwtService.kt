@@ -22,28 +22,12 @@ class JwtService {
       .compact()
 
   fun validateToken(token: String): String? = getPayload(token).subject
-/*    Jwts.parser().verifyWith(secretKey).build()
-      .parseSignedClaims(token).payload.subject*/
 
   fun extractRoles(token: String): List<String> =
     getPayload(token)["roles"] as List<String>
 
-
-/*  {
-    val claims = Jwts.parser().verifyWith(secretKey).build()
-      .parseSignedClaims(token).payload
-    return claims["roles"] as List<String>
-  }*/
-
   fun extractUserId(token: String): UUID =
     UUID.fromString(getPayload(token)["userId"] as String)
-/*
-    val payload = Jwts.parser()
-      .verifyWith(secretKey)
-      .build()
-      .parseSignedClaims(token)
-      .payload
-*/
 
   private fun getPayload(token: String) = Jwts.parser()
     .verifyWith(secretKey)

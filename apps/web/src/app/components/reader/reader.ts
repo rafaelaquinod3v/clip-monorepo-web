@@ -76,10 +76,38 @@ export class Reader {
     if (cleanWord) {
       this.selectedWord.set(cleanWord);
       console.log('Palabra interactiva:', cleanWord);
+      const currentInfo = this.selectedWordInfo();
+      if(currentInfo?.status === 'UNKNOWN'){
+        this.fetchDeepAnalysis(cleanWord);
+      }
+
     }
   }
-
+  private fetchDeepAnalysis(word: string) {
+    this.analyze.analyzeSingleWord(word).subscribe({
+    next: (detailedInfo: any) => {
+        console.log("Deep analysis");
+        console.log(detailedInfo);
+        //this.selectedWordInfo.set(response as WordAnalysis);
+        this.updateSingleWordAnalysis(detailedInfo);
+      },
+      error: (err) => console.log('Error analizando palabra ', err)
+    });
+  }
   analysisData = signal<WordAnalysis[]>([]);  
+
+  updateSingleWordAnalysis(newData: WordAnalysis) {
+    this.analysisData.update(currentList => {
+      // We map through the list: 
+      // If the word matches, we swap it for newData. 
+      // Otherwise, we keep the old item.
+      return currentList.map(item => 
+        item.term.toLowerCase() === newData.term.toLowerCase() 
+          ? newData 
+          : item
+      );
+    });
+  }
 
 }
 

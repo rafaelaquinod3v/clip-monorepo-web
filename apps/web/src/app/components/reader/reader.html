@@ -2,7 +2,7 @@
   <textarea 
     [formField]="textForm.text" 
     placeholder="Escribe tu text..."
-    rows="6">   
+    rows="4">   
   </textarea>
 
   <!-- Mostrando errores usando las funciones de estado del Signal -->
@@ -29,7 +29,8 @@
         [class.active]="selectedWord() === word.trim()"
         (click)="handleWordClick(word)"
         (keydown.enter)="handleWordClick(word)"
-        (keydown.space)="$event.preventDefault(); handleWordClick(word)">
+        (keydown.space)="$event.preventDefault(); handleWordClick(word)"
+        (keydown)="handleKeyDown($event, word)">
         {{ word }}
         </span>
     }
@@ -38,14 +39,6 @@
 } @else {
   <p>Escribe algo arriba para analizarlo...</p>
 }
-
-<!-- Panel de info de la palabra seleccionada -->
-<!-- @if (selectedWord()) {
-  <div class="info-panel">
-    <h3>Análisis de: {{ selectedWord() }}</h3>
-    <button (click)="selectedWord.set(null)">Cerrar</button>
-  </div>
-} -->
 
 <!-- Panel de Detalles con el Análisis Filtrado -->
 @if (selectedWordInfo(); as info) {

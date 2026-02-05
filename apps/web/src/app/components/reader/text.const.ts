@@ -36,3 +36,5 @@ Watch it bring you to your n-n-n-n-n-n-n-n knees, knees
 In the jungle welcome to the jungle
 Watch it bring you to your
 It's gonna bring you down, ha!`;
+
+export const TEST_TTS = `Hello there! Welcome to your English practice session. Today, we are going to explore some interesting new words. Are you ready to improve your pronunciation? Let’s take a deep breath and start with the first lesson. Remember, consistency is the key to success!`;

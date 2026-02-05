@@ -1,0 +1,13 @@
+<div class="audio-controls">
+  @if (isLoaded()) {
+    <button (click)="togglePlay()" class="play-btn">
+      @if (isPlaying()) {
+        <span>⏸️ Pause</span>
+      } @else {
+        <span>▶️ Play</span>
+      }
+    </button>
+  } @else {
+    <p>Waiting for audio data...</p>
+  }
+</div>

@@ -1,9 +1,10 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { form, FormField, required, minLength } from '@angular/forms/signals';
 import { TEST_TTS } from './text.const';
 import { AnalyzeText } from '../../services/analyze-text';
 import { LearningService } from '../../services/learning-service';
 import { SpeechService } from '../../services/speech-service';
+import { AudioPlayer } from '../audio-player/audio-player';
 
 // Definimos una interfaz para tener autocompletado y evitar errores
 interface WordAnalysis {
@@ -15,16 +16,28 @@ interface WordAnalysis {
 
 @Component({
   selector: 'app-reader',
-  imports: [FormField],
+  imports: [FormField, AudioPlayer],
   templateUrl: './reader.html',
   styleUrl: './reader.css',
 })
-export class Reader {
+export class Reader implements OnInit {
+  ngOnInit(): void {
+    this.fetchAudio();
+  }
   analyze = inject(AnalyzeText);
   learning = inject(LearningService);
   speech = inject(SpeechService);
   // 1. Crea el modelo de datos (Signal)
   textModel = signal({ text: TEST_TTS });
+  audioBlob = signal<Blob | null>(null);
+
+  fetchAudio() {
+    if (this.textForm.text().valid()) {
+      this.speech.speak(this.textModel().text).subscribe(blob => {
+        this.audioBlob.set(blob);
+      });
+    }
+  }
 
   // 2. Inicializa el formulario con validaciones
   textForm = form(this.textModel, (s) => {
@@ -45,7 +58,7 @@ export class Reader {
           error: (err) => console.log('Error al procesar el text ', err)
         }
       );
-      this.speech.speak(this.textModel().text).subscribe({
+/*       this.speech.speak(this.textModel().text).subscribe({
       next: (blob: Blob) => {
         console.log('Audio blob received:', blob);
         
@@ -58,7 +71,7 @@ export class Reader {
         audio.play();
       },
         error: (err) => console.log('Error obteniendo audio ', err)
-      });
+      }); */
     }
   }
   // ---- Interaction ----

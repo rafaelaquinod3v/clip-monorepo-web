@@ -14,6 +14,7 @@
     Analyze
   </button>
 </form>
+<app-audio-player [audioBlob]="audioBlob()"></app-audio-player>
 @if (rawResponse()) {
 <div class="text-container">
   @for (word of words(); track $index) {

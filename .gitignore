@@ -54,4 +54,5 @@ build
 python_utils/venv/
 
 apps/desktop-legacy/out/
-apps/desktop/out/
+apps/desktop/out/*.tar.bz2
+*.onnx

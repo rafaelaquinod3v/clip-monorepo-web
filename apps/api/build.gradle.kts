@@ -23,6 +23,10 @@ extensions.configure<JavaPluginExtension> {
 }
 
 dependencies {
+
+  // Esto incluirá tanto el puente Java como la librería nativa
+  implementation(fileTree("libs") { include("*.jar") })
+
   // WebSockets y Mensajería STOMP
   implementation("org.springframework.boot:spring-boot-starter-websocket")
   implementation("org.springframework:spring-messaging")

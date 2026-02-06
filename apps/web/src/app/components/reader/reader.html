@@ -19,10 +19,10 @@
 <div class="text-container">
   @for (word of words(); track $index) {
     @if (word.trim().length === 0) {
-      <!-- Preservamos espacios y saltos de línea -->
+      
       <span>{{ word }}</span>
     } @else {
-      <!-- Cada palabra es un elemento interactivo -->
+     
         <span 
         class="interactive-word" 
         [class.playing]="activeIndex() === $index"

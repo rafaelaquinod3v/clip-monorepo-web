@@ -105,8 +105,8 @@ class TtsService(
     samples.copyInto(paddedSamples, paddingSize) // Move audio to start after 8000 samples
 
     // 2. Recognize (Pass 22050 so Sherpa calculates seconds correctly)
-    val result = recognizerService.getTimestampsFromAudio(paddedSamples, 22050f)
-
+    //val result = recognizerService.getTimestampsFromAudio(paddedSamples, 22050f)
+    val result = recognizerService.getTimestampsFromAudio(samples, 22050f)
     // 3. Group sub-tokens into Words
     val wordAlignments = mutableListOf<Map<String, Any>>()
     var currentWord: MutableMap<String, Any>? = null

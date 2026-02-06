@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, Signal, signal } from '@angular/core';
 import { form, FormField, required, minLength } from '@angular/forms/signals';
 import { TEST_TTS } from './text.const';
 import { AnalyzeText } from '../../services/analyze-text';
@@ -36,7 +36,90 @@ export class Reader implements OnInit {
   textModel = signal({ text: TEST_TTS });
   audioBlob = signal<Blob | null>(null);
   syncData = signal<WordAlignment[]>([]);
+  syncDataPlus: Signal<WordAlignment[]> = computed(() => this.interleave(this.syncData(), {
+    term: " ",
+    start: 0,
+    end: 0,
+    originalIndex: -1,
+    newIndex: -1,
+  }));
   activeIndex = signal<number>(-1);
+  
+  // Definición de la función interleave
+/*   interleave<T>(arr: T[], x: T): T[] {
+    return arr.flatMap(e => [e, x]).slice(0, -1);
+  } */
+
+/*     interleave<T extends object>(arr: T[], separator: T): T[] {
+  return arr
+    .flatMap((item, i) => {
+      // Calculamos las posiciones en el nuevo array
+      const itemIndex = i * 2;
+      const separatorIndex = i * 2 + 1;
+
+      // Retornamos el objeto original con su nuevo índice 
+      // y el separador con su índice (si no es el último)
+      return [
+        { ...item, originalIndex: itemIndex },
+        { ...separator, originalIndex: separatorIndex }
+      ];
+    })
+    .slice(0, -1); // Eliminamos el último separador
+} */
+/* interleave(arr: any[], separatorBase: any) {
+  return arr.flatMap((item, i) => {
+    const isLast = i === arr.length - 1;
+    
+    // 1. Palabra original con su nuevo índice
+    const word = { ...item, newIndex: i * 2 };
+
+    if (isLast) return [word];
+
+    // 2. El espacio hereda los tiempos de la palabra actual 
+    // para que el resaltado no se apague entre palabras.
+    const space = { 
+      ...separatorBase, 
+      start: item.start, 
+      end: item.end, 
+      newIndex: i * 2 + 1 
+    };
+
+    return [word, space];
+  });
+} */
+
+interleave(arr: any[], separatorBase: any): any[] {
+  // 1. Verificación de seguridad
+  if (!arr || arr.length === 0) return [];
+
+  return arr.flatMap((item, i) => {
+    const isLast = i === arr.length - 1;
+    const wordIdx = i * 2;
+    const sepIdx = i * 2 + 1;
+
+    // La palabra original con su nuevo índice
+    const word = { ...item, newIndex: wordIdx };
+
+    // Si es el último, no añadimos el espacio para no descuadrar el final
+    if (isLast) return [word];
+
+    // EL ESPACIO: Para evitar 'undefined', el espacio debe 'llenar' 
+    // el hueco entre el fin de esta palabra y el inicio de la siguiente.
+    const space = { 
+      ...separatorBase, 
+      term: ' ', 
+      start: item.end,        // Empieza justo cuando termina la palabra actual
+      end: arr[i + 1].start,  // Termina justo cuando empieza la siguiente
+      newIndex: sepIdx 
+    };
+
+    return [word, space];
+  });
+  // Eliminamos el .slice(0, -1) porque ya controlamos el último elemento con el 'if'
+}
+
+
+
   private base64ToWav(audio: string) : Blob {
     const byteCharacters = atob(audio);
     const byteNumbers = new Array(byteCharacters.length);
@@ -46,14 +129,61 @@ export class Reader implements OnInit {
     const byteArray = new Uint8Array(byteNumbers);
     return new Blob([byteArray], { type: 'audio/wav' });
   }
-  // This runs whenever the player emits a new time
   handleTimeUpdate(currentTime: number) {
+  // 1. Reset si el audio termina
+  if (currentTime === -1) {
+    this.activeIndex.set(-1);
+    return;
+  }
+
+ // const data = this.syncData();
+ // const dataPlus = this.syncDataPlus();
+  
+  // 2. Encontrar la palabra que suena en este segundo
+  const currentEntry = this.syncDataPlus().find(w => currentTime > w.start && currentTime < w.end);
+  console.log("evento audio");
+  console.log(currentEntry);
+console.log(this.syncDataPlus());
+  if (currentEntry) {
+    this.activeIndex.set(currentEntry.newIndex);
+    console.log(currentEntry);
+    const allItems = this.words();
+    console.log(allItems);
+   // console.log(data);
+    console.log(this.syncDataPlus());
+/*     */
+/*      // El array que tiene ['Hello', ' ', 'there!', ...]
+    let wordCounter = 0;
+
+    // 3. Mapear originalIndex (backend) -> index visual (frontend)
+    for (let i = 0; i < allItems.length; i++) {
+      // Si no es un espacio en blanco, es una palabra que el backend contó
+      if (allItems[i].trim().length > 0) {
+        if (wordCounter === currentEntry.originalIndex) {
+          // Solo actualizamos si el índice cambió para evitar re-renders innecesarios
+          if (this.activeIndex() !== i) {
+            this.activeIndex.set(i);
+          }
+          return; 
+        }
+        wordCounter++;
+      }
+    }
+  } else {
+    // Si estamos en un silencio entre palabras, opcionalmente podemos quitar el highlight
+    // this.activeIndex.set(-1); 
+  } */
+ }
+}
+
+  // This runs whenever the player emits a new time
+/*   handleTimeUpdate(currentTime: number) {
     if (currentTime === -1) {
       this.activeIndex.set(-1);
       return;
     }
 
-    const data = this.syncData();
+    const data = this.syncData(); */
     // We only want to find the index among the actual words (not spaces)
     // If your words() array includes spaces, you might need a mapping logic
 /*     const index = data.findIndex(w => currentTime >= w.start && currentTime <= w.end);
@@ -61,9 +191,12 @@ export class Reader implements OnInit {
     if (index !== this.activeIndex()) {
       this.activeIndex.set(index);
     } */
-     const currentEntry = data.find(w => 
+/*      const currentEntry = data.find(w => 
       currentTime >= w.start && currentTime <= w.end
-    );
+    ); */
+/*     if (currentEntry) {
+      this.activeIndex.set(currentEntry.originalIndex);
+    }  */
 
 /*     if (currentEntry) {
       // 2. Direct mapping: Set the active index to the original index
@@ -86,7 +219,7 @@ export class Reader implements OnInit {
     }
   } */
  //console.log(this.words().slice(0,5));
-   if (currentEntry) {
+/*    if (currentEntry) {
     const allItems = this.words(); // ['Hello', ' ', 'there!', ' ', 'Welcome']
     let wordCounter = 0;
     
@@ -105,9 +238,10 @@ export class Reader implements OnInit {
         
         // Only increment the counter if it was a word
         wordCounter++;
-      }
-    }
-/*    if (currentEntry) {
+      } */
+
+
+        /*    if (currentEntry) {
     const allWords = this.words();
     const targetTerm = currentEntry.term.trim().toLowerCase();
 
@@ -127,8 +261,9 @@ export class Reader implements OnInit {
       this.activeIndex.set(foundIndex);
     }
   } */
-  }
-}
+  
+  //}
+
   // Helper to count non-empty words up to a specific index
 private getWordCountUntil(targetIndex: number): number {
   return this.words()

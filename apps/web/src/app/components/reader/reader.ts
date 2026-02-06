@@ -65,12 +65,76 @@ export class Reader implements OnInit {
       currentTime >= w.start && currentTime <= w.end
     );
 
-    if (currentEntry) {
+/*     if (currentEntry) {
       // 2. Direct mapping: Set the active index to the original index
       // This will work even if your words() array has spaces/punctuation
       this.activeIndex.set(currentEntry.originalIndex);
+    } */
+/*      if (currentEntry) {
+    const allWords = this.words();
+    let wordCounter = 0;
+    
+    // Buscamos el índice en el array que tiene espacios
+    for (let i = 0; i < allWords.length; i++) {
+      if (allWords[i].trim().length > 0) { // Si es una palabra
+        if (wordCounter === currentEntry.originalIndex) {
+          this.activeIndex.set(i);
+          return;
+        }
+        wordCounter++;
+      }
     }
+  } */
+ //console.log(this.words().slice(0,5));
+   if (currentEntry) {
+    const allItems = this.words(); // ['Hello', ' ', 'there!', ' ', 'Welcome']
+    let wordCounter = 0;
+    
+    // We iterate through every item (words and spaces)
+    for (let i = 0; i < allItems.length; i++) {
+      // Check if this specific item is a "word" (not just whitespace)
+      if (allItems[i].trim().length > 0) {
+        
+        // If this is the Nth word the backend is talking about...
+        if (wordCounter === currentEntry.originalIndex) {
+          if (this.activeIndex() !== i) {
+            this.activeIndex.set(i);
+          }
+          return; // Exit once found
+        }
+        
+        // Only increment the counter if it was a word
+        wordCounter++;
+      }
+    }
+/*    if (currentEntry) {
+    const allWords = this.words();
+    const targetTerm = currentEntry.term.trim().toLowerCase();
+
+    // 2. Find the index in the HTML loop
+    // Logic: Look for the word that matches the text at roughly that position
+    const foundIndex = allWords.findIndex((word, index) => {
+      const cleanWord = word.trim().toLowerCase().replace(/[.,!?;:]/g, '');
+      const cleanTarget = targetTerm.replace(/[.,!?;:]/g, '');
+      
+      // Check if text matches AND we are around the originalIndex
+      // (This handles duplicate words like "the... the...")
+      return cleanWord === cleanTarget && 
+             Math.abs(this.getWordCountUntil(index) - currentEntry.originalIndex) <= 1;
+    });
+
+    if (foundIndex !== -1 && foundIndex !== this.activeIndex()) {
+      this.activeIndex.set(foundIndex);
+    }
+  } */
   }
+}
+  // Helper to count non-empty words up to a specific index
+private getWordCountUntil(targetIndex: number): number {
+  return this.words()
+    .slice(0, targetIndex)
+    .filter(w => w.trim().length > 0).length;
+}
   fetchAudio() {
     if (this.textForm.text().valid()) {
       this.speech.speak(this.textModel().text).subscribe(blob => {

@@ -94,8 +94,55 @@ class TtsService(
 
     out.write(header.array())
   }
-
   fun generateAudioWithSync(text: String): Map<String, Any> {
+    val audio = tts.generate(text)
+    val samples = audio.samples
+    val sampleRate = audio.sampleRate // 22050
+
+    // 1. Padding: Add silence at the BEGINNING
+    val paddingSize = 8000
+    val paddedSamples = FloatArray(samples.size + paddingSize)
+    samples.copyInto(paddedSamples, paddingSize) // Move audio to start after 8000 samples
+
+    // 2. Recognize (Pass 22050 so Sherpa calculates seconds correctly)
+    val result = recognizerService.getTimestampsFromAudio(paddedSamples, 22050f)
+
+    // 3. Group sub-tokens into Words
+    val wordAlignments = mutableListOf<Map<String, Any>>()
+    var currentWord: MutableMap<String, Any>? = null
+    var wordIndex = 0
+
+    result.tokens.forEachIndexed { i, token ->
+      // Zipformer tokens starting with " " (or "_" in some models) mark a NEW word
+      val isNewWord = token.startsWith(" ") || token.startsWith("_")
+      val cleanToken = token.replace(" ", "").replace("_", "")
+
+      if (isNewWord || currentWord == null) {
+        // If it's a new word, save the previous one and start a new one
+        currentWord?.let { wordAlignments.add(it) }
+
+        currentWord = mutableMapOf(
+          "term" to cleanToken,
+          "start" to result.timestamps[i],
+          "end" to result.timestamps[i] + 0.1,
+          "originalIndex" to wordIndex++
+        )
+      } else {
+        // It's a sub-token (like "ll" or "o"), append to the current word
+        currentWord["term"] = currentWord["term"].toString() + cleanToken
+        currentWord["end"] = result.timestamps[i] + 0.1
+      }
+    }
+    // Add the last word
+    currentWord?.let { wordAlignments.add(it) }
+
+    return mapOf(
+      "audio" to Base64.getEncoder().encodeToString(convertSamplesToWav(samples, sampleRate.toFloat())),
+      "alignment" to wordAlignments
+    )
+  }
+
+/*  fun generateAudioWithSync(text: String): Map<String, Any> {
     if (text.isBlank()) {
       return mapOf("audio" to "", "alignment" to emptyList<Any>())
     }
@@ -130,6 +177,7 @@ class TtsService(
     val speakingDuration = totalDuration - paddingStart - paddingEnd
 
     val alignment = if (timestamps.isNotEmpty()) {
+      println("timestamps: ${timestamps.size}")
       // Use real timestamps if available
       tokens.mapIndexed { i, token ->
         mapOf(
@@ -166,7 +214,7 @@ class TtsService(
       "audio" to audioBase64,
       "alignment" to alignment
     )
-  }
+  }*/
 
   // Refactor your existing generateWav logic into a helper that takes samples
   private fun convertSamplesToWav(samples: FloatArray, sampleRate: Float): ByteArray {

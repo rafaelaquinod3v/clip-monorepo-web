@@ -1,13 +1,13 @@
-import { Component, computed, inject, OnInit, Signal, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { form, FormField, required, minLength } from '@angular/forms/signals';
 import { TEST_TTS } from './text.const';
 import { AnalyzeText } from '../../services/analyze-text';
 import { LearningService } from '../../services/learning-service';
 import { SpeechService, TtsResponse, WordAlignment } from '../../services/speech-service';
 import { AudioPlayer } from '../audio-player/audio-player';
-import { base64ToWav, handleTimeUpdate } from './audio';
+import { base64ToWav } from './audio';
 import { handleKeyDownHelper, handleWordClickEnterOrSpaceHelper } from './keyboard-mouse';
-import { WordAnalysis, interleaveHelper, updateOptimisticLocalUserWordStatusHelper } from './helper';
+import { WordAnalysis, updateOptimisticLocalUserWordStatusHelper } from './helper';
 
 @Component({
   selector: 'app-reader',
@@ -16,14 +16,13 @@ import { WordAnalysis, interleaveHelper, updateOptimisticLocalUserWordStatusHelp
   styleUrl: './reader.css',
 })
 export class Reader implements OnInit {
-  protected readonly handleTimeUpdate = handleTimeUpdate;
-
   // Services
   analyzeTextService = inject(AnalyzeText);
   learningService = inject(LearningService);
   speechService = inject(SpeechService);
 
   ngOnInit(): void {
+    this.fetchTextAnalysis();
     this.speechService.synthesize(this.textModel().text).subscribe((res: TtsResponse) => {      
       this.alignmentData.set(res.alignment);
       this.audioBlob.set(base64ToWav(res.audio));
@@ -46,25 +45,13 @@ export class Reader implements OnInit {
   // text interaction
   alignmentData = signal<WordAlignment[]>([]);    
   selectedWord = signal<string | null>(null);
- // activeIndex = signal<number>(-1);
-
-  //computed
-  syncAlignmentData: Signal<WordAlignment[]> = computed(() => interleaveHelper(this.alignmentData(), 
-      { term: " ",
-        start: 0,
-        end: 0,
-        originalIndex: -1,
-        newIndex: -1,
-      }
-    )
-  );
 
   activeIndex = computed(() => {
     const time = this.currentTime();
-    const data = this.syncAlignmentData();
+    const data = this.alignmentData();
     console.log(time);
     // Find the word whose range includes the current time
-    return data.findIndex(word => time >= word.start && time <= word.end);
+    return data.find(word => time >= word.start && time <= word.end)?.index;
   });
 
   words = computed(() => {
@@ -106,24 +93,9 @@ export class Reader implements OnInit {
   }
 
   onTimeUpdate(time: number) {
-  //const driftCorrection = 0.727; 
-  //this.currentTime.set(time * driftCorrection);
-    // El factor es: SampleRateArchivo / SampleRateNativoNavegador
-  // Ejemplo: 22050 / 48000 ≈ 0.459
-/*   const factor = 22050 / 48000;
-  this.currentTime.set(time * factor); */
-    
-  
-  // If the audio is literally 3x faster (rare but happens if header is ignored):
-  // const driftCorrection = 48000 / 16000; 
-//const driftCorrection = 16600 / 16000; // Start with 1.0
-  //this.currentTime.set(time * driftCorrection); 
-
     // 1.0375 is your current factor (16600/16000)
-  const precisionFactor = 1.0375; 
-  this.currentTime.set(time * precisionFactor);
-  //this.currentTime.set(time);
-    //this.currentTime.set(time); // <--- AQUÍ se le asigna el valor al Signal
+    //const precisionFactor = 1.0375; 
+    this.currentTime.set(time);
   }
 
   updateSingleWordAnalysis(newData: WordAnalysis) {
@@ -184,19 +156,12 @@ export class Reader implements OnInit {
   }
 
   handleWordClickEnterOrSpace(term: string) {
-    const data = this.syncAlignmentData();
-    
-    // Find the word whose range includes the current time
-    console.log( data.findIndex(word => word.term.toLowerCase() === term.toLocaleLowerCase() ));
-console.log( data.find(word => word.term.toLowerCase() === term.toLocaleLowerCase() )?.start);
-console.log( data.find(word => word.term.toLowerCase() === term.toLocaleLowerCase() )?.newIndex);
-/*     const cleanTerm = handleWordClickEnterOrSpaceHelper(word, this.speechService);
+    const cleanTerm = handleWordClickEnterOrSpaceHelper(term, this.speechService);
     this.selectedWord.set(cleanTerm);
-    //console.log('Palabra interactiva:', cleanTerm);
     const currentInfo = this.selectedWordInfo();
     if(currentInfo?.status === 'UNKNOWN'){
       this.fetchSingleWordAnalysis(cleanTerm);
-    } */
+    }
   }
 }
 

@@ -18,6 +18,7 @@ export class AudioPlayer implements OnDestroy {
   private zone = inject(NgZone);
   private audio = new Audio();
   private currentUrl: string | null = null;
+  private animationFrameId: number | null = null;
   constructor() {
     // 2. This effect runs every time 'audioBlob' changes in the parent
     effect(() => {
@@ -43,31 +44,44 @@ export class AudioPlayer implements OnDestroy {
       // Send the current time to the parent
       this.timeChange.emit(this.audio.currentTime);
     }; */
-    this.audio.addEventListener('timeupdate', () => {
+/*     this.audio.addEventListener('timeupdate', () => {
       this.zone.run(() => { // Force Angular to notice the change
         this.timeChange.emit(this.audio.currentTime);
       });
-    });
+    }); */
     
     /* this.isPlaying.set(false); */
 /*     this.audio.onended = () => {
       this.isPlaying.set(false);
       this.timeChange.emit(-1); // Reset highlight when finished
     }; */
-    this.audio.addEventListener('ended', () => {
+/*     this.audio.addEventListener('ended', () => {
       this.zone.run(() => {
+        this.isPlaying.set(false);
+        this.timeChange.emit(-1);
+      });
+    }); */
+
+    /* this.audio.onended = () => this.isPlaying.set(false); */
+/*     this.audio.onerror = (e) => {
+      console.error("Error cargando el audio:", e);
+      this.isLoaded.set(false);
+    }; */
+        this.audio.addEventListener('ended', () => {
+      this.zone.run(() => {
+        this.stopSyncLoop(); // Stop polling when finished
         this.isPlaying.set(false);
         this.timeChange.emit(-1);
       });
     });
 
-    /* this.audio.onended = () => this.isPlaying.set(false); */
     this.audio.onerror = (e) => {
       console.error("Error cargando el audio:", e);
       this.isLoaded.set(false);
+      this.stopSyncLoop();
     };
   }
- togglePlay() {
+/*  togglePlay() {
     if (!this.isLoaded()) return;
 
     if (this.audio.paused) {
@@ -77,16 +91,66 @@ export class AudioPlayer implements OnDestroy {
       this.audio.pause();
       this.isPlaying.set(false);
     }
+  } */
+
+      togglePlay() {
+    if (!this.isLoaded()) return;
+
+    if (this.audio.paused) {
+      this.audio.play().then(() => {
+        this.zone.run(() => {
+          this.isPlaying.set(true);
+          this.startSyncLoop(); // 2. Start high-precision polling
+        });
+      }).catch(err => console.error("Error al reproducir:", err));
+    } else {
+      this.audio.pause();
+      this.isPlaying.set(false);
+      this.stopSyncLoop(); // 3. Stop polling on pause
+    }
+  }
+  private startSyncLoop() {
+    this.stopSyncLoop(); // Avoid multiple loops
+
+    const update = () => {
+      if (!this.audio.paused && !this.audio.ended) {
+        // Emit the high-precision time
+        // The zone.run is necessary because rAF runs outside Angular's cycle
+        this.zone.run(() => {
+          this.timeChange.emit(this.audio.currentTime);
+        });
+        this.animationFrameId = requestAnimationFrame(update);
+      }
+    };
+    this.animationFrameId = requestAnimationFrame(update);
   }
 
-  private cleanup() {
+  private stopSyncLoop() {
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+  }
+/*   private cleanup() {
     this.audio.pause();
     this.isLoaded.set(false);
     this.isPlaying.set(false);
     if (this.currentUrl) {
       URL.revokeObjectURL(this.currentUrl);
       this.currentUrl = null;
+    } */
+
+  private cleanup() {
+    this.stopSyncLoop();
+    this.audio.pause();
+    this.audio.src = ''; // Clear source to stop internal buffers
+    this.isLoaded.set(false);
+    this.isPlaying.set(false);
+    if (this.currentUrl) {
+      URL.revokeObjectURL(this.currentUrl);
+      this.currentUrl = null;
     }
+  }
   }
 
 /*   private cleanup() {

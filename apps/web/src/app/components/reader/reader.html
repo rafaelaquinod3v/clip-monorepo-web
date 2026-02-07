@@ -15,24 +15,23 @@
   </button>
 </form>
 <app-audio-player [audioBlob]="audioBlob()" (timeChange)="onTimeUpdate($event)"></app-audio-player>
-@if (syncAlignmentData()) {
+@if (rawResponse()) {
 <div class="text-container">
  <!--  @for (word of words(); track $index) { -->
-   @for (word of syncAlignmentData(); track word.newIndex) {
-    @if (word.term.trim().length === 0) {
-      
-      <span>{{ word.term }}</span>
+   @for (word of words(); track $index) {
+    @if (word.trim().length === 0) {      
+      <span>{{ word }}</span>
     } @else {     
         <span 
         class="interactive-word" 
         [class.playing]="activeIndex() === $index"
         role="button"
         tabindex="0"
-        [class.active]="selectedWord() === word.term.trim()"
-        (click)="handleWordClickEnterOrSpace(word.term)"
-        (keydown.enter)="handleWordClickEnterOrSpace(word.term)"
-        (keydown.space)="$event.preventDefault(); handleWordClickEnterOrSpace(word.term)"
-        (keydown)="handleKeyDown($event, word.term)">{{ word.term.trim() }} {{word.newIndex}}</span>
+        [class.active]="selectedWord() === word.trim()"
+        (click)="handleWordClickEnterOrSpace(word)"
+        (keydown.enter)="handleWordClickEnterOrSpace(word)"
+        (keydown.space)="$event.preventDefault(); handleWordClickEnterOrSpace(word)"
+        (keydown)="handleKeyDown($event, word)">{{ word.trim() }}</span>
     }
   }
 </div>

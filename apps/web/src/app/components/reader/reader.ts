@@ -5,15 +5,9 @@ import { AnalyzeText } from '../../services/analyze-text';
 import { LearningService } from '../../services/learning-service';
 import { SpeechService, TtsResponse, WordAlignment } from '../../services/speech-service';
 import { AudioPlayer } from '../audio-player/audio-player';
-import { base64ToWav } from './audio';
-
-// Definimos una interfaz para tener autocompletado y evitar errores
-interface WordAnalysis {
-  term: string;
-  lemma: string;
-  status: string;
-  targetLemma?: string;
-}
+import { base64ToWav, handleTimeUpdate } from './audio';
+import { handleKeyDownHelper, handleWordClickEnterOrSpaceHelper } from './keyboard-mouse';
+import { WordAnalysis, interleaveHelper, updateOptimisticLocalUserWordStatusHelper } from './helper';
 
 @Component({
   selector: 'app-reader',
@@ -22,190 +16,103 @@ interface WordAnalysis {
   styleUrl: './reader.css',
 })
 export class Reader implements OnInit {
+  protected readonly handleTimeUpdate = handleTimeUpdate;
+
+  // Services
+  analyzeTextService = inject(AnalyzeText);
+  learningService = inject(LearningService);
+  speechService = inject(SpeechService);
+
   ngOnInit(): void {
-    //this.fetchAudio();
-    this.speech.synthesize(this.textModel().text).subscribe((res: any) => {
-      const data: TtsResponse = res;
-      this.syncData.set(data.alignment);
-      this.audioBlob.set(base64ToWav(data.audio));
+    this.speechService.synthesize(this.textModel().text).subscribe((res: TtsResponse) => {      
+      this.alignmentData.set(res.alignment);
+      this.audioBlob.set(base64ToWav(res.audio));
     });
   }
-  analyze = inject(AnalyzeText);
-  learning = inject(LearningService);
-  speech = inject(SpeechService);
-  // 1. Crea el modelo de datos (Signal)
+
   textModel = signal({ text: TEST_TTS });
-  audioBlob = signal<Blob | null>(null);
-  syncData = signal<WordAlignment[]>([]);
-  syncDataPlus: Signal<WordAlignment[]> = computed(() => this.interleave(this.syncData(), {
-    term: " ",
-    start: 0,
-    end: 0,
-    originalIndex: -1,
-    newIndex: -1,
-  }));
-  activeIndex = signal<number>(-1);
-    // 2. Inicializa el formulario con validaciones
   textForm = form(this.textModel, (s) => {
     required(s.text);
     minLength(s.text, 10);
   });
 
-interleave(arr: any[], separatorBase: any): any[] {
-  // 1. Verificación de seguridad
-  if (!arr || arr.length === 0) return [];
+  // text analysis
+  rawResponse = signal<string>("");
+  wordAnalysisResponse = signal<WordAnalysis[]>([]);
 
-  return arr.flatMap((item, i) => {
-    const isLast = i === arr.length - 1;
-    const wordIdx = i * 2;
-    const sepIdx = i * 2 + 1;
+  currentTime = signal<number>(0);
+  audioBlob = signal<Blob | null>(null);
 
-    // La palabra original con su nuevo índice
-    const word = { ...item, newIndex: wordIdx };
+  // text interaction
+  alignmentData = signal<WordAlignment[]>([]);    
+  selectedWord = signal<string | null>(null);
+ // activeIndex = signal<number>(-1);
 
-    // Si es el último, no añadimos el espacio para no descuadrar el final
-    if (isLast) return [word];
+  //computed
+  syncAlignmentData: Signal<WordAlignment[]> = computed(() => interleaveHelper(this.alignmentData(), 
+      { term: " ",
+        start: 0,
+        end: 0,
+        originalIndex: -1,
+        newIndex: -1,
+      }
+    )
+  );
 
-    // EL ESPACIO: Para evitar 'undefined', el espacio debe 'llenar' 
-    // el hueco entre el fin de esta palabra y el inicio de la siguiente.
-    const space = { 
-      ...separatorBase, 
-      term: ' ', 
-      start: item.end,        // Empieza justo cuando termina la palabra actual
-      end: arr[i + 1].start,  // Termina justo cuando empieza la siguiente
-      newIndex: sepIdx 
-    };
-
-    return [word, space];
+  activeIndex = computed(() => {
+    const time = this.currentTime();
+    const data = this.syncAlignmentData();
+    console.log(time);
+    // Find the word whose range includes the current time
+    return data.findIndex(word => time >= word.start && time <= word.end);
   });
-  // Eliminamos el .slice(0, -1) porque ya controlamos el último elemento con el 'if'
-}
 
+  words = computed(() => {
+    const text = this.rawResponse();
+    if (!text) return [];
+      // Separamos por espacios y saltos de línea
+    return text.split(/(\s+)/); 
+  });
 
+  selectedWordInfo = computed(() => {
+      const word = this.selectedWord();
+      const data = this.wordAnalysisResponse();
+      
+      if (!word || !data) return null;
 
+      // Buscamos la palabra en el análisis (ignorando mayúsculas/minúsculas)
+      return data.find(item => 
+        item.term.toLowerCase() === word.toLowerCase()
+      );
+    }
+  );
 
-  handleTimeUpdate(currentTime: number) {
-  // 1. Reset si el audio termina
-  if (currentTime === -1) {
-    this.activeIndex.set(-1);
-    return;
-  }
-
- // const data = this.syncData();
- // const dataPlus = this.syncDataPlus();
-  
-  // 2. Encontrar la palabra que suena en este segundo
-  const currentEntry = this.syncDataPlus().find(w => currentTime > w.start && currentTime < w.end);
-  console.log("evento audio");
-  console.log(currentEntry);
-console.log(this.syncDataPlus());
-  if (currentEntry) {
-    this.activeIndex.set(currentEntry.newIndex);
-    console.log(currentEntry);
-    const allItems = this.words();
-    console.log(allItems);
-   // console.log(data);
-    console.log(this.syncDataPlus());
- }
-}
-
-  fetchAudio() {
+  // api
+  fetchAudioOnly() {
     if (this.textForm.text().valid()) {
-      this.speech.speak(this.textModel().text).subscribe(blob => {
+      this.speechService.speak(this.textModel().text).subscribe(blob => {
         this.audioBlob.set(blob);
       });
     }
   }
 
-
-
-  sendToApi() {
+  fetchTextAnalysis() {
     if (this.textForm.text().valid()) {
-      console.log('Enviando:', this.textModel().text);
-      // Tu lógica de backend aquí
-      this.analyze.analyzeText(this.textModel().text).subscribe(
-        { next: (response: any) => {
-            console.log(response);
+      this.analyzeTextService.analyzeText(this.textModel().text).subscribe((response: any) => {
             this.rawResponse.set(response.rawText);
-            this.analysisData.set(response.words);
-          },
-          error: (err) => console.log('Error al procesar el text ', err)
-        }
-      );
-    }
-  }
-  // ---- Interaction ----
-    // Aquí guardas la respuesta "rawtext" del backend
-  rawResponse = signal<string>("");
-  
-  // Signal para saber qué palabra ha tocado el usuario
-  selectedWord = signal<string | null>(null);
-
-  // Dividimos el texto en palabras individuales automáticamente
-  words = computed(() => {
-    const text = this.rawResponse();
-    if (!text) return [];
-      // Separamos por espacios y saltos de línea
-      return text.split(/(\s+)/); 
-    });
-
-  selectedWordInfo = computed(() => {
-    const word = this.selectedWord();
-    const data = this.analysisData();
-    
-    if (!word || !data) return null;
-
-    // Buscamos la palabra en el análisis (ignorando mayúsculas/minúsculas)
-    return data.find(item => 
-      item.term.toLowerCase() === word.toLowerCase()
-    );
-  });
-
-  handleWordClick(word: string) {
-    // Limpiamos puntuación básica para el análisis
-    const cleanWord = word.trim().replace(/[.,!?;:]/g, '');
-    if (cleanWord) {
-      this.speech.speak(cleanWord).subscribe({
-      next: (blob: Blob) => {
-        console.log('Audio blob received:', blob);
-        
-        // Create a URL for the blob
-        const url = window.URL.createObjectURL(blob);
-        
-        // Play it immediately
-        const audio = new Audio();
-        audio.src = url;
-        // Release the URL as soon as the browser has finished loading the data
-        audio.oncanplaythrough = () => {
-            window.URL.revokeObjectURL(url);
-        };
-        audio.play();
-      },
-        error: (err) => console.log('Error obteniendo audio ', err)
+            this.wordAnalysisResponse.set(response.words);
       });
-      this.selectedWord.set(cleanWord);
-      console.log('Palabra interactiva:', cleanWord);
-      const currentInfo = this.selectedWordInfo();
-      if(currentInfo?.status === 'UNKNOWN'){
-        this.fetchDeepAnalysis(cleanWord);
-      }
-
     }
   }
-  private fetchDeepAnalysis(word: string) {
-    this.analyze.analyzeSingleWord(word).subscribe({
-    next: (detailedInfo: any) => {
-        console.log("Deep analysis");
-        console.log(detailedInfo);
-        this.updateSingleWordAnalysis(detailedInfo);
-      },
-      error: (err) => console.log('Error analizando palabra ', err)
-    });
+
+  onTimeUpdate(time: number) {
+  const driftCorrection = 0.727; 
+  this.currentTime.set(time * driftCorrection);
+    //this.currentTime.set(time); // <--- AQUÍ se le asigna el valor al Signal
   }
-  analysisData = signal<WordAnalysis[]>([]);  
 
   updateSingleWordAnalysis(newData: WordAnalysis) {
-    this.analysisData.update(currentList => {
+    this.wordAnalysisResponse.update(currentList => {
       // We map through the list: 
       // If the word matches, we swap it for newData. 
       // Otherwise, we keep the old item.
@@ -217,38 +124,13 @@ console.log(this.syncDataPlus());
     });
   }
 
-  handleKeyDown(event: KeyboardEvent, word: string) {
-    
-    // 1. Detectar si Shift está presionado
-    const isShift = event.shiftKey;
-
-    // 2. Detectar si la tecla física es un número (Digit0 al Digit9)
-    const isDigit = event.code.startsWith('Digit');
-    const isNumpad = event.code.startsWith('Numpad');
-
-    if (isShift && (isDigit || isNumpad)) {
-      console.log('Evento de teclado!!');
-      event.preventDefault(); // Evita que se escriba el símbolo en otros campos
-      
-      // Extraemos el número final del string "Digit1", "Digit2", etc.
-      const numberPressed = event.code.replace('Digit', '').replace('Numpad', '');
-      
-      console.log(`Combinación detectada: Shift + ${numberPressed}`);
-      // Validate it's a single digit (0-9)
-      if (/^[0-9]$/.test(numberPressed)) {
-        this.processStatusUpdate(word, numberPressed);
-      }
-    }
+  private fetchSingleWordAnalysis(term: string) {
+    this.analyzeTextService.analyzeSingleWord(term)
+      .subscribe((analysis: WordAnalysis) => 
+        this.updateSingleWordAnalysis(analysis));
   }
 
-  private updateOptimisticLocalUserWordStatus(currentList: WordAnalysis[], term: string, newStatus: string): WordAnalysis[] {
-    return currentList.map(item => 
-      item.term.toLowerCase() === term.toLowerCase()
-      ? {...item, status: newStatus} : item
-    );
-  }
-
-  private processStatusUpdate(word: string, key: string) {
+  private UpdateStatusProcess(word: string, key: string) {
     const currentInfo = this.selectedWordInfo();
     
     // Mapeamos números a tus estados del backend
@@ -266,50 +148,41 @@ console.log(this.syncDataPlus());
     console.log("new Status: " + newStatus);
     if (currentInfo?.status === 'UNKNOWN') {
       // Si es desconocida, llamamos al endpoint de "crear"
-      this.learning.addUserWord({term: word, statusCode: key}).subscribe({
-    next: () => {
-      // 2. Since response is empty, we update the Signal manually
-      this.analysisData.update(currentList => 
-        currentList.map(item => 
-          item.term.toLowerCase() === word.toLowerCase() 
-            ? { ...item, status: newStatus } // Spread old properties, overwrite status
-            : item
-        )
-      );
-      
-      console.log(`Local sync: ${word} is now ${newStatus}`);
-    },
-    error: (err) => {
-      console.error('Failed to update status on backend', err);
-      // Optional: Show a "toast" notification to the user
-    }
-  });
-      
+      this.learningService.addUserWord({term: word, statusCode: key})
+        .subscribe(() => 
+          this.wordAnalysisResponse.update(currentList => updateOptimisticLocalUserWordStatusHelper(currentList, word, newStatus)));      
     } else {
       // Si ya existe, llamamos al endpoint de "actualizar status"
-      this.learning.updateUserWordStatus({term: word, statusCode: key}).subscribe({
-    next: () => {
-      // 2. Since response is empty, we update the Signal manually
-      this.analysisData.update(currentList => 
-        currentList.map(item => 
-          item.term.toLowerCase() === word.toLowerCase() 
-            ? { ...item, status: newStatus } // Spread old properties, overwrite status
-            : item
-        )
-      );
-      
-      console.log(`Local sync: ${word} is now ${newStatus}`);
-    },
-    error: (err) => {
-      console.error('Failed to update status on backend', err);
-      // Optional: Show a "toast" notification to the user
-    }
-  });
-      
+      this.learningService.updateUserWordStatus({term: word, statusCode: key})
+        .subscribe(() =>
+          this.wordAnalysisResponse.update(currentList => updateOptimisticLocalUserWordStatusHelper(currentList, word, newStatus)));      
     }
   }
 
+  // Keyboard / Mouse
 
+  handleKeyDown(event: KeyboardEvent, term: string) {
+    const keyCode = handleKeyDownHelper(event);
+    if(term && keyCode){
+      this.UpdateStatusProcess(term, keyCode);
+    }
+  }
+
+  handleWordClickEnterOrSpace(term: string) {
+    const data = this.syncAlignmentData();
+    
+    // Find the word whose range includes the current time
+    console.log( data.findIndex(word => word.term.toLowerCase() === term.toLocaleLowerCase() ));
+console.log( data.find(word => word.term.toLowerCase() === term.toLocaleLowerCase() )?.start);
+console.log( data.find(word => word.term.toLowerCase() === term.toLocaleLowerCase() )?.newIndex);
+/*     const cleanTerm = handleWordClickEnterOrSpaceHelper(word, this.speechService);
+    this.selectedWord.set(cleanTerm);
+    //console.log('Palabra interactiva:', cleanTerm);
+    const currentInfo = this.selectedWordInfo();
+    if(currentInfo?.status === 'UNKNOWN'){
+      this.fetchSingleWordAnalysis(cleanTerm);
+    } */
+  }
 }
 
 

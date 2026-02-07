@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { WordAnalysis } from '../components/reader/helper';
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +14,6 @@ export class AnalyzeText {
   }
   
   analyzeSingleWord(rawText: string) {
-    return this.http.post(`${this.API_URL}/analyze-single-word`, rawText);
+    return this.http.post<WordAnalysis>(`${this.API_URL}/analyze-single-word`, rawText);
   }
 }

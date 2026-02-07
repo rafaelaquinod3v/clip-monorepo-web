@@ -100,9 +100,9 @@ class TtsService(
     val sampleRate = audio.sampleRate // 22050
 
     // 1. Padding: Add silence at the BEGINNING
-    val paddingSize = 8000
-    val paddedSamples = FloatArray(samples.size + paddingSize)
-    samples.copyInto(paddedSamples, paddingSize) // Move audio to start after 8000 samples
+    //val paddingSize = 8000
+    //val paddedSamples = FloatArray(samples.size + paddingSize)
+    //samples.copyInto(paddedSamples, paddingSize) // Move audio to start after 8000 samples
 
     // 2. Recognize (Pass 22050 so Sherpa calculates seconds correctly)
     //val result = recognizerService.getTimestampsFromAudio(paddedSamples, 22050f)

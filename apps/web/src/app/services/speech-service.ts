@@ -27,6 +27,6 @@ export class SpeechService {
     });
   }
   synthesize(text: string) {
-    return this.http.get(`${this.apiUrl}/synthesize?text=${text}`);
+    return this.http.get<TtsResponse>(`${this.apiUrl}/synthesize?text=${text}`);
   }
 }

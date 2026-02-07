@@ -1,4 +1,4 @@
-import { Component, effect, input, OnDestroy, output, signal } from '@angular/core';
+import { Component, effect, inject, input, NgZone, OnDestroy, output, signal } from '@angular/core';
 
 @Component({
   selector: 'app-audio-player',
@@ -15,6 +15,7 @@ export class AudioPlayer implements OnDestroy {
   audioBlob = input<Blob | null>(null);
   // Emit the current second to the parent
   timeChange = output<number>();
+  private zone = inject(NgZone);
   private audio = new Audio();
   private currentUrl: string | null = null;
   constructor() {
@@ -26,21 +27,7 @@ export class AudioPlayer implements OnDestroy {
       }
     });
   }
-/*   loadAudio(blob: Blob) {
-    // 1. Limpiamos cualquier audio previo de la memoria
-    this.cleanup();
 
-    // 2. Creamos la nueva URL y cargamos el audio
-    this.currentUrl = URL.createObjectURL(blob);
-    this.audio.src = this.currentUrl;
-    this.audio.load(); // Carga el audio sin reproducir (autoplay: off)
-    
-    this.isLoaded.set(true);
-    this.isPlaying.set(false);
-
-    // 3. Listener para saber cuándo termina
-    this.audio.onended = () => this.isPlaying.set(false);
-  } */
   private setupNewAudio(blob: Blob) {
     this.cleanup(); // Important: free previous memory
 
@@ -51,16 +38,27 @@ export class AudioPlayer implements OnDestroy {
       this.isLoaded.set(true);
     };
 
-    this.audio.ontimeupdate = () => {
+/*     this.audio.ontimeupdate = () => {
       // Send the current time to the parent
       this.timeChange.emit(this.audio.currentTime);
-    };
+    }; */
+    this.audio.addEventListener('timeupdate', () => {
+      this.zone.run(() => { // Force Angular to notice the change
+        this.timeChange.emit(this.audio.currentTime);
+      });
+    });
     
     /* this.isPlaying.set(false); */
-    this.audio.onended = () => {
+/*     this.audio.onended = () => {
       this.isPlaying.set(false);
       this.timeChange.emit(-1); // Reset highlight when finished
-    };
+    }; */
+    this.audio.addEventListener('ended', () => {
+      this.zone.run(() => {
+        this.isPlaying.set(false);
+        this.timeChange.emit(-1);
+      });
+    });
 
     /* this.audio.onended = () => this.isPlaying.set(false); */
     this.audio.onerror = (e) => {
@@ -89,6 +87,18 @@ export class AudioPlayer implements OnDestroy {
       this.currentUrl = null;
     }
   }
+
+/*   private cleanup() {
+  if (this.audio) {
+    this.audio.pause();
+    this.audio.src = '';
+    this.audio.load();
+    //this.audio.removeEventListener('timeupdate', this.timeUpdateHandler); // If using named functions
+    if (this.currentUrl) {
+      URL.revokeObjectURL(this.currentUrl);
+    }
+  } */
+
 
 
 

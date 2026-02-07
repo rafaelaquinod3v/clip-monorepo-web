@@ -1,4 +1,4 @@
-<form (submit)="$event.preventDefault(); sendToApi()">
+<form (submit)="$event.preventDefault(); fetchTextAnalysis()">
   <textarea 
     [formField]="textForm.text" 
     placeholder="Escribe tu text..."
@@ -14,25 +14,25 @@
     Analyze
   </button>
 </form>
-<app-audio-player [audioBlob]="audioBlob()" (timeChange)="handleTimeUpdate($event)"></app-audio-player>
-@if (rawResponse()) {
+<app-audio-player [audioBlob]="audioBlob()" (timeChange)="onTimeUpdate($event)"></app-audio-player>
+@if (syncAlignmentData()) {
 <div class="text-container">
-  @for (word of words(); track $index) {
-    @if (word.trim().length === 0) {
+ <!--  @for (word of words(); track $index) { -->
+   @for (word of syncAlignmentData(); track word.newIndex) {
+    @if (word.term.trim().length === 0) {
       
-      <span>{{ word }}</span>
-    } @else {
-     
+      <span>{{ word.term }}</span>
+    } @else {     
         <span 
         class="interactive-word" 
         [class.playing]="activeIndex() === $index"
         role="button"
         tabindex="0"
-        [class.active]="selectedWord() === word.trim()"
-        (click)="handleWordClick(word)"
-        (keydown.enter)="handleWordClick(word)"
-        (keydown.space)="$event.preventDefault(); handleWordClick(word)"
-        (keydown)="handleKeyDown($event, word)">{{ word.trim() }}</span>
+        [class.active]="selectedWord() === word.term.trim()"
+        (click)="handleWordClickEnterOrSpace(word.term)"
+        (keydown.enter)="handleWordClickEnterOrSpace(word.term)"
+        (keydown.space)="$event.preventDefault(); handleWordClickEnterOrSpace(word.term)"
+        (keydown)="handleKeyDown($event, word.term)">{{ word.term.trim() }} {{word.newIndex}}</span>
     }
   }
 </div>

@@ -5,6 +5,7 @@ import { AnalyzeText } from '../../services/analyze-text';
 import { LearningService } from '../../services/learning-service';
 import { SpeechService, TtsResponse, WordAlignment } from '../../services/speech-service';
 import { AudioPlayer } from '../audio-player/audio-player';
+import { base64ToWav } from './audio';
 
 // Definimos una interfaz para tener autocompletado y evitar errores
 interface WordAnalysis {
@@ -26,7 +27,7 @@ export class Reader implements OnInit {
     this.speech.synthesize(this.textModel().text).subscribe((res: any) => {
       const data: TtsResponse = res;
       this.syncData.set(data.alignment);
-      this.audioBlob.set(this.base64ToWav(data.audio));
+      this.audioBlob.set(base64ToWav(data.audio));
     });
   }
   analyze = inject(AnalyzeText);
@@ -44,49 +45,11 @@ export class Reader implements OnInit {
     newIndex: -1,
   }));
   activeIndex = signal<number>(-1);
-  
-  // Definición de la función interleave
-/*   interleave<T>(arr: T[], x: T): T[] {
-    return arr.flatMap(e => [e, x]).slice(0, -1);
-  } */
-
-/*     interleave<T extends object>(arr: T[], separator: T): T[] {
-  return arr
-    .flatMap((item, i) => {
-      // Calculamos las posiciones en el nuevo array
-      const itemIndex = i * 2;
-      const separatorIndex = i * 2 + 1;
-
-      // Retornamos el objeto original con su nuevo índice 
-      // y el separador con su índice (si no es el último)
-      return [
-        { ...item, originalIndex: itemIndex },
-        { ...separator, originalIndex: separatorIndex }
-      ];
-    })
-    .slice(0, -1); // Eliminamos el último separador
-} */
-/* interleave(arr: any[], separatorBase: any) {
-  return arr.flatMap((item, i) => {
-    const isLast = i === arr.length - 1;
-    
-    // 1. Palabra original con su nuevo índice
-    const word = { ...item, newIndex: i * 2 };
-
-    if (isLast) return [word];
-
-    // 2. El espacio hereda los tiempos de la palabra actual 
-    // para que el resaltado no se apague entre palabras.
-    const space = { 
-      ...separatorBase, 
-      start: item.start, 
-      end: item.end, 
-      newIndex: i * 2 + 1 
-    };
-
-    return [word, space];
+    // 2. Inicializa el formulario con validaciones
+  textForm = form(this.textModel, (s) => {
+    required(s.text);
+    minLength(s.text, 10);
   });
-} */
 
 interleave(arr: any[], separatorBase: any): any[] {
   // 1. Verificación de seguridad
@@ -120,15 +83,7 @@ interleave(arr: any[], separatorBase: any): any[] {
 
 
 
-  private base64ToWav(audio: string) : Blob {
-    const byteCharacters = atob(audio);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-    byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    return new Blob([byteArray], { type: 'audio/wav' });
-  }
+
   handleTimeUpdate(currentTime: number) {
   // 1. Reset si el audio termina
   if (currentTime === -1) {
@@ -151,125 +106,9 @@ console.log(this.syncDataPlus());
     console.log(allItems);
    // console.log(data);
     console.log(this.syncDataPlus());
-/*     */
-/*      // El array que tiene ['Hello', ' ', 'there!', ...]
-    let wordCounter = 0;
-
-    // 3. Mapear originalIndex (backend) -> index visual (frontend)
-    for (let i = 0; i < allItems.length; i++) {
-      // Si no es un espacio en blanco, es una palabra que el backend contó
-      if (allItems[i].trim().length > 0) {
-        if (wordCounter === currentEntry.originalIndex) {
-          // Solo actualizamos si el índice cambió para evitar re-renders innecesarios
-          if (this.activeIndex() !== i) {
-            this.activeIndex.set(i);
-          }
-          return; 
-        }
-        wordCounter++;
-      }
-    }
-  } else {
-    // Si estamos en un silencio entre palabras, opcionalmente podemos quitar el highlight
-    // this.activeIndex.set(-1); 
-  } */
  }
 }
 
-  // This runs whenever the player emits a new time
-/*   handleTimeUpdate(currentTime: number) {
-    if (currentTime === -1) {
-      this.activeIndex.set(-1);
-      return;
-    }
-
-    const data = this.syncData(); */
-    // We only want to find the index among the actual words (not spaces)
-    // If your words() array includes spaces, you might need a mapping logic
-/*     const index = data.findIndex(w => currentTime >= w.start && currentTime <= w.end);
-    
-    if (index !== this.activeIndex()) {
-      this.activeIndex.set(index);
-    } */
-/*      const currentEntry = data.find(w => 
-      currentTime >= w.start && currentTime <= w.end
-    ); */
-/*     if (currentEntry) {
-      this.activeIndex.set(currentEntry.originalIndex);
-    }  */
-
-/*     if (currentEntry) {
-      // 2. Direct mapping: Set the active index to the original index
-      // This will work even if your words() array has spaces/punctuation
-      this.activeIndex.set(currentEntry.originalIndex);
-    } */
-/*      if (currentEntry) {
-    const allWords = this.words();
-    let wordCounter = 0;
-    
-    // Buscamos el índice en el array que tiene espacios
-    for (let i = 0; i < allWords.length; i++) {
-      if (allWords[i].trim().length > 0) { // Si es una palabra
-        if (wordCounter === currentEntry.originalIndex) {
-          this.activeIndex.set(i);
-          return;
-        }
-        wordCounter++;
-      }
-    }
-  } */
- //console.log(this.words().slice(0,5));
-/*    if (currentEntry) {
-    const allItems = this.words(); // ['Hello', ' ', 'there!', ' ', 'Welcome']
-    let wordCounter = 0;
-    
-    // We iterate through every item (words and spaces)
-    for (let i = 0; i < allItems.length; i++) {
-      // Check if this specific item is a "word" (not just whitespace)
-      if (allItems[i].trim().length > 0) {
-        
-        // If this is the Nth word the backend is talking about...
-        if (wordCounter === currentEntry.originalIndex) {
-          if (this.activeIndex() !== i) {
-            this.activeIndex.set(i);
-          }
-          return; // Exit once found
-        }
-        
-        // Only increment the counter if it was a word
-        wordCounter++;
-      } */
-
-
-        /*    if (currentEntry) {
-    const allWords = this.words();
-    const targetTerm = currentEntry.term.trim().toLowerCase();
-
-    // 2. Find the index in the HTML loop
-    // Logic: Look for the word that matches the text at roughly that position
-    const foundIndex = allWords.findIndex((word, index) => {
-      const cleanWord = word.trim().toLowerCase().replace(/[.,!?;:]/g, '');
-      const cleanTarget = targetTerm.replace(/[.,!?;:]/g, '');
-      
-      // Check if text matches AND we are around the originalIndex
-      // (This handles duplicate words like "the... the...")
-      return cleanWord === cleanTarget && 
-             Math.abs(this.getWordCountUntil(index) - currentEntry.originalIndex) <= 1;
-    });
-
-    if (foundIndex !== -1 && foundIndex !== this.activeIndex()) {
-      this.activeIndex.set(foundIndex);
-    }
-  } */
-  
-  //}
-
-  // Helper to count non-empty words up to a specific index
-private getWordCountUntil(targetIndex: number): number {
-  return this.words()
-    .slice(0, targetIndex)
-    .filter(w => w.trim().length > 0).length;
-}
   fetchAudio() {
     if (this.textForm.text().valid()) {
       this.speech.speak(this.textModel().text).subscribe(blob => {
@@ -278,11 +117,7 @@ private getWordCountUntil(targetIndex: number): number {
     }
   }
 
-  // 2. Inicializa el formulario con validaciones
-  textForm = form(this.textModel, (s) => {
-    required(s.text);
-    minLength(s.text, 10);
-  });
+
 
   sendToApi() {
     if (this.textForm.text().valid()) {
@@ -297,20 +132,6 @@ private getWordCountUntil(targetIndex: number): number {
           error: (err) => console.log('Error al procesar el text ', err)
         }
       );
-/*       this.speech.speak(this.textModel().text).subscribe({
-      next: (blob: Blob) => {
-        console.log('Audio blob received:', blob);
-        
-        // Create a URL for the blob
-        const url = window.URL.createObjectURL(blob);
-        
-        // Play it immediately
-        const audio = new Audio();
-        audio.src = url;
-        audio.play();
-      },
-        error: (err) => console.log('Error obteniendo audio ', err)
-      }); */
     }
   }
   // ---- Interaction ----
@@ -396,18 +217,6 @@ private getWordCountUntil(targetIndex: number): number {
     });
   }
 
-
-
-/*   handleKeyDown(event: KeyboardEvent, word: string) {
-    console.log(event);
-    // Verificamos si se presionó Shift + un número (0-9)
-    const isNumber = /^[0-9]$/.test(event.key);
-    
-    if (event.shiftKey && isNumber) {
-      event.preventDefault(); // Evita comportamientos extraños del navegador
-      this.processStatusUpdate(word, event.key);
-    }
-  } */
   handleKeyDown(event: KeyboardEvent, word: string) {
     
     // 1. Detectar si Shift está presionado
@@ -432,6 +241,12 @@ private getWordCountUntil(targetIndex: number): number {
     }
   }
 
+  private updateOptimisticLocalUserWordStatus(currentList: WordAnalysis[], term: string, newStatus: string): WordAnalysis[] {
+    return currentList.map(item => 
+      item.term.toLowerCase() === term.toLowerCase()
+      ? {...item, status: newStatus} : item
+    );
+  }
 
   private processStatusUpdate(word: string, key: string) {
     const currentInfo = this.selectedWordInfo();
@@ -470,13 +285,6 @@ private getWordCountUntil(targetIndex: number): number {
     }
   });
       
-      
-      
-/*       .subscribe(res => {
-        console.log('AddUserWord via shift + status');
-        console.log(res);
-        //this.updateSingleWordAnalysis(res);
-      }); */
     } else {
       // Si ya existe, llamamos al endpoint de "actualizar status"
       this.learning.updateUserWordStatus({term: word, statusCode: key}).subscribe({
@@ -498,14 +306,6 @@ private getWordCountUntil(targetIndex: number): number {
     }
   });
       
-      
-      
-      
-/*       .subscribe(res => {
-        //this.updateSingleWordAnalysis(res);
-        console.log('UpdateserWord via shift + status');
-        console.log(res);
-      }); */
     }
   }
 

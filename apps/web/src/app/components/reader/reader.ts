@@ -106,8 +106,23 @@ export class Reader implements OnInit {
   }
 
   onTimeUpdate(time: number) {
-  const driftCorrection = 0.727; 
-  this.currentTime.set(time * driftCorrection);
+  //const driftCorrection = 0.727; 
+  //this.currentTime.set(time * driftCorrection);
+    // El factor es: SampleRateArchivo / SampleRateNativoNavegador
+  // Ejemplo: 22050 / 48000 ≈ 0.459
+/*   const factor = 22050 / 48000;
+  this.currentTime.set(time * factor); */
+    
+  
+  // If the audio is literally 3x faster (rare but happens if header is ignored):
+  // const driftCorrection = 48000 / 16000; 
+//const driftCorrection = 16600 / 16000; // Start with 1.0
+  //this.currentTime.set(time * driftCorrection); 
+
+    // 1.0375 is your current factor (16600/16000)
+  const precisionFactor = 1.0375; 
+  this.currentTime.set(time * precisionFactor);
+  //this.currentTime.set(time);
     //this.currentTime.set(time); // <--- AQUÍ se le asigna el valor al Signal
   }
 

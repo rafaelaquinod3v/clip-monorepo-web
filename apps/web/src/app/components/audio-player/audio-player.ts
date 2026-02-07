@@ -34,6 +34,7 @@ export class AudioPlayer implements OnDestroy {
     this.currentUrl = URL.createObjectURL(blob);
     this.audio.src = this.currentUrl;
     this.audio.load();
+    //this.audio.playbackRate = 16000 / 48000;
     this.audio.oncanplaythrough = () => {
       this.isLoaded.set(true);
     };

@@ -1,6 +1,4 @@
 
-chatterbox:
-  url: http://localhost:5123/v1/audio/speech
 server:
   servlet:
     session:

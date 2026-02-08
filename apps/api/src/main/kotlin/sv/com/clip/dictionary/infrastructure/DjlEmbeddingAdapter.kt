@@ -9,7 +9,7 @@ import sv.com.clip.dictionary.domain.EmbeddingProvider
 @Service
 class DjlEmbeddingAdapter : EmbeddingProvider {
   private val model: ZooModel<String, FloatArray> = Criteria.builder()
-    .setTypes(String::class.java, FloatArray::class.java)
+    .setTypes(String::class.java, FloatArray::class.java) // TODO: urgent
     .optModelUrls("djl://ai.djl.huggingface.pytorch/sentence-transformers/all-MiniLM-L6-v2")
     .optEngine("PyTorch")
     .build()

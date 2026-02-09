@@ -1,8 +1,15 @@
 package sv.com.clip.speech.internal
 
 import com.k2fsa.sherpa.onnx.*
+
 import org.springframework.core.io.ClassPathResource
+import org.springframework.http.client.JdkClientHttpRequestFactory
+
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
+
+
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -12,6 +19,8 @@ import ws.schild.jave.MultimediaObject
 import ws.schild.jave.encode.AudioAttributes
 import ws.schild.jave.encode.EncodingAttributes
 import java.io.File
+import java.net.http.HttpClient
+import java.time.Duration
 
 @Service
 class TtsService(
@@ -192,5 +201,128 @@ class TtsService(
       tempMp3.delete()
     }
   }
+
+
+/*
+  private val restClient = RestClient.create("http://localhost:8880/v1").responseTimeout(Duration.ofSeconds(30)) // Dale tiempo a Kokoro
+    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
+*/
+
+  fun generateSpeech(text: String, voice: String = "af_heart"): ByteArray? {
+/*    val nettyClient = HttpClient.create()
+      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
+      .responseTimeout(Duration.ofSeconds(30)) // Now it should appear with this import
+
+    val webClient = WebClient.builder()
+      .clientConnector(ReactorClientHttpConnector(nettyClient))
+      .baseUrl("http://localhost:8880/v1")
+      .build()*/
+    val nativeClient = HttpClient.newBuilder()
+      .connectTimeout(Duration.ofSeconds(10)) // Aquí se pone el CONNECT timeout
+      .build()
+    val factory = JdkClientHttpRequestFactory(nativeClient)
+    factory.setReadTimeout(Duration.ofSeconds(30)) // This is the Response Timeout
+   // factory.setConnectTimeout(Duration.ofSeconds(10))
+
+    val restClient = RestClient.builder()
+      .requestFactory(factory)
+      .baseUrl("http://localhost:8880/v1")
+      .build()
+
+    val requestBody = mapOf(
+      "input" to text,
+      "voice" to voice,
+      "model" to "tts-1", // Requerido por compatibilidad OpenAI
+      "response_format" to "mp3"
+    )
+
+    return restClient.post()
+      .uri("/audio/speech")
+      .body(requestBody)
+      .retrieve()
+      .body<ByteArray>() // Recibes los bytes del audio
+  }
+
+  fun generateAudioWithSyncV2(text: String): Map<String, Any> {
+    //val audio = tts.generate(text)
+    val samples = generateSpeech(text) //audio.samples
+    val sampleRate = 24000 ///audio.sampleRate
+
+    // 1. Padding: Add silence at the BEGINNING
+    // val paddingSize = 8000
+    //val paddedSamples = FloatArray(samples.size + paddingSize)
+    //samples.copyInto(paddedSamples, paddingSize) // Move audio to start after 8000 samples
+   //
+    // 2. Recognize (Pass 22050 so Sherpa calculates seconds correctly)
+    val floatArrayData = byteToFloatArray(samples!!)
+    val totalDuration = floatArrayData.size.toDouble() / sampleRate
+    val result = recognizerService.getTimestampsFromAudio(floatArrayData, sampleRate.toFloat())
+    // 3. Group sub-tokens into Words
+    val wordAlignments = mutableListOf<Map<String, Any>>()
+    // var currentWord: MutableMap<String, Any>? = null
+    var currentWord: MutableMap<String, Any>? = null
+    var wordCounter = 0 // This corresponds to the index in a split(" ") array
+
+    result.tokens.forEachIndexed { i, token ->
+      val punctuationRegex = Regex("[.,!?;:]")
+      // Whisper marca el inicio de palabra con " " (espacio de BPE)
+      val isNewWord = token.startsWith(" ") || token.startsWith("_")
+      //val cleanToken = token.replace(" ", "").replace("_", "")
+      val hasSpace = token.startsWith(" ") || token.startsWith("_")
+      val cleanToken = token.replace(Regex("[ _]"), "")
+      val isContinuation = !hasSpace || cleanToken.matches(punctuationRegex)
+      //val cleanToken = token.replace(Regex("[ _]"), "")
+      val nextTokenStart = result.timestamps.getOrElse(i + 1) { totalDuration.toFloat() }
+      if (!isContinuation || currentWord == null) {
+        // If it's a new word, save the previous one and start a new one
+        currentWord?.let {
+          wordAlignments.add(it)
+          wordCounter += 2 // frontend text.split(/(\s+)/)
+        }
+
+        currentWord = mutableMapOf(
+          "term" to cleanToken,
+          "start" to result.timestamps[i],
+          "end" to nextTokenStart,
+          "index" to wordCounter
+        )
+      } else {
+        // It's a sub-token (like "ll" or "o"), append to the current word
+        currentWord["term"] = currentWord["term"].toString() + cleanToken
+        currentWord["end"] = nextTokenStart
+      }
+    }
+    // Add the last word
+    currentWord?.let { wordAlignments.add(it) }
+
+    //wordAlignments.forEach { println(it["term"]) }
+
+    return mapOf(
+      "sampleRate" to sampleRate,
+      "duration" to totalDuration,
+      "audio" to Base64.getEncoder().encodeToString(samples),
+      "alignment" to wordAlignments
+    )
+  }
+
+
+
+  fun byteToFloatArray(audioBytes: ByteArray): FloatArray {
+    // 2 bytes por muestra en PCM 16-bit
+    val n = audioBytes.size / 2
+    val floatAudio = FloatArray(n)
+
+    // Usamos ByteBuffer para manejar el orden de los bytes (Little Endian para Kokoro)
+    val buffer = ByteBuffer.wrap(audioBytes).order(ByteOrder.LITTLE_ENDIAN)
+
+    for (i in 0 until n) {
+      // Leemos el Short (16 bits) y normalizamos al rango [-1.0, 1.0]
+      val pcmSample = buffer.short.toFloat()
+      floatAudio[i] = pcmSample / 32768.0f
+    }
+
+    return floatAudio
+  }
+
 }
 

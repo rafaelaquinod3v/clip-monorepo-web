@@ -32,4 +32,12 @@ export class SpeechService {
   downloadAudio(text: string) {
     return this.http.get(`${this.apiUrl}/download-audio?text=${text}`, {responseType: 'blob', observe: 'response'});
   }
+
+  generateSpeech(text: string) {
+    return this.http.get(`${this.apiUrl}/generate-speech?text=${text}`, {
+      responseType: 'blob'
+    });
+  }
+
+  
 }

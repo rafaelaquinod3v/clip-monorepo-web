@@ -27,6 +27,9 @@ export class Reader implements OnInit {
       this.alignmentData.set(res.alignment);
       this.audioBlob.set(base64ToMp3Fast(res.audio));
     });
+/*     this.speechService.generateSpeech(this.textModel().text).subscribe((response: Blob) => {
+      this.audioBlob.set(response);
+    }); */
   }
 
   textModel = signal({ text: TEST_TTS });

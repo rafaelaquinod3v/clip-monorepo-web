@@ -24,7 +24,7 @@ class AudioController(private val ttsService: TtsService) {
 
   @GetMapping("/synthesize")
   fun synthesize(@RequestParam text: String): ResponseEntity<Map<String, Any>> {
-    val result = ttsService.generateAudioWithSync(text)
+    val result = ttsService.generateAudioWithSyncV2(text)
     return ResponseEntity.ok(result)
   }
   @GetMapping("/download-audio", produces = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -52,5 +52,17 @@ class AudioController(private val ttsService: TtsService) {
 
     return ResponseEntity(formData, HttpStatus.OK)
   }
+
+  @GetMapping("/generate-speech", produces = ["audio/mp3"])
+  fun generateSpeech(@RequestParam text: String): ResponseEntity<ByteArray> {
+    val mp3Data = ttsService.generateSpeech(text)
+
+    val headers = HttpHeaders()
+    headers.contentType = MediaType.parseMediaType("audio/mp3")
+    headers.contentDisposition = ContentDisposition.inline().filename("speech.mp3").build()
+
+    return ResponseEntity(mp3Data, headers, HttpStatus.OK)
+  }
+
 
 }

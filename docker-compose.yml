@@ -1,4 +1,11 @@
 services:
+
+  kokoro-tts:
+    image: ghcr.io/remsky/kokoro-fastapi-cpu:latest
+    ports:
+      - "8880:8880"
+    restart: unless-stopped
+
   ollama:
     image: ollama/ollama:latest
     container_name: ollama

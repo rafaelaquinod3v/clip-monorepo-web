@@ -233,7 +233,8 @@ class TtsService(
       "input" to text,
       "voice" to voice,
       "model" to "tts-1", // Requerido por compatibilidad OpenAI
-      "response_format" to "mp3"
+      //"response_format" to "mp3"
+      "response_format" to "wav"
     )
 
     return restClient.post()
@@ -254,7 +255,7 @@ class TtsService(
     //samples.copyInto(paddedSamples, paddingSize) // Move audio to start after 8000 samples
    //
     // 2. Recognize (Pass 22050 so Sherpa calculates seconds correctly)
-    val floatArrayData = byteToFloatArray(samples!!)
+    val floatArrayData = byteToFloatArrayWav(samples!!)
     val totalDuration = floatArrayData.size.toDouble() / sampleRate
     val result = recognizerService.getTimestampsFromAudio(floatArrayData, sampleRate.toFloat())
     // 3. Group sub-tokens into Words
@@ -300,7 +301,7 @@ class TtsService(
     return mapOf(
       "sampleRate" to sampleRate,
       "duration" to totalDuration,
-      "audio" to Base64.getEncoder().encodeToString(samples),
+      "audio" to Base64.getEncoder().encodeToString(convertWavToMp3(samples)),
       "alignment" to wordAlignments
     )
   }
@@ -323,6 +324,21 @@ class TtsService(
 
     return floatAudio
   }
+
+  fun byteToFloatArrayWav(audioBytes: ByteArray): FloatArray {
+    val headerSize = 44 // Cabecera estándar de WAV
+    val pcmBytes = audioBytes.copyOfRange(headerSize, audioBytes.size)
+
+    val n = pcmBytes.size / 2
+    val floatAudio = FloatArray(n)
+    val buffer = ByteBuffer.wrap(pcmBytes).order(ByteOrder.LITTLE_ENDIAN)
+
+    for (i in 0 until n) {
+      floatAudio[i] = buffer.short.toFloat() / 32768.0f
+    }
+    return floatAudio
+  }
+
 
 }
 

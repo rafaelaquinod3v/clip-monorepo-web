@@ -21,7 +21,7 @@ class RecognizerService {
 
     // 1. Para este modelo específico usa 80
     val featConfig = FeatureConfig.Builder()
-      .setSampleRate(16000)
+      .setSampleRate(24000) // kokoro tts
       .setFeatureDim(80)
       .build()
 

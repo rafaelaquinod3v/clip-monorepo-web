@@ -28,4 +28,8 @@ export class SpeechService {
   synthesize(text: string) {
     return this.http.get<TtsResponse>(`${this.apiUrl}/synthesize?text=${text}`);
   }
+
+  downloadAudio(text: string) {
+    return this.http.get(`${this.apiUrl}/download-audio?text=${text}`, {responseType: 'blob', observe: 'response'});
+  }
 }

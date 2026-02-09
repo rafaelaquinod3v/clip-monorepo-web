@@ -43,9 +43,9 @@ class AudioController(private val ttsService: TtsService) {
     // 2. Parte 2: El archivo de audio binario
     val audioBytes = wavData // Aquí obtienes tus bytes reales del audio
     val audioHeaders = HttpHeaders().apply {
-      contentType = MediaType.parseMediaType("audio/mpeg")
+      contentType = MediaType.parseMediaType("audio/wav")
       // El navegador/cliente lo identificará como un archivo adjunto
-      setContentDispositionFormData("audioFile", "grabacion.mp3")
+      setContentDispositionFormData("audioFile", "audio.wav")
     }
     val audioPart = HttpEntity(ByteArrayResource(audioBytes), audioHeaders)
     formData.add("audioFile", audioPart)

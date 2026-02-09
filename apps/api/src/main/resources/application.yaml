@@ -1,5 +1,19 @@
 
 server:
+  compression:
+    # 1. Activar la compresión
+    enabled: true
+    # 2. Tipos de archivos que deben comprimirse (JSON es el más importante para ti)
+    mime-types:
+      - application/json
+      - application/xml
+      - text/html
+      - text/plain
+      - text/css
+    # 3. Tamaño mínimo (en bytes) para aplicar compresión.
+    # Menos de 1KB no vale la pena comprimir por el overhead de CPU.
+    min-response-size: 1024
+
   servlet:
     session:
       cookie:

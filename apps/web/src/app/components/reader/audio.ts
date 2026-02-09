@@ -24,3 +24,17 @@ export function base64ToWav(audio: string) : Blob {
     const byteArray = new Uint8Array(byteNumbers);
     return new Blob([byteArray], { type: 'audio/wav' });
 }
+
+export function base64ToMp3(base64: string): Blob {
+    // 1. Decodificar Base64 a una cadena de bytes
+    const byteCharacters = atob(base64);
+    
+    // 2. Crear un array de bytes eficiente (Uint8Array)
+    const byteNumbers = new Uint8Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    
+    // 3. Retornar el Blob con el tipo de contenido correcto para MP3
+    return new Blob([byteNumbers], { type: 'audio/mpeg' });
+}

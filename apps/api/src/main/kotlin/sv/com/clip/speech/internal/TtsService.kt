@@ -7,6 +7,11 @@ import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.Base64
+import ws.schild.jave.Encoder
+import ws.schild.jave.MultimediaObject
+import ws.schild.jave.encode.AudioAttributes
+import ws.schild.jave.encode.EncodingAttributes
+import java.io.File
 
 @Service
 class TtsService(
@@ -137,7 +142,7 @@ class TtsService(
     return mapOf(
       "sampleRate" to sampleRate,
       "duration" to totalDuration,
-      "audio" to Base64.getEncoder().encodeToString(convertSamplesToWav(samples, sampleRate.toFloat())),
+      "audio" to Base64.getEncoder().encodeToString(convertWavToMp3(convertSamplesToWav(samples, sampleRate.toFloat()))),
       "alignment" to wordAlignments
     )
   }
@@ -153,6 +158,39 @@ class TtsService(
     }
     out.write(buffer.array())
     return out.toByteArray()
+  }
+
+  fun convertWavToMp3(wavBytes: ByteArray): ByteArray {
+    // JAVE2 a veces requiere un archivo temporal porque FFmpeg lo prefiere
+    val tempWav = File.createTempFile("temp_audio", ".wav")
+    val tempMp3 = File.createTempFile("temp_audio", ".mp3")
+
+    try {
+      tempWav.writeBytes(wavBytes)
+
+      // Configuración de Audio
+      val audio = AudioAttributes().apply {
+        setCodec("libmp3lame")
+        setBitRate(64000) // 64kbps es ideal para voz
+        setChannels(1)
+        setSamplingRate(16000) // Mantener tus 16k
+      }
+
+      // Configuración de Codificación
+      val attrs = EncodingAttributes().apply {
+        setOutputFormat("mp3")
+        setAudioAttributes(audio)
+      }
+
+      // Ejecutar conversión
+      Encoder().encode(MultimediaObject(tempWav), tempMp3, attrs)
+
+      return tempMp3.readBytes()
+    } finally {
+      // Limpieza de archivos temporales
+      tempWav.delete()
+      tempMp3.delete()
+    }
   }
 }
 

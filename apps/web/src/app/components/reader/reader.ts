@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { form, FormField, required, minLength } from '@angular/forms/signals';
-import { TEST_TTS } from './text.const';
+import { JUNGLE, TEST_TTS, WELCOME_TO_THE_JUNGLE } from './text.const';
 import { AnalyzeText } from '../../services/analyze-text';
 import { LearningService } from '../../services/learning-service';
 import { SpeechService, TtsResponse, WordAlignment } from '../../services/speech-service';
@@ -27,9 +27,6 @@ export class Reader implements OnInit {
       this.alignmentData.set(res.alignment);
       this.audioBlob.set(base64ToMp3Fast(res.audio));
     });
-/*     this.speechService.generateSpeech(this.textModel().text).subscribe((response: Blob) => {
-      this.audioBlob.set(response);
-    }); */
   }
 
   textModel = signal({ text: TEST_TTS });

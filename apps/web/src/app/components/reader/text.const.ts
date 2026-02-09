@@ -1,3 +1,20 @@
+export const JUNGLE = `Yes, ready?
+Welcome to the jungle, we got fun and games
+We got everything you want, honey, we know the names
+We are the people that can find whatever you may need
+If you got the money, honey, we got your disease
+It's a jungle, welcome to the jungle
+Watch it bring it to your n-n-n-n-n-n-n-n knees, knees
+Oh ah, I wanna see you bleed
+Welcome to the jungle, we take it day by day
+If you want you're gonna bleed but it's the price to pay
+And you're a very sexy girl, and very hard to please
+You can taste the bright lights but you won't get there for free
+In the jungle welcome to the jungle
+Feel my, my, my serpentine
+I wanna, I wanna hear you scream`;
+
+
 export const WELCOME_TO_THE_JUNGLE = `Yes, ready?
 Welcome to the jungle, we got fun and games
 We got everything you want, honey, we know the names

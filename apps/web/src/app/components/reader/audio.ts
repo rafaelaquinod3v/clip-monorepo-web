@@ -38,3 +38,10 @@ export function base64ToMp3(base64: string): Blob {
     // 3. Retornar el Blob con el tipo de contenido correcto para MP3
     return new Blob([byteNumbers], { type: 'audio/mpeg' });
 }
+
+export function base64ToMp3Fast(base64: string): Blob {
+    const binaryString = atob(base64);
+    const bytes = Uint8Array.from(binaryString, c => c.charCodeAt(0));
+    return new Blob([bytes], { type: 'audio/mpeg' });
+}
+

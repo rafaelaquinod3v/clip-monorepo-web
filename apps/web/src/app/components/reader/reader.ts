@@ -5,7 +5,7 @@ import { AnalyzeText } from '../../services/analyze-text';
 import { LearningService } from '../../services/learning-service';
 import { SpeechService, TtsResponse, WordAlignment } from '../../services/speech-service';
 import { AudioPlayer } from '../audio-player/audio-player';
-import { base64ToMp3, base64ToWav } from './audio';
+import { base64ToMp3Fast } from './audio';
 import { handleKeyDownHelper, handleWordClickEnterOrSpaceHelper } from './keyboard-mouse';
 import { WordAnalysis, updateOptimisticLocalUserWordStatusHelper } from './helper';
 
@@ -25,7 +25,7 @@ export class Reader implements OnInit {
     this.fetchTextAnalysis();
     this.speechService.synthesize(this.textModel().text).subscribe((res: TtsResponse) => {      
       this.alignmentData.set(res.alignment);
-      this.audioBlob.set(base64ToMp3(res.audio));
+      this.audioBlob.set(base64ToMp3Fast(res.audio));
     });
   }
 

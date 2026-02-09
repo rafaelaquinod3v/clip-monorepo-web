@@ -15,6 +15,7 @@
   </button>
 </form>
 <app-audio-player [audioBlob]="audioBlob()" (timeChange)="onTimeUpdate($event)"></app-audio-player>
+<!-- waveform -->
 @if (rawResponse()) {
 <div class="text-container">
  <!--  @for (word of words(); track $index) { -->

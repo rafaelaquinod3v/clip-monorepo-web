@@ -151,7 +151,7 @@ export class AudioPlayer implements OnDestroy {
       this.currentUrl = null;
     }
   }
-  }
+  
 
 /*   private cleanup() {
   if (this.audio) {

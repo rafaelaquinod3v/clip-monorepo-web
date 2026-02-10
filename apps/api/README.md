@@ -1,3 +1,20 @@
+https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX
+
+-- kokoro
+//sudo apt-get install libespeak-ng-dev
+sudo apt update && sudo apt install espeak-ng espeak-ng-data libespeak-ng-dev -y
+sudo ln -s /usr/lib/x86_64-linux-gnu/espeak-ng-data /usr/share/espeak-ng-data
+# Crear la carpeta donde eSpeak busca por defecto
+sudo mkdir -p /usr/share/espeak-ng-data
+
+# Copiar TODO el contenido desde la ruta de librerías a la ruta de datos
+# (Usamos -r para copiar subcarpetas como 'lang', 'voices', etc.)
+sudo cp -r /usr/lib/x86_64-linux-gnu/espeak-ng-data/* /usr/share/espeak-ng-data/
+
+# Dar permisos de lectura (por si acaso Spring no puede leerlos)
+sudo chmod -R 755 /usr/share/espeak-ng-data
+
+
 -- For the direct lemma search
 CREATE INDEX idx_lexical_lemma ON lexical_entries (lemma);
 

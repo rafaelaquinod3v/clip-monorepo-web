@@ -44,6 +44,12 @@ dependencies {
   implementation("ai.djl.huggingface:tokenizers")
   implementation("org.springframework.ai:spring-ai-starter-model-ollama")
 
+  // Kokoro
+  implementation("com.microsoft.onnxruntime:onnxruntime:1.17.1")
+  implementation("net.java.dev.jna:jna:5.13.0")
+
+
+
   // FORZAR NATURALEZA LINUX PARA WSL
   // Esto evita que busque .dll de Windows y use .so de Linux
   runtimeOnly("ai.djl.pytorch:pytorch-native-cpu::linux-x86_64")

@@ -24,7 +24,7 @@ class AudioController(private val ttsService: TtsService) {
 
   @GetMapping("/synthesize")
   fun synthesize(@RequestParam text: String): ResponseEntity<Map<String, Any>> {
-    val result = ttsService.generateAudioWithSyncV2(text)
+    val result = ttsService.generateAudioWithSyncV3(text)
     return ResponseEntity.ok(result)
   }
   @GetMapping("/download-audio", produces = [MediaType.MULTIPART_FORM_DATA_VALUE])

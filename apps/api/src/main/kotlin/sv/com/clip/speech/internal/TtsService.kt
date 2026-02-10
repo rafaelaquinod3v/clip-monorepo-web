@@ -25,6 +25,8 @@ import java.time.Duration
 @Service
 class TtsService(
   private val recognizerService: RecognizerService,
+  private val phonemeService: PhonemeService,
+  private val kokoroOnnxService: KokoroOnnxService,
 ) {
 
   private val tts: OfflineTts
@@ -339,6 +341,68 @@ class TtsService(
     return floatAudio
   }
 
+  fun generateAudioWithSyncV3(text: String): Map<String, Any> {
+    //val audio = tts.generate(text)
+    val ipaPhonemes = phonemeService.getPhonemes(text)
+    val samples = kokoroOnnxService.generateAudio(ipaPhonemes) //audio.samples
+    val sampleRate = 24000 ///audio.sampleRate
 
+    // 1. Padding: Add silence at the BEGINNING
+    // val paddingSize = 8000
+    //val paddedSamples = FloatArray(samples.size + paddingSize)
+    //samples.copyInto(paddedSamples, paddingSize) // Move audio to start after 8000 samples
+    //
+    // 2. Recognize (Pass 22050 so Sherpa calculates seconds correctly)
+    val wav = convertSamplesToWav(samples, sampleRate.toFloat())
+    val floatArrayData = byteToFloatArrayWav(wav)
+    val totalDuration = floatArrayData.size.toDouble() / sampleRate
+    val result = recognizerService.getTimestampsFromAudio(floatArrayData, sampleRate.toFloat())
+    // 3. Group sub-tokens into Words
+    val wordAlignments = mutableListOf<Map<String, Any>>()
+    // var currentWord: MutableMap<String, Any>? = null
+    var currentWord: MutableMap<String, Any>? = null
+    var wordCounter = 0 // This corresponds to the index in a split(" ") array
+
+    result.tokens.forEachIndexed { i, token ->
+      val punctuationRegex = Regex("[.,!?;:]")
+      // Whisper marca el inicio de palabra con " " (espacio de BPE)
+      val isNewWord = token.startsWith(" ") || token.startsWith("_")
+      //val cleanToken = token.replace(" ", "").replace("_", "")
+      val hasSpace = token.startsWith(" ") || token.startsWith("_")
+      val cleanToken = token.replace(Regex("[ _]"), "")
+      val isContinuation = !hasSpace || cleanToken.matches(punctuationRegex)
+      //val cleanToken = token.replace(Regex("[ _]"), "")
+      val nextTokenStart = result.timestamps.getOrElse(i + 1) { totalDuration.toFloat() }
+      if (!isContinuation || currentWord == null) {
+        // If it's a new word, save the previous one and start a new one
+        currentWord?.let {
+          wordAlignments.add(it)
+          wordCounter += 2 // frontend text.split(/(\s+)/)
+        }
+
+        currentWord = mutableMapOf(
+          "term" to cleanToken,
+          "start" to result.timestamps[i],
+          "end" to nextTokenStart,
+          "index" to wordCounter
+        )
+      } else {
+        // It's a sub-token (like "ll" or "o"), append to the current word
+        currentWord["term"] = currentWord["term"].toString() + cleanToken
+        currentWord["end"] = nextTokenStart
+      }
+    }
+    // Add the last word
+    currentWord?.let { wordAlignments.add(it) }
+
+    //wordAlignments.forEach { println(it["term"]) }
+
+    return mapOf(
+      "sampleRate" to sampleRate,
+      "duration" to totalDuration,
+      "audio" to Base64.getEncoder().encodeToString(convertWavToMp3(wav)),
+      "alignment" to wordAlignments
+    )
+  }
 }
 

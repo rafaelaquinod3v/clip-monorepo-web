@@ -344,7 +344,10 @@ class TtsService(
   fun generateAudioWithSyncV3(text: String): Map<String, Any> {
     //val audio = tts.generate(text)
     val ipaPhonemes = phonemeService.getPhonemes(text)
+    println("ipa???")
+    println(ipaPhonemes)
     val samples = kokoroOnnxService.generateAudio(ipaPhonemes) //audio.samples
+    println("samples = ${samples.size}")
     val sampleRate = 24000 ///audio.sampleRate
 
     // 1. Padding: Add silence at the BEGINNING

@@ -16,10 +16,16 @@ class VoiceStyleService {
 
     val bytes = inputStream.readAllBytes()
     val floatBuffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer()
+    // Create an array for JUST one style (256 floats)
+    val singleStyle = FloatArray(256)
 
-    val styleArray = FloatArray(floatBuffer.remaining())
+    // Read only the first 256 elements from the 130,560 available
+    floatBuffer.get(singleStyle)
+
+    return singleStyle
+/*    val styleArray = FloatArray(floatBuffer.remaining())
     floatBuffer.get(styleArray)
     println(styleArray.size)
-    return styleArray // Esto debería tener tamaño 256
+    return styleArray*/ // Esto debería tener tamaño 256
   }
 }

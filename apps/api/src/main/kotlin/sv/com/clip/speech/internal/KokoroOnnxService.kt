@@ -15,7 +15,7 @@ data class TokenizerConfig(val model: ModelConfig)
 data class ModelConfig(val vocab: Map<String, Long>)
 
 @Service
-class KokoroOnnxService(private val voiceStyleService: VoiceStyleService) {
+class KokoroOnnxService(private val voiceStyleService: VoiceStyleService, private val phonemeService: PhonemeService) {
   private val env = OrtEnvironment.getEnvironment()
   private val session: OrtSession
   private val vocab: Map<String, Long>
@@ -40,6 +40,7 @@ class KokoroOnnxService(private val voiceStyleService: VoiceStyleService) {
   //private val phonemeIds = mapOf('h' to 75, 'e' to 72, 'l' to 79, 'o' to 82 /* ... completar mapeo ... */) tokenizer.json
 
   fun generateAudio(phonemes: String): FloatArray {
+    println("generateAudio fun")
     // 1. Tokenización: Convertir String de fonemas a IDs numéricos
     //val tokens = phonemes.map { phonemeIds[it] ?: 0 }.map { it.toLong() }.toLongArray()
     val tokens = textToTokenIds(phonemes)
@@ -50,7 +51,7 @@ class KokoroOnnxService(private val voiceStyleService: VoiceStyleService) {
     // 2. Crear Tensores de entrada
     val container = mapOf(
       "input_ids" to OnnxTensor.createTensor(env, LongBuffer.wrap(inputIds), longArrayOf(1, inputIds.size.toLong())),
-      "style_id" to OnnxTensor.createTensor(env, java.nio.FloatBuffer.wrap(styleArray), longArrayOf(1, 256)),
+      "style" to OnnxTensor.createTensor(env, java.nio.FloatBuffer.wrap(styleArray), longArrayOf(1, 256)),
       "speed" to OnnxTensor.createTensor(env, floatArrayOf(1.0f))
     )
 

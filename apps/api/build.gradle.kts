@@ -48,6 +48,14 @@ dependencies {
   implementation("com.microsoft.onnxruntime:onnxruntime:1.17.1")
   implementation("net.java.dev.jna:jna:5.13.0")
 
+  //
+
+  // Motor políglota básico
+  implementation("org.graalvm.polyglot:polyglot:24.0.0")
+  // El "runtime" de Python que vive dentro de tu JAR
+  implementation("org.graalvm.python:python-language:24.0.0")
+  implementation("org.graalvm.python:python-resources:24.0.0")
+
   // text chop
   implementation("org.apache.opennlp:opennlp-tools:2.3.0")
 

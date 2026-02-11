@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { form, FormField, required, minLength } from '@angular/forms/signals';
-import { JUNGLE, TEST_TTS, WELCOME_TO_THE_JUNGLE } from './text.const';
+import { DELICIOUS_TTS, JUNGLE, STRESS_TTS, TEST_TTS, WELCOME_TO_THE_JUNGLE } from './text.const';
 import { AnalyzeText } from '../../services/analyze-text';
 import { LearningService } from '../../services/learning-service';
 import { SpeechService, TtsResponse, WordAlignment } from '../../services/speech-service';

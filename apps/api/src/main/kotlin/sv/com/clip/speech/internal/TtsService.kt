@@ -345,12 +345,13 @@ class TtsService(
   fun generateAudioWithSyncV3(text: String): Map<String, Any> {
     val sentences = textProcessorService.splitSentences(text)
     val chunks = mutableListOf<FloatArray>()
-    /*    sentences.forEach { sentence ->
+    sentences.forEach { sentence ->
       println(sentence)
+      println(phonemeService.getPhonemes(sentence))
       chunks.add(kokoroOnnxService.generateAudio(phonemeService.getPhonemes(sentence)))
-    }*/
-    chunks.add(kokoroOnnxService.generateAudio(phonemeService.getPhonemes(sentences[1])))
-    println(phonemeService.getPhonemes(sentences[1]))
+    }
+    //chunks.add(kokoroOnnxService.generateAudio(phonemeService.getPhonemes(sentences[0])))
+    //println(phonemeService.getPhonemes(sentences[0]))
     val samples = stitchAudio(chunks)
     val sampleRate = 24000 ///audio.sampleRate
     println("samples: ${samples.size}")

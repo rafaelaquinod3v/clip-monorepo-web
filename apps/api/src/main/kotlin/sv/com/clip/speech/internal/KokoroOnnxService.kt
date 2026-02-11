@@ -103,6 +103,9 @@ class KokoroOnnxService(private val voiceStyleService: VoiceStyleService, privat
     tokens.add(0L)
 
     for (char in phonemes) {
+      if(vocab[char.toString()] == null){
+        println("missing token $char")
+      }
       val id = vocab[char.toString()]
       if (id != null) {
         tokens.add(id)

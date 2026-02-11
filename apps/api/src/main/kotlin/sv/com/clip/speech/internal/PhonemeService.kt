@@ -55,7 +55,18 @@ class PhonemeService {
         Reference.reachabilityFence(ptrRef)
       }
     }
-    return sb.toString().trim()
+    return sanitizePhonemes(sb.toString().trim())
   }
+
+  fun sanitizePhonemes(ipa: String): String {
+    return ipa
+      .replace("'", "ˈ") // espeak stress to Kokoro stress
+      .replace("ˌ", "ˌ") // Secondary stress
+      .replace("'", "ˈ")  // Replace standard apostrophe with IPA primary stress
+      .replace("g", "ɡ") // Standard g to double-storey ɡ (ID 92)
+      .replace("r", "ɹ") // Standard r to alveolar ɹ (ID 123)
+    // Add more replacements if you see "MISSING CHAR" logs
+  }
+
 }
 

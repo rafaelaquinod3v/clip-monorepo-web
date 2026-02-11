@@ -1,3 +1,10 @@
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+sdk list java | grep graal
+sdk install java 21.0.2-graalce
+java -version
+
+
 todo: long term rust kokoro tts & espeak-ng 
 
 

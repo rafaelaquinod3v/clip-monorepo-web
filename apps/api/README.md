@@ -1,3 +1,6 @@
+todo: long term rust kokoro tts & espeak-ng 
+
+
 https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX
 
 -- kokoro

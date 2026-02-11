@@ -48,6 +48,11 @@ class RecognizerService {
 
 fun getTimestampsFromAudio(samples: FloatArray, sampleRate: Float): OfflineRecognizerResult {
   val stream = recognizer.createStream()
+  if (samples.isEmpty()) {
+    println("Received empty audio for timestamping. Skipping ONNX decode.")
+   // return OfflineRecognizerResult()// or return empty list of timestamps
+  }
+  //val stream = recognizer.createStream()
 
 
   stream.acceptWaveform(samples, sampleRate.toInt())

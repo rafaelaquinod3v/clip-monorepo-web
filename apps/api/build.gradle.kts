@@ -48,7 +48,8 @@ dependencies {
   implementation("com.microsoft.onnxruntime:onnxruntime:1.17.1")
   implementation("net.java.dev.jna:jna:5.13.0")
 
-
+  // text chop
+  implementation("org.apache.opennlp:opennlp-tools:2.3.0")
 
   // FORZAR NATURALEZA LINUX PARA WSL
   // Esto evita que busque .dll de Windows y use .so de Linux

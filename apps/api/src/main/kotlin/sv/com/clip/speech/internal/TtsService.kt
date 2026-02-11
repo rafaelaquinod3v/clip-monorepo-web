@@ -27,6 +27,7 @@ class TtsService(
   private val recognizerService: RecognizerService,
   private val phonemeService: PhonemeService,
   private val kokoroOnnxService: KokoroOnnxService,
+  private val textProcessorService: TextProcessorService,
 ) {
 
   private val tts: OfflineTts
@@ -342,22 +343,20 @@ class TtsService(
   }
 
   fun generateAudioWithSyncV3(text: String): Map<String, Any> {
-    //val audio = tts.generate(text)
-    val ipaPhonemes = phonemeService.getPhonemes(text)
-    println("ipa???")
-    println(ipaPhonemes)
-    val samples = kokoroOnnxService.generateAudio(ipaPhonemes) //audio.samples
-    println("samples = ${samples.size}")
+    val sentences = textProcessorService.splitSentences(text)
+    val chunks = mutableListOf<FloatArray>()
+    /*    sentences.forEach { sentence ->
+      println(sentence)
+      chunks.add(kokoroOnnxService.generateAudio(phonemeService.getPhonemes(sentence)))
+    }*/
+    chunks.add(kokoroOnnxService.generateAudio(phonemeService.getPhonemes(sentences[1])))
+    println(phonemeService.getPhonemes(sentences[1]))
+    val samples = stitchAudio(chunks)
     val sampleRate = 24000 ///audio.sampleRate
-
-    // 1. Padding: Add silence at the BEGINNING
-    // val paddingSize = 8000
-    //val paddedSamples = FloatArray(samples.size + paddingSize)
-    //samples.copyInto(paddedSamples, paddingSize) // Move audio to start after 8000 samples
-    //
-    // 2. Recognize (Pass 22050 so Sherpa calculates seconds correctly)
+    println("samples: ${samples.size}")
     val wav = convertSamplesToWav(samples, sampleRate.toFloat())
     val floatArrayData = byteToFloatArrayWav(wav)
+
     val totalDuration = floatArrayData.size.toDouble() / sampleRate
     val result = recognizerService.getTimestampsFromAudio(floatArrayData, sampleRate.toFloat())
     // 3. Group sub-tokens into Words
@@ -406,6 +405,44 @@ class TtsService(
       "audio" to Base64.getEncoder().encodeToString(convertWavToMp3(wav)),
       "alignment" to wordAlignments
     )
+  }
+  fun resample24to16(input: FloatArray): FloatArray {
+    val outputSize = (input.size * 16000 / 24000)
+    val output = FloatArray(outputSize)
+    for (i in 0 until outputSize) {
+      val index = i * 1.5f // 24000 / 16000 = 1.5
+      val low = index.toInt()
+      val high = if (low + 1 < input.size) low + 1 else low
+      val weight = index - low
+      output[i] = (1 - weight) * input[low] + weight * input[high]
+    }
+    return output
+  }
+
+  fun stitchAudio(chunks: List<FloatArray>): FloatArray {
+    println("stichAudio fun")
+    if (chunks.isEmpty()) return floatArrayOf() // Guard against empty list
+    val sampleRate = 24000
+    val silenceDuration = 0.15 // 150ms silence between sentences
+    val silenceSamples = (sampleRate * silenceDuration).toInt()
+    val silencePadding = FloatArray(silenceSamples) { 0f }
+
+    val totalSize = chunks.sumOf { it.size } + (chunks.size - 1) * silenceSamples
+    val finalAudio = FloatArray(totalSize)
+
+
+    var currentOffset = 0
+    chunks.forEachIndexed { index, chunk ->
+      System.arraycopy(chunk, 0, finalAudio, currentOffset, chunk.size)
+      currentOffset += chunk.size
+
+      // Add silence if it's not the last chunk
+      if (index < chunks.size - 1) {
+        System.arraycopy(silencePadding, 0, finalAudio, currentOffset, silenceSamples)
+        currentOffset += silenceSamples
+      }
+    }
+    return finalAudio
   }
 }
 

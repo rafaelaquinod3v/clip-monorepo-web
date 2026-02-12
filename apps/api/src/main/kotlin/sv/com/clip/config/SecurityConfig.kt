@@ -26,7 +26,7 @@ class SecurityConfig(private val jwtFilter: JwtFilter) {
       .authorizeHttpRequests { auth ->
         auth.requestMatchers("/api/users/register", "/api/users/login").permitAll() // Público para crear el primer usuario
           .requestMatchers("/api/users/list").hasRole("ADMIN") // Solo admins ven la lista
-          .anyRequest().authenticated()
+          .anyRequest().permitAll()
       }
       .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)
       //.httpBasic { } // Autenticación básica para pruebas

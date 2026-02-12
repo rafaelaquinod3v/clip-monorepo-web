@@ -3,6 +3,7 @@ package sv.com.clip.speech.internal
 import com.k2fsa.sherpa.onnx.*
 
 import org.springframework.core.io.ClassPathResource
+import org.springframework.core.io.Resource
 import org.springframework.http.client.JdkClientHttpRequestFactory
 
 import org.springframework.stereotype.Service
@@ -19,6 +20,7 @@ import ws.schild.jave.MultimediaObject
 import ws.schild.jave.encode.AudioAttributes
 import ws.schild.jave.encode.EncodingAttributes
 import java.io.File
+import java.io.InputStream
 import java.net.http.HttpClient
 import java.time.Duration
 
@@ -206,26 +208,14 @@ class TtsService(
   }
 
 
-/*
-  private val restClient = RestClient.create("http://localhost:8880/v1").responseTimeout(Duration.ofSeconds(30)) // Dale tiempo a Kokoro
-    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
-*/
-
   fun generateSpeech(text: String, voice: String = "af_heart"): ByteArray? {
-/*    val nettyClient = HttpClient.create()
-      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
-      .responseTimeout(Duration.ofSeconds(30)) // Now it should appear with this import
 
-    val webClient = WebClient.builder()
-      .clientConnector(ReactorClientHttpConnector(nettyClient))
-      .baseUrl("http://localhost:8880/v1")
-      .build()*/
     val nativeClient = HttpClient.newBuilder()
       .connectTimeout(Duration.ofSeconds(10)) // Aquí se pone el CONNECT timeout
       .build()
     val factory = JdkClientHttpRequestFactory(nativeClient)
     factory.setReadTimeout(Duration.ofSeconds(30)) // This is the Response Timeout
-   // factory.setConnectTimeout(Duration.ofSeconds(10))
+
 
     val restClient = RestClient.builder()
       .requestFactory(factory)
@@ -245,6 +235,36 @@ class TtsService(
       .body(requestBody)
       .retrieve()
       .body<ByteArray>() // Recibes los bytes del audio
+  }
+
+  fun generateSpeechStreaming(text: String, voice: String = "af_heart"): InputStream? {
+
+    val nativeClient = HttpClient.newBuilder()
+      .connectTimeout(Duration.ofSeconds(10)) // Aquí se pone el CONNECT timeout
+      .build()
+    val factory = JdkClientHttpRequestFactory(nativeClient)
+    factory.setReadTimeout(Duration.ofSeconds(30)) // This is the Response Timeout
+
+
+    val restClient = RestClient.builder()
+      .requestFactory(factory)
+      .baseUrl("http://localhost:8880/v1")
+      .build()
+
+    val requestBody = mapOf(
+      "input" to text,
+      "voice" to voice,
+      "model" to "kokoro", // Nombre del modelo específico
+      "response_format" to "opus", // Opus es mejor para streaming que WAV
+      "stream" to true,
+      "output_format" to "json" // O el parámetro específico que habilite timestamps en tu versión
+    )
+
+    return restClient.post()
+      .uri("/audio/speech")
+      .body(requestBody)
+      .retrieve()
+      .body<Resource>()?.inputStream // Recibes los bytes del audio
   }
 
   fun generateAudioWithSyncV2(text: String): Map<String, Any> {
@@ -348,7 +368,9 @@ class TtsService(
     sentences.forEach { sentence ->
       println(sentence)
       println(phonemeService.getPhonemes(sentence))
-      chunks.add(kokoroOnnxService.generateAudio(phonemeService.getPhonemes(sentence)))
+      println("$sentence v2")
+      println(phonemeService.getPhonemesV2(sentence))
+      chunks.add(kokoroOnnxService.generateAudio(phonemeService.getPhonemesV2(sentence)?.ipa!!))
     }
     //chunks.add(kokoroOnnxService.generateAudio(phonemeService.getPhonemes(sentences[0])))
     //println(phonemeService.getPhonemes(sentences[0]))

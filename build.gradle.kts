@@ -13,8 +13,14 @@ allprojects {
     mavenCentral()
     maven { url = uri("https://jitpack.io") }
     maven { url = uri("https://repo.spring.io") }
+   // maven { url = uri("https://maven.oracle.com") }
   }
   apply {
       plugin("dev.nx.gradle.project-graph")
   }
 }
+/*allprojects {
+  group = "sv.com.clip" // Ensure this is NOT null
+  version = "1.0.0"
+}*/
+

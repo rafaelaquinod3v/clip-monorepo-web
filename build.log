@@ -1,0 +1,198 @@
+Initialized native services in: /home/rafae/.gradle/native
+Initialized jansi services in: /home/rafae/.gradle/native
+Removing 0 daemon stop events from registry
+Previous Daemon (1910) stopped at Wed Feb 11 16:56:32 CST 2026 other compatible daemons were started and after being idle for 0 minutes and not recently used
+Previous Daemon (12157) stopped at Wed Feb 11 16:47:11 CST 2026 by user or operating system
+Starting a Gradle Daemon, 2 busy and 2 stopped Daemons could not be reused, use --status for details
+Starting process 'Gradle build daemon'. Working directory: /home/rafae/.gradle/daemon/8.14 Command: /home/rafae/.sdkman/candidates/java/21.0.2-graalce/bin/java --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-opens=java.base/java.nio.charset=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens=java.xml/javax.xml.namespace=ALL-UNNAMED -Xmx2048m -Dfile.encoding=UTF-8 -Duser.country -Duser.language=en -Duser.variant -cp /home/rafae/.gradle/wrapper/dists/gradle-8.14-all/c2qonpi39x1mddn7hk5gh9iqj/gradle-8.14/lib/gradle-daemon-main-8.14.jar -javaagent:/home/rafae/.gradle/wrapper/dists/gradle-8.14-all/c2qonpi39x1mddn7hk5gh9iqj/gradle-8.14/lib/agents/gradle-instrumentation-agent-8.14.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 8.14
+Successfully started process 'Gradle build daemon'
+An attempt to start the daemon took 1.168 secs.
+The client will now receive all logging from the daemon (pid: 1138). The daemon log file: /home/rafae/.gradle/daemon/8.14/daemon-1138.out.log
+Starting build in new daemon [memory: 2 GiB]
+Using 4 worker leases.
+Received JVM installation metadata from '/home/rafae/.sdkman/candidates/java/21.0.2-graalce': {JAVA_HOME=/home/rafae/.sdkman/candidates/java/21.0.2-graalce, JAVA_VERSION=21.0.2, JAVA_VENDOR=GraalVM Community, RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=21.0.2+13-jvmci-23.1-b30, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=21.0.2+13-jvmci-23.1-b30, VM_VENDOR=GraalVM Community, OS_ARCH=amd64}
+Watching the file system is configured to be enabled if available
+Now considering [/home/rafae/code/english-learning/clip-monorepo] as hierarchies to watch
+File system watching is active
+Starting Build
+Settings evaluated using settings file '/home/rafae/code/english-learning/clip-monorepo/settings.gradle.kts'.
+Projects loaded. Root project using build file '/home/rafae/code/english-learning/clip-monorepo/build.gradle.kts'.
+Included projects: [root project 'clip-monorepo', project ':api']
+
+> Configure project :
+Evaluating root project 'clip-monorepo' using build file '/home/rafae/code/english-learning/clip-monorepo/build.gradle.kts'.
+Resolved plugin [id: 'dev.nx.gradle.project-graph', version: '0.1.10']
+Wed Feb 11 17:14:24 CST 2026 Applying NxProjectGraphReportPlugin to clip-monorepo
+Wed Feb 11 17:14:24 CST 2026 Applying NxProjectGraphReportPlugin to api
+
+> Configure project :api
+Evaluating project ':api' using build file '/home/rafae/code/english-learning/clip-monorepo/apps/api/build.gradle.kts'.
+Resolved plugin [id: 'org.jetbrains.kotlin.jvm', version: '2.2.21']
+Resolved plugin [id: 'org.jetbrains.kotlin.plugin.spring', version: '2.2.21']
+Resolved plugin [id: 'org.jetbrains.kotlin.plugin.jpa', version: '2.2.21']
+Resolved plugin [id: 'org.springframework.boot', version: '4.0.1']
+Resolved plugin [id: 'io.spring.dependency-management', version: '1.1.7']
+Resolved plugin [id: 'org.flywaydb.flyway', version: '11.20.1']
+Resolved plugin [id: 'org.graalvm.python', version: '25.0.2']
+Build cdb2afbe-9fa2-4496-8953-93bc9319dedf is started
+Using Kotlin Gradle Plugin gradle813 variant
+kotlin scripting plugin: created the scripting discovery configuration: kotlinScriptDef
+kotlin scripting plugin: created the scripting discovery configuration: testKotlinScriptDef
+Applying dependency management to configuration 'annotationProcessor' in project 'api'
+Applying dependency management to configuration 'api' in project 'api'
+Applying dependency management to configuration 'apiDependenciesMetadata' in project 'api'
+Applying dependency management to configuration 'apiElements' in project 'api'
+Applying dependency management to configuration 'archives' in project 'api'
+Applying dependency management to configuration 'bootArchives' in project 'api'
+Applying dependency management to configuration 'compileClasspath' in project 'api'
+Applying dependency management to configuration 'compileOnly' in project 'api'
+Applying dependency management to configuration 'compileOnlyDependenciesMetadata' in project 'api'
+Applying dependency management to configuration 'default' in project 'api'
+Applying dependency management to configuration 'developmentOnly' in project 'api'
+Applying dependency management to configuration 'implementation' in project 'api'
+Applying dependency management to configuration 'implementationDependenciesMetadata' in project 'api'
+Applying dependency management to configuration 'intransitiveDependenciesMetadata' in project 'api'
+Applying dependency management to configuration 'kotlinBouncyCastleConfiguration' in project 'api'
+Applying dependency management to configuration 'kotlinBuildToolsApiClasspath' in project 'api'
+Applying dependency management to configuration 'kotlinCompilerClasspath' in project 'api'
+Applying dependency management to configuration 'kotlinCompilerPluginClasspath' in project 'api'
+Applying dependency management to configuration 'kotlinCompilerPluginClasspathMain' in project 'api'
+Applying dependency management to configuration 'kotlinCompilerPluginClasspathTest' in project 'api'
+Applying dependency management to configuration 'kotlinInternalAbiValidation' in project 'api'
+Applying dependency management to configuration 'kotlinKlibCommonizerClasspath' in project 'api'
+Applying dependency management to configuration 'kotlinNativeCompilerPluginClasspath' in project 'api'
+Applying dependency management to configuration 'kotlinScriptDef' in project 'api'
+Applying dependency management to configuration 'kotlinScriptDefExtensions' in project 'api'
+Applying dependency management to configuration 'mainSourceElements' in project 'api'
+Applying dependency management to configuration 'productionRuntimeClasspath' in project 'api'
+Applying dependency management to configuration 'runtimeClasspath' in project 'api'
+Applying dependency management to configuration 'runtimeElements' in project 'api'
+Applying dependency management to configuration 'runtimeOnly' in project 'api'
+Applying dependency management to configuration 'swiftExportClasspath' in project 'api'
+Applying dependency management to configuration 'swiftExportClasspathResolvable' in project 'api'
+Applying dependency management to configuration 'testAndDevelopmentOnly' in project 'api'
+Applying dependency management to configuration 'testAnnotationProcessor' in project 'api'
+Applying dependency management to configuration 'testApi' in project 'api'
+Applying dependency management to configuration 'testApiDependenciesMetadata' in project 'api'
+Applying dependency management to configuration 'testCompileClasspath' in project 'api'
+Applying dependency management to configuration 'testCompileOnly' in project 'api'
+Applying dependency management to configuration 'testCompileOnlyDependenciesMetadata' in project 'api'
+Applying dependency management to configuration 'testImplementation' in project 'api'
+Applying dependency management to configuration 'testImplementationDependenciesMetadata' in project 'api'
+Applying dependency management to configuration 'testIntransitiveDependenciesMetadata' in project 'api'
+Applying dependency management to configuration 'testKotlinScriptDef' in project 'api'
+Applying dependency management to configuration 'testKotlinScriptDefExtensions' in project 'api'
+Applying dependency management to configuration 'testResultsElementsForTest' in project 'api'
+Applying dependency management to configuration 'testRuntimeClasspath' in project 'api'
+Applying dependency management to configuration 'testRuntimeOnly' in project 'api'
+Applying dependency management to configuration 'pythonLauncherClasspath' in project 'api'
+Virtual filesystem is deployed to default resources directory 'org.graalvm.python.vfs'. This can cause conflicts if used with other Java libraries that also deploy GraalPy virtual filesystem. Consider adding `resourceDirectory = "GRAALPY-VFS/${groupId}/${artifactId}"` to your build.gradle script (replace the placeholders with values specific to your project), moving any existing sources from 'org.graalvm.python.vfs/src' to 'GRAALPY-VFS/${groupId}/${artifactId}', and using VirtualFileSystem$Builder#resourceDirectory.
+For more details, please refer to https://www.graalvm.org/latest/reference-manual/python/Embedding-Build-Tools. 
+Applying dependency management to configuration 'apiElements-published' in project 'api'
+Applying dependency management to configuration 'runtimeElements-published' in project 'api'
+All projects evaluated.
+Task path ':api:build' matched project ':api'
+Task name matched 'build'
+Selected primary task 'build' from project :api
+Resolving global dependency management for project 'api'
+Excluding []
+Excluding []
+Excluding []
+Path for java installation '/usr/lib/jvm/openjdk-21' (Common Linux Locations) auto-detected does not contain a java executable
+Starting process 'command '/usr/lib/jvm/java-21-openjdk-amd64/bin/java''. Working directory: /home/rafae/.gradle/.tmp/tmp-jvm15265522214970835120probe Command: /usr/lib/jvm/java-21-openjdk-amd64/bin/java -Xmx32m -Xms32m -cp . JavaProbe
+Successfully started process 'command '/usr/lib/jvm/java-21-openjdk-amd64/bin/java''
+Received JVM installation metadata from '/usr/lib/jvm/java-21-openjdk-amd64': {JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64, JAVA_VERSION=21.0.10, JAVA_VENDOR=Ubuntu, RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=21.0.10+7-Ubuntu-124.04, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=21.0.10+7-Ubuntu-124.04, VM_VENDOR=Ubuntu, OS_ARCH=amd64}
+Excluding []
+Excluding []
+Excluding []
+Excluding []
+Excluding []
+Excluding []
+Excluding []
+Excluding []
+Excluding []
+Excluding []
+Tasks to be executed: [task ':api:checkKotlinGradlePluginConfigurationErrors', task ':api:compileKotlin', task ':api:compileJava', task ':api:graalPyInstallPackages', task ':api:graalPyVFSFilesList', task ':api:processResources', task ':api:classes', task ':api:resolveMainClassName', task ':api:bootJar', task ':api:graalPyMetaInf', task ':api:jar', task ':api:assemble', task ':api:compileTestKotlin', task ':api:compileTestJava', task ':api:processTestResources', task ':api:testClasses', task ':api:test', task ':api:check', task ':api:build']
+Tasks that were excluded: []
+Resolve mutations for :api:checkKotlinGradlePluginConfigurationErrors (Thread[#97,Execution worker,5,main]) started.
+:api:checkKotlinGradlePluginConfigurationErrors (Thread[#97,Execution worker,5,main]) started.
+
+> Task :api:checkKotlinGradlePluginConfigurationErrors SKIPPED
+Skipping task ':api:checkKotlinGradlePluginConfigurationErrors' as task onlyIf 'errorDiagnostics are present' is false.
+Resolve mutations for :api:compileKotlin (Thread[#97,Execution worker,5,main]) started.
+:api:compileKotlin (Thread[#97,Execution worker,5,main]) started.
+
+> Task :api:compileKotlin UP-TO-DATE
+Excluding []
+Excluding []
+Caching disabled for task ':api:compileKotlin' because:
+  Build cache is disabled
+Skipping task ':api:compileKotlin' as it is up-to-date.
+Resolve mutations for :api:compileJava (Thread[#97,Execution worker,5,main]) started.
+:api:compileJava (Thread[#97,Execution worker,5,main]) started.
+
+> Task :api:compileJava NO-SOURCE
+Skipping task ':api:compileJava' as it has no source files and no previous output files.
+Resolve mutations for :api:graalPyInstallPackages (Thread[#97,Execution worker,5,main]) started.
+:api:graalPyInstallPackages (Thread[#97,Execution worker,5,main]) started.
+
+> Task :api:graalPyInstallPackages
+Caching disabled for task ':api:graalPyInstallPackages' because:
+  Build cache is disabled
+  Gradle does not know how file 'build/generated/graalpy/resources' was created (output property 'output'). Task output caching requires exclusive access to output paths to guarantee correctness (i.e. multiple tasks are not allowed to produce output in the same location).
+Task ':api:graalPyInstallPackages' is not up-to-date because:
+  Task has failed previously.
+Got 1 python package(s) in GraalPy plugin configuration
+Reinstalling GraalPy venv due to corrupt contents file
+Creating GraalPy 25.0.2 venv
+Running: /home/rafae/code/english-learning/clip-monorepo/apps/api/build/python-launcher/graalpy.sh -m venv /home/rafae/code/english-learning/clip-monorepo/apps/api/build/generated/graalpy/resources/org.graalvm.python.vfs/venv --without-pip
+Executing: /home/rafae/code/english-learning/clip-monorepo/apps/api/build/generated/graalpy/resources/org.graalvm.python.vfs/venv/bin/graalpy -I -m ensurepip
+WARNING: Disabling truststore because platform isn't supported
+Looking in links: /tmp/tmp5mil6l0b
+Loading GraalPy post-release patch repository from https://raw.githubusercontent.com/oracle/graalpython/refs/heads/github/patches/25.0.2/graalpython/lib-graalpython/patches/. This can be controlled with PIP_GRAALPY_PATCHES_URL environment variable. Set to 'disabled' to disable
+WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='raw.githubusercontent.com', port=443): Read timed out. (read timeout=15)")': /oracle/graalpython/refs/heads/github/patches/25.0.2/graalpython/lib-graalpython/patches/metadata.toml
+Processing /tmp/tmp5mil6l0b/pip-24.3.1-py3-none-any.whl
+Installing collected packages: pip
+Successfully installed pip-24.3.1
+Executing: /home/rafae/code/english-learning/clip-monorepo/apps/api/build/generated/graalpy/resources/org.graalvm.python.vfs/venv/bin/graalpy -m pip install --compile misaki[en]
+WARNING: Disabling truststore because platform isn't supported
+Looking in indexes: https://pypi.org/simple, https://www.graalvm.org/python/wheels/
+Loading GraalPy post-release patch repository from https://raw.githubusercontent.com/oracle/graalpython/refs/heads/github/patches/25.0.2/graalpython/lib-graalpython/patches/. This can be controlled with PIP_GRAALPY_PATCHES_URL environment variable. Set to 'disabled' to disable
+Collecting misaki[en]
+  Using cached misaki-0.9.4-py3-none-any.whl.metadata (19 kB)
+Collecting addict (from misaki[en])
+  Using cached addict-2.4.0-py3-none-any.whl.metadata (1.0 kB)
+Collecting regex (from misaki[en])
+  Using cached regex-2026.1.15.tar.gz (414 kB)
+auto-patching C API usages in /tmp/pip-install-gd8g75i0/regex_0a756f0d8ea6460aa6c85ce1cbe18486/src/_regex.c
+  Looking for GraalPy patches for regex
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='pypi.org', port=443): Read timed out. (read timeout=15)")': /simple/espeakng-loader/
+WARNING: Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x6a5f9cdb>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution')': /simple/espeakng-loader/
+WARNING: Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x114b8b04>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution')': /simple/espeakng-loader/
+WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='www.graalvm.org', port=443): Read timed out. (read timeout=15)")': /python/wheels/espeakng-loader/
+Collecting espeakng-loader (from misaki[en])
+  Using cached espeakng_loader-0.2.4-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (1.3 kB)
+WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPSConnectionPool(host='pypi.org', port=443): Read timed out. (read timeout=15)")': /simple/num2words/
+Collecting num2words (from misaki[en])
+  Using cached num2words-0.5.14-py3-none-any.whl.metadata (13 kB)
+Collecting phonemizer-fork (from misaki[en])
+  Using cached phonemizer_fork-3.3.2-py3-none-any.whl.metadata (48 kB)
+Collecting spacy (from misaki[en])
+  Using cached spacy-3.8.11.tar.gz (1.3 MB)
+auto-patching C API usages in /tmp/pip-install-gd8g75i0/spacy_6617c855ffa64c659be738ae75d9f7bc/spacy/matcher/levenshtein.c
+  Looking for GraalPy patches for spacy
+  Installing build dependencies: started
+  Installing build dependencies: still running...
+  Installing build dependencies: still running...
+  Installing build dependencies: still running...
+  Installing build dependencies: still running...
+  Installing build dependencies: still running...
+  Installing build dependencies: still running...
+  Installing build dependencies: still running...
+  Installing build dependencies: still running...

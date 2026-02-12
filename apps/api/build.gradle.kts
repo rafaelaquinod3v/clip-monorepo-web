@@ -1,3 +1,5 @@
+
+
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 
@@ -10,8 +12,20 @@ plugins {
   id("org.springframework.boot") version "4.0.1"
   id("io.spring.dependency-management") version "1.1.7"
   id("org.flywaydb.flyway") version "11.20.1"
+  //id("org.graalvm.python") version "25.0.2"
 }
-
+// These are specific to the GraalVM Python Plugin
+/*graalPy {
+  packages.set(listOf("misaki[en]"))
+}*/
+/*configurations.all {
+  resolutionStrategy.eachDependency {
+    if (requested.group == null) {
+      // Usar una dependencia dummy con group válido
+      useTarget("org.graalvm.python:dummy:1.0")
+    }
+  }
+}*/
 group = "sv.com.clip"
 version = "0.0.1-SNAPSHOT"
 description = "Clip Learn English"
@@ -26,6 +40,10 @@ dependencies {
 
   // Esto incluirá tanto el puente Java como la librería nativa
   implementation(fileTree("libs") { include("*.jar") })
+/*  implementation(files(
+    "libs/sherpa-onnx-native-lib-linux-x64-v1.12.10.jar",
+    "libs/sherpa-onnx-v1.12.10.jar"
+  ))*/
 
   // WebSockets y Mensajería STOMP
   implementation("org.springframework.boot:spring-boot-starter-websocket")
@@ -51,10 +69,14 @@ dependencies {
   //
 
   // Motor políglota básico
-  implementation("org.graalvm.polyglot:polyglot:24.0.0")
-  // El "runtime" de Python que vive dentro de tu JAR
-  implementation("org.graalvm.python:python-language:24.0.0")
-  implementation("org.graalvm.python:python-resources:24.0.0")
+  // Source: https://mvnrepository.com/artifact/org.graalvm.python/python-language
+/*  implementation("org.graalvm.polyglot:polyglot:25.0.2")
+  implementation("org.graalvm.python:python-language:25.0.2")*/
+  //implementation("org.graalvm.polyglot:polyglot:24.1.1")
+  //implementation("org.graalvm.polyglot:python-community:24.1.1")
+  //implementation("org.graalvm.python:python-embedding:24.1.1")
+  //implementation("org.graalvm.python:python-language:24.1.1")
+  //implementation("org.graalvm.python:python-resources:24.1.1")
 
   // text chop
   implementation("org.apache.opennlp:opennlp-tools:2.3.0")

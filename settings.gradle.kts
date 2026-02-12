@@ -5,13 +5,14 @@
  * For more detailed information on multi-project builds, please refer to https://docs.gradle.org/9.2.1/userguide/multi_project_builds.html in the Gradle documentation.
  */
 
+/*
 pluginManagement {
   repositories {
     gradlePluginPortal()
-    mavenCentral() // The GraalVM plugins are often synced here
-    // If you use internal repos for plugins, add them here
+    mavenCentral()
   }
 }
+*/
 
 rootProject.name = "clip-monorepo"
 

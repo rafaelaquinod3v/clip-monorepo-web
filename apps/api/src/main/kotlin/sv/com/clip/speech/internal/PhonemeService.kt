@@ -3,11 +3,17 @@ package sv.com.clip.speech.internal
 import com.sun.jna.Memory
 import com.sun.jna.Pointer
 import com.sun.jna.ptr.PointerByReference
+//import org.graalvm.polyglot.Context
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import java.lang.ref.Reference
 
 @Service
 class PhonemeService {
+/*  private val context = Context.newBuilder("python")
+    .allowAllAccess(true) // Permite que Python acceda a archivos y red si es necesario
+    .build()*/
   companion object {
     private val ESPEAK_LOCK = Any()
     private var isInitialized = false
@@ -68,5 +74,31 @@ class PhonemeService {
     // Add more replacements if you see "MISSING CHAR" logs
   }
 
+/*  fun textToPhonemes(text: String): String {
+    // Ejecutamos código Python directamente
+    val pyCode = """
+            from phonemizer import phonemize
+            def get_ipa(text):
+                return phonemize(text, language='en-us', backend='espeak')
+        """.trimIndent()
+
+    context.eval("python", pyCode)
+    val pythonFunction = context.getBindings("python").getMember("get_ipa")
+
+    // Llamamos a la función de Python pasándole el texto de Kotlin
+    return pythonFunction.execute(text).asString()
+  }*/
+private val restClient = RestClient.create("http://localhost:8765")
+  fun getPhonemesV2(input: String): PhonemeResponse? {
+    return restClient.get()
+      .uri { uriBuilder ->
+        uriBuilder
+          .path("/phonemes")
+          .queryParam("text", input) // Agrega ?text=valor
+          .build()
+      }
+      .retrieve()
+      .body<PhonemeResponse>()
+  }
 }
 

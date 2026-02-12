@@ -1,3 +1,6 @@
+sudo apt install -y ffmpeg espeak-ng libespeak-ng1 build-essential python3-dev
+
+
 curl -s "https://get.sdkman.io" | bash
 source "$HOME/.sdkman/bin/sdkman-init.sh"
 sdk list java | grep graal

@@ -1,20 +1,19 @@
 services:
-
   kokoro-tts:
     image: ghcr.io/remsky/kokoro-fastapi-cpu:latest
-    container_name: kokoro
+    container_name: kokoro_local
     ports:
       - "8880:8880"
     shm_size: '2gb' # IMPORTANT: PyTorch needs shared memory
     deploy:
       resources:
         limits:
-          memory: 4G  # Give it enough room to breathe
+          memory: 3G  # Give it enough room to breathe
     restart: unless-stopped
 
   ollama:
     image: ollama/ollama:latest
-    container_name: ollama
+    container_name: ollama_local
     restart: unless-stopped
     ports:
       - "11434:11434"

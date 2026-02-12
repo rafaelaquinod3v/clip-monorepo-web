@@ -1,11 +1,18 @@
 package sv.com.clip.speech.web
 
 import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.Resource
 import org.springframework.http.*
+import org.springframework.http.client.JdkClientHttpRequestFactory
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.toEntity
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import sv.com.clip.speech.internal.TtsService
+import java.net.http.HttpClient
+import java.time.Duration
 
 @RestController
 @RequestMapping("/api/audio")
@@ -24,9 +31,49 @@ class AudioController(private val ttsService: TtsService) {
 
   @GetMapping("/synthesize")
   fun synthesize(@RequestParam text: String): ResponseEntity<Map<String, Any>> {
-    val result = ttsService.generateAudioWithSyncV3(text)
+    val result = ttsService.generateAudioWithSyncV2(text)
     return ResponseEntity.ok(result)
   }
+  @PostMapping("/stream-book")
+  fun streamSpeech(@RequestBody request: Map<String, String>): ResponseEntity<StreamingResponseBody> {
+    // Configuramos la petición a Kokoro-FastAPI
+    val kokoroRequest = mapOf(
+      "input" to request["text"],
+      "voice" to (request["voice"] ?: "af_heart"),
+      "model" to "kokoro",
+      "stream" to true,           // Activamos streaming nativo
+      "output_format" to "json"   // Para recibir audio + timestamps en el stream
+    )
+    val nativeClient = HttpClient.newBuilder()
+      .connectTimeout(Duration.ofSeconds(10)) // Aquí se pone el CONNECT timeout
+      .build()
+    val factory = JdkClientHttpRequestFactory(nativeClient)
+    factory.setReadTimeout(Duration.ofSeconds(30)) // This is the Response Timeout
+
+
+    val restClient = RestClient.builder()
+      .requestFactory(factory)
+      .baseUrl("http://localhost:8880/v1")
+      .build()
+
+    val responseBody = StreamingResponseBody { outputStream ->
+      restClient.post()
+        .uri("/audio/speech")
+        .body(kokoroRequest)
+        .retrieve()
+        .onStatus({ it.isError }) { _, res -> throw RuntimeException("Error en Kokoro: ${res.statusCode}") }
+        .toEntity<Resource>()
+        .body?.inputStream?.use { inputStream ->
+          // Copiamos el stream de Kokoro directamente al cliente (frontend)
+          inputStream.transferTo(outputStream)
+        }
+    }
+
+    return ResponseEntity.ok()
+      .contentType(MediaType.APPLICATION_OCTET_STREAM) // O un MIME type específico si usas JSON streaming
+      .body(responseBody)
+  }
+
   @GetMapping("/download-audio", produces = [MediaType.MULTIPART_FORM_DATA_VALUE])
   fun downloadAudio(@RequestParam text: String): ResponseEntity<MultiValueMap<String, Any>> {
 

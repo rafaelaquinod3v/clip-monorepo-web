@@ -1,0 +1,11 @@
+.highlight {
+  background-color: yellow;
+  font-weight: bold;
+  transition: all 0.1s ease;
+}
+
+span {
+  display: inline-block;
+  margin-right: 4px;
+  font-size: 1.2rem;
+}

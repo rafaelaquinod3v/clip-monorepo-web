@@ -42,7 +42,9 @@ class AudioController(private val ttsService: TtsService) {
       "voice" to (request["voice"] ?: "af_heart"),
       "model" to "kokoro",
       "stream" to true,           // Activamos streaming nativo
-      "output_format" to "json"   // Para recibir audio + timestamps en el stream
+      "response_format" to "mp3",
+      "return_timestamps" to true,
+      "return_download_link" to false,
     )
     val nativeClient = HttpClient.newBuilder()
       .connectTimeout(Duration.ofSeconds(10)) // Aquí se pone el CONNECT timeout
@@ -53,12 +55,13 @@ class AudioController(private val ttsService: TtsService) {
 
     val restClient = RestClient.builder()
       .requestFactory(factory)
-      .baseUrl("http://localhost:8880/v1")
+      .baseUrl("http://localhost:8880")
       .build()
 
     val responseBody = StreamingResponseBody { outputStream ->
       restClient.post()
-        .uri("/audio/speech")
+        .uri("/dev/captioned_speech")
+       // .header("Accept", "application/x-ndjson")
         .body(kokoroRequest)
         .retrieve()
         .onStatus({ it.isError }) { _, res -> throw RuntimeException("Error en Kokoro: ${res.statusCode}") }

@@ -42,6 +42,7 @@ export class SpeechService {
       // Dependiendo de cómo envíe Kokoro los datos, será un JSON con audio base64 o binario.
       const chunk = decoder.decode(value, { stream: true });
       
+      console.log("Contenido del chunk:", chunk);
       try {
         const data = JSON.parse(chunk);
         if (data.word) {

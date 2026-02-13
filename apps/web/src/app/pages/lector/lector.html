@@ -1,11 +1,6 @@
 <div class="libro-container">
   <!-- El texto se divide en palabras para poder resaltarlas -->
   <p>
-<!--     <span *ngFor="let palabra of palabrasLibro; let i = index" 
-          [id]="'word-' + i"
-          [class.highlight]="i === indicePalabraActiva">
-      {{ palabra }} 
-    </span> -->
     @for(palabra of palabrasLibro; track $index) {
         <span 
           [id]="'word-' + $index"

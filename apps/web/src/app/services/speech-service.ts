@@ -18,43 +18,98 @@ export interface TtsResponse {
   providedIn: 'root',
 })
 export class SpeechService {
-  private wordMetadataSource = new Subject<any>();
-  wordMetadata$ = this.wordMetadataSource.asObservable();
+  //private wordMetadataSource = new Subject<any>();
+  //wordMetadata$ = this.wordMetadataSource.asObservable();
+  private audioChunkSubject = new Subject<Uint8Array>();
+  audioChunk$ = this.audioChunkSubject.asObservable();
+  
+  wordMetadata$ = new Subject<any>();
+  // En speech-service.ts
+async streamBookAudiov2(text: string, voice = 'af_heart') {
+  const response = await fetch('http://localhost:8080/api/audio/stream-book', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text, voice })
+  });
 
-  async streamBookAudio(text: string, voice = 'af_heart') {
+  const reader = response.body?.getReader();
+  const decoder = new TextDecoder();
+  let buffer = ""; // Aquí acumulamos los pedazos de texto
+
+  while (reader) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+
+    // Lógica para separar objetos JSON {"audio":...}{"audio":...}
+    // Buscamos el cierre de una llave y la apertura de la siguiente
+    let boundary = buffer.indexOf('}{');
+    
+    while (boundary !== -1) {
+      const completeJson = buffer.substring(0, boundary + 1);
+      this.processJsonObject(completeJson);
+      
+      buffer = buffer.substring(boundary + 1);
+      boundary = buffer.indexOf('}{');
+    }
+
+    // Si el backend envía un objeto por línea (\n), esto también ayuda:
+    if (buffer.includes('\n')) {
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ""; // Guardamos el último trozo incompleto
+        for (const line of lines) {
+            if (line.trim()) this.processJsonObject(line);
+        }
+    }
+  }
+}
+
+private processJsonObject(jsonString: string) {
+  try {
+    const data = JSON.parse(jsonString);
+    if (data.metadata) this.wordMetadata$.next(data.metadata);
+    if (data.audio) {
+      const binary = atob(data.audio);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      this.audioChunkSubject.next(bytes);
+    }
+  } catch (e) {
+    // Si falla, probablemente el JSON aún está incompleto
+    console.debug("Esperando más datos para completar el JSON...");
+  }
+}
+
+
+/*   async streamBookAudiov2(text: string, voice = 'af_heart') {
     const response = await fetch('http://localhost:8080/api/audio/stream-book', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, voice })
     });
+    const reader = response.body?.getReader();
 
-    if (!response.body) throw new Error('No se pudo recibir el stream');
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-
-    // Procesar el stream
     while (true) {
-      const { value, done } = await reader.read();
+      const { done, value } = await reader!.read();
       if (done) break;
-      console.log("Chunk recibido:", value.length, "bytes"); // Si ves esto, el stream vive
-      // Aquí decodificas el chunk. 
-      // Dependiendo de cómo envíe Kokoro los datos, será un JSON con audio base64 o binario.
-      const chunk = decoder.decode(value, { stream: true });
+
+      // Asumiendo que cada chunk es un JSON completo {"audio": "...", "metadata": {...}}
+      // Si el JSON viene partido, necesitarás un buffer de texto
+      const json = JSON.parse(new TextDecoder().decode(value));
       
-      console.log("Contenido del chunk:", chunk);
-      try {
-        const data = JSON.parse(chunk);
-        if (data.word) {
-          // Emitimos la palabra y sus tiempos para el componente
-          this.wordMetadataSource.next(data);
-        }
-        // Aquí manejarías la reproducción del audio (ver abajo)
-      } catch (e) {
-        // A veces los chunks cortan un JSON a la mitad, necesitarías un buffer de texto
+      // 1. Enviar metadata para los timestamps
+      this.wordMetadata$.next(json.metadata);
+      console.log(json.metadata);
+      // 2. Decodificar Base64 a bytes y emitir
+      const binaryString = atob(json.audio);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
       }
+      this.audioChunkSubject.next(bytes);
     }
-  }
+  } */
 
   private http = inject(HttpClient);
   private readonly apiUrl = 'http://localhost:8080/api/audio';

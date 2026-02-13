@@ -22,12 +22,12 @@ export class Reader implements OnInit {
   speechService = inject(SpeechService);
 
   ngOnInit(): void {
-    this.speechService.streamBookAudio("welcome to the jungle");
-/*     this.fetchTextAnalysis();
+   
+    this.fetchTextAnalysis();
     this.speechService.synthesize(this.textModel().text).subscribe((res: TtsResponse) => {      
       this.alignmentData.set(res.alignment);
       this.audioBlob.set(base64ToMp3Fast(res.audio));
-    }); */
+    });
   }
 
   textModel = signal({ text: TEST_TTS });

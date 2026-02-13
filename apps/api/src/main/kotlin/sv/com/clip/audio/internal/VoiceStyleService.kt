@@ -1,4 +1,4 @@
-package sv.com.clip.speech.internal
+package sv.com.clip.audio.internal
 
 import org.springframework.stereotype.Service
 import java.io.InputStream

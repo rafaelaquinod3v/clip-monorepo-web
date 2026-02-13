@@ -1,4 +1,4 @@
-package sv.com.clip.speech.internal
+package sv.com.clip.audio.internal
 
 import com.k2fsa.sherpa.onnx.FeatureConfig
 import com.k2fsa.sherpa.onnx.OfflineModelConfig
@@ -6,7 +6,6 @@ import com.k2fsa.sherpa.onnx.OfflineNemoEncDecCtcModelConfig
 import com.k2fsa.sherpa.onnx.OfflineRecognizer
 import com.k2fsa.sherpa.onnx.OfflineRecognizerConfig
 import com.k2fsa.sherpa.onnx.OfflineRecognizerResult
-import com.k2fsa.sherpa.onnx.OfflineTransducerModelConfig
 import jakarta.annotation.PostConstruct
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
@@ -47,24 +46,22 @@ class RecognizerService {
   }
 
 fun getTimestampsFromAudio(samples: FloatArray, sampleRate: Float): OfflineRecognizerResult {
-  val stream = recognizer.createStream()
-  if (samples.isEmpty()) {
-    println("Received empty audio for timestamping. Skipping ONNX decode.")
-   // return OfflineRecognizerResult()// or return empty list of timestamps
+    val stream = recognizer.createStream()
+    if (samples.isEmpty()) {
+      println("Received empty audio for timestamping.")
+    }
+
+    stream.acceptWaveform(samples, sampleRate.toInt())
+
+    recognizer.decode(stream)
+    val result = recognizer.getResult(stream)
+
+    println("Whisper detected text: ${result.text}") // <--- Check this!
+    println("Whisper detected tokens: ${result.tokens.joinToString()}")
+    println("Timestamps size: ${result.timestamps.size}")
+    // Ensure native resources are released
+    stream.release()
+
+    return result
   }
-  //val stream = recognizer.createStream()
-
-
-  stream.acceptWaveform(samples, sampleRate.toInt())
-
-  recognizer.decode(stream)
-  val result = recognizer.getResult(stream)
-  println("Whisper detected text: ${result.text}") // <--- Check this!
-  println("Whisper detected tokens: ${result.tokens.joinToString()}")
-  println("Timestamps size: ${result.timestamps.size}")
-  // Ensure native resources are released
-  stream.release()
-
-  return result
-}
 }

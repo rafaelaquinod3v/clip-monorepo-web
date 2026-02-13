@@ -1,6 +1,6 @@
 import { Component, ElementRef, inject, ViewChild } from '@angular/core';
 import { SpeechService } from '../../services/speech-service';
-import { STRESS_TTS, TEST_TTS, TEST_TTS_2 } from '../../components/reader/text.const';
+import { STRESS_TTS, TEST_TTS, TEST_TTS_2, WELCOME_TO_THE_JUNGLE } from '../../components/reader/text.const';
 
 @Component({
   selector: 'app-lector',

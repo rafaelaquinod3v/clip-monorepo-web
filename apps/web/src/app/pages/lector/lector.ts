@@ -19,16 +19,6 @@ export class Lector {
   private chunkQueue: ArrayBuffer[] = [];
   private isFirstChunk = true;
 
-/* constructor() {
-  this.audioService.wordMetadata$.subscribe(m => this.timestamps.push(m));
-  
-  this.audioService.audioChunk$.subscribe(bytes => {
-    // Usamos slice() para asegurar que pasamos una copia limpia del buffer
-    this.chunkQueue.push(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer);
-    this.processQueue();
-  });
-}
- */
   constructor() {
     // Escuchamos metadatos: los metadatos definen qué palabras existen
     this.audioService.wordMetadata$.subscribe(newWords => {
@@ -88,7 +78,6 @@ async comenzarLectura() {
 
   // Ahora sí pedimos el audio al backend
   const texto = TEST_TTS;
- // this.palabrasLibro = texto.split(' ');
   await this.audioService.streamBookAudiov2(texto);
 }
 

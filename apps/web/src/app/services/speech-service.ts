@@ -18,13 +18,12 @@ export interface TtsResponse {
   providedIn: 'root',
 })
 export class SpeechService {
-  //private wordMetadataSource = new Subject<any>();
-  //wordMetadata$ = this.wordMetadataSource.asObservable();
+
   private audioChunkSubject = new Subject<Uint8Array>();
   audioChunk$ = this.audioChunkSubject.asObservable();
   
   wordMetadata$ = new Subject<any>();
-  // En speech-service.ts
+  
 async streamBookAudiov2(text: string, voice = 'af_heart') {
   const response = await fetch('http://localhost:8080/api/audio/stream-book', {
     method: 'POST',
@@ -68,7 +67,7 @@ async streamBookAudiov2(text: string, voice = 'af_heart') {
 private processJsonObject(jsonString: string) {
   try {
     const data = JSON.parse(jsonString);
-    console.log(Object.keys(data));
+    
     if (data.timestamps) this.wordMetadata$.next(data.timestamps);
     console.log(data.timestamps);
     if (data.audio) {
@@ -83,35 +82,6 @@ private processJsonObject(jsonString: string) {
   }
 }
 
-
-/*   async streamBookAudiov2(text: string, voice = 'af_heart') {
-    const response = await fetch('http://localhost:8080/api/audio/stream-book', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, voice })
-    });
-    const reader = response.body?.getReader();
-
-    while (true) {
-      const { done, value } = await reader!.read();
-      if (done) break;
-
-      // Asumiendo que cada chunk es un JSON completo {"audio": "...", "metadata": {...}}
-      // Si el JSON viene partido, necesitarás un buffer de texto
-      const json = JSON.parse(new TextDecoder().decode(value));
-      
-      // 1. Enviar metadata para los timestamps
-      this.wordMetadata$.next(json.metadata);
-      console.log(json.metadata);
-      // 2. Decodificar Base64 a bytes y emitir
-      const binaryString = atob(json.audio);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-      this.audioChunkSubject.next(bytes);
-    }
-  } */
 
   private http = inject(HttpClient);
   private readonly apiUrl = 'http://localhost:8080/api/audio';

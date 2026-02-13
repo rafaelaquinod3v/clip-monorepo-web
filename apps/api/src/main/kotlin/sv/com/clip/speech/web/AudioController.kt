@@ -35,7 +35,71 @@ class AudioController(private val ttsService: TtsService, private val textProces
     val result = ttsService.generateAudioWithSyncV2(text)
     return ResponseEntity.ok(result)
   }
+
   @PostMapping("/stream-book")
+  fun streamSpeech(@RequestBody request: Map<String, String>): ResponseEntity<StreamingResponseBody> {
+    val fullText = request["text"] ?: throw IllegalArgumentException("Text is required")
+    val voice = request["voice"] ?: "af_heart"
+
+    // 1. Split the text into sentences (using your OpenNLP service)
+    val sentences = textProcessorService.splitText(fullText)
+    sentences.forEach { sentence -> println(sentence) }
+    // Configuration for the RestClient
+    val nativeClient = HttpClient.newBuilder()
+      .connectTimeout(Duration.ofSeconds(10))
+      .build()
+    val factory = JdkClientHttpRequestFactory(nativeClient)
+    factory.setReadTimeout(Duration.ofSeconds(60)) // Enough time for Kokoro to process one sentence
+
+    val restClient = RestClient.builder()
+      .requestFactory(factory)
+      .baseUrl("http://localhost:8880")
+      .build()
+
+    val responseBody = StreamingResponseBody { outputStream ->
+      sentences.forEach { sentence ->
+        if (sentence.isBlank()) return@forEach
+
+        // 2. Prepare the request for ONE sentence only
+        val kokoroRequest = mapOf(
+          "input" to sentence.trim(),
+          "voice" to voice,
+          "model" to "kokoro",
+          "stream" to true,
+          "response_format" to "mp3",
+          "return_timestamps" to true,
+          "return_download_link" to false
+        )
+
+        try {
+          // 3. Request audio for this sentence and pipe it to the outputStream
+          restClient.post()
+            .uri("/dev/captioned_speech")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(kokoroRequest)
+            .retrieve()
+            .onStatus({ it.isError }) { _, res ->
+              println("Error in Kokoro for sentence: ${res.statusCode}")
+            }
+            .toEntity<Resource>()
+            .body?.inputStream?.use { inputStream ->
+              // IMPORTANT: We transfer each sentence's JSON stream to the client
+              inputStream.transferTo(outputStream)
+              // Add a newline to ensure the Frontend parser sees distinct objects
+              outputStream.write("\n".toByteArray())
+              outputStream.flush()
+            }
+        } catch (e: Exception) {
+          println("Failed to process sentence: $sentence. Error: ${e.message}")
+        }
+      }
+    }
+
+    return ResponseEntity.ok()
+      .contentType(MediaType.parseMediaType("application/x-ndjson"))
+      .body(responseBody)
+  }
+/*  @PostMapping("/stream-book")
   fun streamSpeech(@RequestBody request: Map<String, String>): ResponseEntity<StreamingResponseBody> {
     textProcessorService.splitText(request["text"]!!).forEach { sentence -> println(sentence) }
     // Configuramos la petición a Kokoro-FastAPI
@@ -77,7 +141,7 @@ class AudioController(private val ttsService: TtsService, private val textProces
     return ResponseEntity.ok()
       .contentType(MediaType.APPLICATION_OCTET_STREAM) // O un MIME type específico si usas JSON streaming
       .body(responseBody)
-  }
+  }*/
 
   @GetMapping("/download-audio", produces = [MediaType.MULTIPART_FORM_DATA_VALUE])
   fun downloadAudio(@RequestParam text: String): ResponseEntity<MultiValueMap<String, Any>> {

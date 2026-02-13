@@ -95,15 +95,15 @@ private processJsonObject(jsonString: string) {
     return this.http.get<TtsResponse>(`${this.apiUrl}/synthesize?text=${text}`);
   }
 
-  downloadAudio(text: string) {
+/*   downloadAudio(text: string) {
     return this.http.get(`${this.apiUrl}/download-audio?text=${text}`, {responseType: 'blob', observe: 'response'});
-  }
+  } */
 
-  generateSpeech(text: string) {
+/*   generateSpeech(text: string) {
     return this.http.get(`${this.apiUrl}/generate-speech?text=${text}`, {
       responseType: 'blob'
     });
-  }
+  } */
 
   
 }

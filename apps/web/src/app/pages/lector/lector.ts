@@ -18,14 +18,15 @@ export class Lector {
   private sourceBuffer!: SourceBuffer;
   private chunkQueue: ArrayBuffer[] = [];
   private isFirstChunk = true;
+  private offsetGlobal = 0;
 
   constructor() {
     // Escuchamos metadatos: los metadatos definen qué palabras existen
     this.audioService.wordMetadata$.subscribe(newWords => {
       // newWords es el array de objetos {word, start_time, end_time}
       newWords.forEach((m: any) => {
-        this.timestamps.push(m);
-        this.palabrasLibro.push(m.word);
+       // this.timestamps.push(m);
+       // this.palabrasLibro.push(m.word);
       });
     });
 
@@ -33,6 +34,20 @@ export class Lector {
       this.chunkQueue.push(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer);
       this.processQueue();
     });
+
+    this.audioService.wordMetadata$.subscribe(metadata => {
+      let sentenceDuration = 0;
+      const adjusted = metadata.map((m: any) => {
+        if (m.end_time > sentenceDuration) sentenceDuration = m.end_time;
+        return { ...m, 
+          start_time: m.start_time + this.offsetGlobal, 
+          end_time: m.end_time + this.offsetGlobal 
+        };
+      });
+      this.timestamps.push(...adjusted);
+      this.offsetGlobal += sentenceDuration; // Prepare offset for the next sentence in the stream
+    });
+
   }
 
 // En lector.ts
@@ -59,6 +74,11 @@ processQueue() {
 
 
 async comenzarLectura() {
+  const texto = TEST_TTS;
+  // 1. Render everything IMMEDIATELY
+  // We use a regex that matches words and punctuation separately to match Kokoro's behavior
+  this.palabrasLibro = texto.match(/(\w+|[^\w\s])/g) || [];
+
   this.isFirstChunk = true;
   this.chunkQueue = [];
   this.timestamps = [];
@@ -77,8 +97,9 @@ async comenzarLectura() {
   });
 
   // Ahora sí pedimos el audio al backend
-  const texto = TEST_TTS;
+  
   await this.audioService.streamBookAudiov2(texto);
+  
 }
 
 

@@ -10,13 +10,14 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.toEntity
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
+import sv.com.clip.speech.internal.TextProcessorService
 import sv.com.clip.speech.internal.TtsService
 import java.net.http.HttpClient
 import java.time.Duration
 
 @RestController
 @RequestMapping("/api/audio")
-class AudioController(private val ttsService: TtsService) {
+class AudioController(private val ttsService: TtsService, private val textProcessorService: TextProcessorService) {
 
   @GetMapping("/speak", produces = ["audio/wav"])
   fun speak(@RequestParam text: String): ResponseEntity<ByteArray> {
@@ -36,6 +37,7 @@ class AudioController(private val ttsService: TtsService) {
   }
   @PostMapping("/stream-book")
   fun streamSpeech(@RequestBody request: Map<String, String>): ResponseEntity<StreamingResponseBody> {
+    textProcessorService.splitText(request["text"]!!).forEach { sentence -> println(sentence) }
     // Configuramos la petición a Kokoro-FastAPI
     val kokoroRequest = mapOf(
       "input" to request["text"],

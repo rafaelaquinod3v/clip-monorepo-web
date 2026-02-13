@@ -68,7 +68,9 @@ async streamBookAudiov2(text: string, voice = 'af_heart') {
 private processJsonObject(jsonString: string) {
   try {
     const data = JSON.parse(jsonString);
-    if (data.metadata) this.wordMetadata$.next(data.metadata);
+    console.log(Object.keys(data));
+    if (data.timestamps) this.wordMetadata$.next(data.timestamps);
+    console.log(data.timestamps);
     if (data.audio) {
       const binary = atob(data.audio);
       const bytes = new Uint8Array(binary.length);

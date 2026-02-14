@@ -15,3 +15,8 @@
   <!-- El elemento de audio es invisible, lo controlamos por código -->
   <audio #audioPlayer (timeupdate)="sincronizarTexto($event)"></audio>
 </div>
+
+<hr>
+<h2>upload</h2>
+<input type="file" (change)="onFileSelected($event)" accept=".epub">
+<button (click)="onUpload()" [disabled]="!selectedFile">Subir Ebook</button>

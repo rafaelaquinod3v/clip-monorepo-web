@@ -13,6 +13,7 @@ allprojects {
     mavenCentral()
     maven { url = uri("https://jitpack.io") }
     maven { url = uri("https://repo.spring.io") }
+    maven { url = uri("https://github.com/psiegman/mvn-repo/raw/master/releases") } // epublib
    // maven { url = uri("https://maven.oracle.com") }
   }
   apply {

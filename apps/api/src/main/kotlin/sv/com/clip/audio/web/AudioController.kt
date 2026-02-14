@@ -33,7 +33,7 @@ class AudioController(private val ttsService: TTSService,) {
 
     val responseBody = StreamingResponseBody { outputStream ->
       // Delegamos TODA la lógica al servicio
-      ttsService.streamTextSincrono(fullText, voice, outputStream)
+      ttsService.streamTextSplitBySentenceSync(fullText, voice, outputStream)
     }
 
     return ResponseEntity.ok()

@@ -1,3 +1,5 @@
+storage:
+  location: /var/opt/clip/uploads
 
 server:
   compression:

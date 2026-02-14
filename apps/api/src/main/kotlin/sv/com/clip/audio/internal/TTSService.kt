@@ -78,7 +78,7 @@ class TTSService(
     tts = OfflineTts(mainConfig)
   }
 
-  fun streamTextSplitBySentence(fullText: String, voice: String, outputStream: OutputStream) = runBlocking {
+/*  fun streamTextSplitBySentence(fullText: String, voice: String, outputStream: OutputStream) = runBlocking {
     val sentences = textProcessor.splitBySentence(fullText).filter { it.isNotBlank() }
     val objectMapper = ObjectMapper() // O inyéctalo si ya tienes uno en Spring
 
@@ -109,14 +109,14 @@ class TTSService(
         println("Error procesando fragmento JSON: ${e.message}")
       }
     }
-  }
+  }*/
 
   private fun fetchFullJsonResponse(sentence: String, voice: String): Map<String, Any>? {
     val kokoroRequest = mapOf(
       "input" to sentence,
       "voice" to voice,
       "model" to "kokoro",
-      "stream" to false,
+      "stream" to true,
       "response_format" to "mp3" // O "wav" según prefieras
     )
 
@@ -231,7 +231,7 @@ class TTSService(
       .body<ByteArray>() // Recibes los bytes del audio
   }
 
-
+  // kokoro_local
   fun generateAudioWithSync(text: String): Map<String, Any> {
 
     val samples = generateSpeech(text) //audio.samples

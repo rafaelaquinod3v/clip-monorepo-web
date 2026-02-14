@@ -1,6 +1,7 @@
 import { Component, ElementRef, inject, ViewChild } from '@angular/core';
 import { SpeechService } from '../../services/speech-service';
 import { STRESS_TTS, TEST_TTS, TEST_TTS_2, WELCOME_TO_THE_JUNGLE } from '../../components/reader/text.const';
+import { EpubService } from '../../services/epub-service';
 
 @Component({
   selector: 'app-lector',
@@ -9,6 +10,29 @@ import { STRESS_TTS, TEST_TTS, TEST_TTS_2, WELCOME_TO_THE_JUNGLE } from '../../c
   styleUrl: './lector.css',
 })
 export class Lector {
+
+  selectedFile: File | null = null;
+
+  ebookService = inject(EpubService);
+
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0]; // Captura el primer archivo
+  }
+
+  onUpload() {
+    if (this.selectedFile) {
+      this.ebookService.upload(this.selectedFile).subscribe({
+        next: (res) => console.log('Subida exitosa', res),
+        error: (err) => console.error('Error al subir', err)
+      });
+    }
+  }
+
+
+
+
+
+
   audioService = inject(SpeechService);
   @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
   palabrasLibro: string[] = [];

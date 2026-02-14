@@ -81,6 +81,18 @@ dependencies {
   // text chop
   implementation("org.apache.opennlp:opennlp-tools:2.3.0")
 
+  // epub
+  //implementation("nl.siegmann.epublib:epublib-core:3.1")
+  implementation("nl.siegmann.epublib:epublib-core:3.1") {
+    // Opcional: Excluir slf4j si entra en conflicto con Spring Boot
+    exclude(group = "org.slf4j")
+  }
+  implementation("org.jsoup:jsoup:1.15.4")
+  implementation("org.apache.commons:commons-compress:1.26.1")
+ // implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
+
+
+
   // FORZAR NATURALEZA LINUX PARA WSL
   // Esto evita que busque .dll de Windows y use .so de Linux
   runtimeOnly("ai.djl.pytorch:pytorch-native-cpu::linux-x86_64")

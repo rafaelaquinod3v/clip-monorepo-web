@@ -4,6 +4,7 @@ import { Login } from './pages/login/login';
 import { authGuard } from './guards/auth-guard';
 import { Library } from './pages/library/library';
 import { Lector } from './pages/lector/lector';
+import { Epub } from './components/epub/epub';
 
 export const appRoutes: Route[] = [
     {
@@ -17,6 +18,9 @@ export const appRoutes: Route[] = [
     },
     {
         path: 'lector', component: Lector, canActivate: [authGuard]
+    },
+    {
+        path: 'epub', component: Epub, canActivate: [authGuard]
     },
     {
         path: '', redirectTo: '/login', pathMatch: 'full'

@@ -1,15 +1,15 @@
-.fluido {
-  /* clamp(mínimo, valor_fluido, máximo) */
+/* .fluido {
+  
   width: clamp(300px, 50vw, 800px); 
   height: clamp(200px, 40vh, 500px);
   overflow: hidden;
-  line-height: 1.5; /* Mantén esto constante */
+  line-height: 1.5; 
   font-size: 18px;
-}
+} */
 
 .reader-style {
   width: 90vw;   /* O el tamaño que decidieras */
-  height: 80vh;
+  height: 70vh;
   padding: 20px;
   font-family: 'Georgia', serif;
   font-size: 18px;
@@ -24,4 +24,17 @@
   top: -9999px;      /* Lo mandamos lejos de la vista */
   visibility: hidden; 
   pointer-events: none;
+}
+
+.controls {
+    display: flex;
+    width: 90vw;
+    padding: 20px;
+    box-sizing: border-box; 
+    /*  justify-content: space-between; */
+    justify-content: center; /* Centra todo el grupo de hijos */
+    gap: 20px;               /* Separa a los hijos con un espacio fijo */
+  
+    /* Opcional: si quieres centrar verticalmente también */
+    align-items: center; 
 }

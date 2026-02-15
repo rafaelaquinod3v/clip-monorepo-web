@@ -1,5 +1,6 @@
 package sv.com.clip.config
 
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -19,7 +20,14 @@ class SecurityConfig(private val jwtFilter: JwtFilter) {
 
   @Bean
   fun filterChain(http: HttpSecurity): SecurityFilterChain {
-    http.csrf { it.disable() } // Deshabilitado solo para pruebas rápidas con Postman
+    http
+      .exceptionHandling { auth ->
+        // Si el acceso es denegado o no hay auth, devuelve 401
+        auth.authenticationEntryPoint { _, response, _ ->
+          response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+        }
+      }
+      .csrf { it.disable() } // Deshabilitado solo para pruebas rápidas con Postman
       .cors {  } // importante para angular / electron
       .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
       .headers { it.frameOptions { frame -> frame.sameOrigin() } } // Permitir Frames pgadmin

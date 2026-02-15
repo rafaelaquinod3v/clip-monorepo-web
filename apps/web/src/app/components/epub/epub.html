@@ -7,9 +7,14 @@
   {{ content() }}
 </div> -->
 <!-- El contenedor real que ve el usuario -->
+<div class="controls">
+    <button [disabled]="pageHistory.length === 0" (click)="prev()">prev</button>
+    <button [disabled]="currentPageStart() >= allPhrases.length" (click)="next()">next</button>
+</div>
 <div #mainReader class="reader-style">
   {{ content() }}
 </div>
+
 <!-- El contenedor "fantasma" para cálculos (oculto) -->
 <div #ghost class="reader-style ghost-hidden"></div>
 

@@ -2,6 +2,12 @@ import { Component, ElementRef, HostListener, inject, signal, ViewChild } from '
 import { EpubService, SentenceEntry } from '../../services/epub-service';
 import { debounceTime, Subject } from 'rxjs';
 
+interface BookState {
+  currentPageStart: number;
+  pageHistory: number[];
+  offset: number;
+}
+
 @Component({
   selector: 'app-epub',
   imports: [],
@@ -11,10 +17,15 @@ import { debounceTime, Subject } from 'rxjs';
 export class Epub {
   epubService = inject(EpubService);
   readonly epubName = "645392f4-421d-4177-b9db-2fa724b0d69e_pg64317-images.jsonl";
-  private offset = 4;
-  private proximoOffset = 4;
-  private limit = 10;
-  //content = signal("");
+  private offset = 0;
+  private readonly LIMIT = 100; // Cuántas frases pedimos por vez
+  private readonly UMBRAL_PRECARGA = 20; // Si quedan menos de 20 frases, cargamos más
+  private isLoading = false; // Evita peticiones duplicadas
+
+  
+  
+  // Pila de índices donde comenzó cada página visitada
+  pageHistory: number[] = [];
   // Índice de la primera frase que se ve actualmente en pantalla
   currentPageStart = signal<number>(0); 
 
@@ -68,23 +79,74 @@ export class Epub {
   @ViewChild('ghost') ghostElement!: ElementRef<HTMLElement>;
 
   loadEpub() {
-    this.epubService.loadEpubJsonl(this.epubName, this.offset, this.limit).subscribe((response: SentenceEntry[]) => {
+    // 1. Intentar recuperar estado previo
+    const saved = localStorage.getItem(`book_progress_${this.epubName}`);
+    
+    if (saved) {
+      const state: BookState = JSON.parse(saved);
+      this.currentPageStart.set(state.currentPageStart);
+      this.pageHistory = state.pageHistory;
+      this.offset = state.offset;
+    } else {
+      // Estado inicial si es la primera vez
+      this.offset = 0;
+      this.currentPageStart.set(0);
+      this.pageHistory = [];
+    }
+
+    // 2. Cargar las frases desde el offset guardado
+    // Nota: Para que el historial funcione, necesitamos cargar desde el inicio 
+    // hasta el offset actual, o al menos el bloque actual.
+    this.fetchPhrases();
+
+
+/*     this.epubService.loadEpubJsonl(this.epubName, this.offset, this.LIMIT).subscribe((response: SentenceEntry[]) => {
       console.log(response);
-/*       const cuantasCaben = this.checkFit(response);
-      
-      // Solo seteamos las que caben visualmente
-      const textoVisible = response.slice(0, cuantasCaben).map(e => e.text).join('');
-      this.content.set(textoVisible); */
 
       this.allPhrases = response; // Guardamos todo el "pool" de frases
       this.currentPageStart.set(0); // Empezamos por el principio
       this.renderCurrentPage();
 
-      // El resto lo guardas para el offset de la siguiente página
-      //this.proximoOffset += cuantasCaben;
-    });
+    }); */
   }
+  prev() {
+    console.log("prev");
+    if (this.pageHistory.length > 0) {
+      // Recuperamos el último índice guardado
+      const lastIndex = this.pageHistory.pop();
+      
+      if (lastIndex !== undefined) {
+        this.currentPageStart.set(lastIndex);
+        this.renderCurrentPage();
+      }
+    }
+    this.saveProgress();
+  }
+  next() {
+    console.log("next");
+    const phrasesFromCurrent = this.allPhrases.slice(this.currentPageStart());
+    const count = this.checkFit(phrasesFromCurrent);
 
+    // El nuevo inicio es el inicio anterior + las que acabamos de leer
+    const nextIndex = this.currentPageStart() + count;
+
+    if (nextIndex < this.allPhrases.length) {
+      // GUARDAR HISTORIAL: El índice actual es el inicio de la página que estamos dejando
+      this.pageHistory.push(this.currentPageStart());
+      this.currentPageStart.set(nextIndex);
+      this.renderCurrentPage();
+      // VERIFICAR PRECARGA
+      const frasesRestantes = this.allPhrases.length - nextIndex;
+      if (frasesRestantes < this.UMBRAL_PRECARGA && !this.isLoading) {
+        this.preloadNextPhrases();
+      }
+    } else {
+      // Si llegamos al final absoluto y no hay más cargadas
+      if (!this.isLoading) this.preloadNextPhrases();
+      console.log("Fin del contendido cargado");
+    }
+    this.saveProgress();
+  }
 
 // Usa setTimeout(0) para forzar al navegador a procesar el layout antes de medir
 checkFit(frases: SentenceEntry[]): number {
@@ -109,4 +171,44 @@ checkFit(frases: SentenceEntry[]): number {
   return count; // Si recorre todo y no desborda, caben todas
 }
 
+  private preloadNextPhrases() {
+    this.isLoading = true;
+    this.offset += this.LIMIT; // Aumentamos el offset para la siguiente tanda
+
+    this.epubService.loadEpubJsonl(this.epubName, this.offset, this.LIMIT)
+      .subscribe({
+        next: (newPhrases: SentenceEntry[]) => {
+          // Unimos las frases nuevas a la lista maestra
+          this.allPhrases = [...this.allPhrases, ...newPhrases];
+          this.isLoading = false;
+          console.log(`Precargadas ${newPhrases.length} frases nuevas. Total: ${this.allPhrases.length}`);
+        },
+        error: (err) => {
+          this.isLoading = false;
+          console.error("Error en precarga", err);
+        }
+      });
+  }
+  private saveProgress() {
+    const state: BookState = {
+      currentPageStart: this.currentPageStart(),
+      pageHistory: this.pageHistory,
+      offset: this.offset
+    };
+    // Guardamos usando el nombre del libro como llave única
+    localStorage.setItem(`book_progress_${this.epubName}`, JSON.stringify(state));
+  }
+
+  private fetchPhrases() {
+    this.isLoading = true;
+    // Cargamos desde 0 hasta el offset actual + LIMIT para tener todo el historial disponible
+    const totalToFetch = this.offset + this.LIMIT;
+    
+    this.epubService.loadEpubJsonl(this.epubName, 0, totalToFetch)
+      .subscribe((response) => {
+        this.allPhrases = response;
+        this.renderCurrentPage();
+        this.isLoading = false;
+      });
+  }
 }

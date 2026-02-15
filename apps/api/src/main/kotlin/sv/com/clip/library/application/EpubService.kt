@@ -13,7 +13,7 @@ class EpubService(@Value("\${storage.location}") private val storageLocation: St
   private val mapper = jacksonObjectMapper()
 
   fun loadEpubFromJsonl(epubName: String, offset: Int, limit: Int): List<SentenceEntry> {
-    val epubPath = root.resolve(epubName)
+    val epubPath = root.resolve("$epubName.jsonl")
     val epubFile = epubPath.toFile()
     if (!epubFile.exists()) { throw RuntimeException("epub '$epubName' not found") }
     return epubFile.useLines { lines ->

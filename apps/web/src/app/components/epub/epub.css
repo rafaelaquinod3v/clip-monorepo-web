@@ -1,0 +1,27 @@
+.fluido {
+  /* clamp(mínimo, valor_fluido, máximo) */
+  width: clamp(300px, 50vw, 800px); 
+  height: clamp(200px, 40vh, 500px);
+  overflow: hidden;
+  line-height: 1.5; /* Mantén esto constante */
+  font-size: 18px;
+}
+
+.reader-style {
+  width: 90vw;   /* O el tamaño que decidieras */
+  height: 80vh;
+  padding: 20px;
+  font-family: 'Georgia', serif;
+  font-size: 18px;
+  line-height: 1.6;
+  overflow: hidden; /* Evita scrolls durante el cálculo */
+  box-sizing: border-box; /* Fundamental para que el padding no altere el alto */
+  display: block;
+}
+
+.ghost-hidden {
+  position: absolute;
+  top: -9999px;      /* Lo mandamos lejos de la vista */
+  visibility: hidden; 
+  pointer-events: none;
+}

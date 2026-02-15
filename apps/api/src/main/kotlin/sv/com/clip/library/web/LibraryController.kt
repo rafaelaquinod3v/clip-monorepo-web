@@ -2,6 +2,8 @@ package sv.com.clip.library.web
 
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -9,11 +11,16 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import sv.com.clip.library.api.ImportRawTextSourceMaterialRequest
+import sv.com.clip.library.application.EpubService
 import sv.com.clip.library.application.ImportEpubService
+import sv.com.clip.library.application.SentenceEntry
 
 @RestController
 @RequestMapping("/library")
-class LibraryController(private val importEpubService: ImportEpubService) {
+class LibraryController(
+  private val importEpubService: ImportEpubService,
+  private val epubService: EpubService,
+) {
 
   @PostMapping("/import")
   fun addToLibrary(@RequestBody request: ImportRawTextSourceMaterialRequest): Boolean {
@@ -50,4 +57,24 @@ class LibraryController(private val importEpubService: ImportEpubService) {
     //val result = learningService.processContent(request.url)
     //return ResponseEntity.ok(ContentResponse("result"))
   //}
+
+  @GetMapping("/{id}/content")
+  fun getBookContent(
+    @PathVariable id: String,
+    @RequestParam(defaultValue = "0") offset: Int,
+    @RequestParam(defaultValue = "20") limit: Int
+  ): ResponseEntity<List<SentenceEntry>> {
+
+    // Llamamos al servicio para obtener el fragmento de frases
+    val nodes = epubService.loadEpubFromJsonl(id, offset, limit)
+
+    return if (nodes.isNotEmpty()) {
+      ResponseEntity.ok(nodes)
+    } else {
+      // Si el offset es mayor al total de frases, devolvemos 204 (No Content)
+      ResponseEntity.noContent().build()
+    }
+  }
+
+
 }

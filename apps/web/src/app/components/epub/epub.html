@@ -1,1 +1,15 @@
-<p>epub works!</p>
+<h1>{{epubName}}</h1>
+
+<button (click)="loadEpub()">Load Epub</button>
+<!-- <main class="fluido">{{content()}}</main> -->
+<!-- El contenedor real que ve el usuario -->
+<!-- <div #mainReader class="reader-style">
+  {{ content() }}
+</div> -->
+<!-- El contenedor real que ve el usuario -->
+<div #mainReader class="reader-style">
+  {{ content() }}
+</div>
+<!-- El contenedor "fantasma" para cálculos (oculto) -->
+<div #ghost class="reader-style ghost-hidden"></div>
+

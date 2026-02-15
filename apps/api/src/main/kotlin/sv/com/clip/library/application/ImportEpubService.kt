@@ -2,26 +2,20 @@ package sv.com.clip.library.application
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import jakarta.annotation.PostConstruct
-import nl.siegmann.epublib.domain.Book
 import nl.siegmann.epublib.domain.TOCReference
 import org.jsoup.Jsoup
 import nl.siegmann.epublib.epub.EpubReader
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import sv.com.clip.text.api.TextProcessorExternal
-import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.UUID
-import java.util.zip.ZipFile
-import java.util.zip.ZipInputStream
-import kotlin.io.path.name
 
-data class SentenceEntry(val title: String, val text: String, val index: Int)
+
 
 @Service
 class ImportEpubService(

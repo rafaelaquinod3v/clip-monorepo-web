@@ -2,6 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
+export interface SentenceEntry{
+  index: number;
+  title: string;
+  text: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -19,5 +25,8 @@ export class EpubService {
       responseType: 'text'
     });
   }
-
+  
+  loadEpubJsonl(fileName: string, offset: number, limit: number) {
+    return this.http.get<SentenceEntry[]>(`${this.apiUrl}/${fileName}/content?offset=${offset}&limit=${limit}`);
+  }
 }

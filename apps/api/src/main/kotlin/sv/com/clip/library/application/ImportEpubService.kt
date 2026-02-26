@@ -8,19 +8,22 @@ import nl.siegmann.epublib.epub.EpubReader
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import sv.com.clip.media.api.MediaApi
+import sv.com.clip.media.api.MediaRequest
+import sv.com.clip.storage.api.StorageExternal
 import sv.com.clip.text.api.TextProcessorExternal
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
 import java.util.UUID
-
 
 
 @Service
 class ImportEpubService(
   @Value("\${storage.location}") private val storageLocation: String,
-  private val textProcessorService: TextProcessorExternal
+  private val textProcessorService: TextProcessorExternal,
+  private val storage: StorageExternal,
+  private val media: MediaApi,
 ) {
 
   private val root = Paths.get(storageLocation)
@@ -48,7 +51,11 @@ class ImportEpubService(
   }
 
   fun save(file: MultipartFile): String {
-    try {
+      val fileName = storage.store(file)
+      val originalFilename = file.originalFilename!!
+      media.save(MediaRequest(UUID.randomUUID(), fileName, originalFilename))
+    return fileName
+    /*    try {
       if (file.isEmpty) throw RuntimeException("Archivo vacío")
 
       // Generar un nombre único para evitar colisiones
@@ -63,7 +70,7 @@ class ImportEpubService(
       return fileName // Retornas el nombre o la ruta para guardarlo en la DB
     } catch (e: Exception) {
       throw RuntimeException("Error al guardar el archivo: ${e.message}")
-    }
+    }*/
   }
 /*  private val BANNED_TITLES = setOf(
     // Front matter (Inicio)

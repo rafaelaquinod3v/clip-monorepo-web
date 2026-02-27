@@ -138,7 +138,8 @@ dependencies {
   implementation("org.apache.lucene:lucene-core:9.12.1")
   // Módulo de análisis (contiene EnglishAnalyzer)
   implementation("org.apache.lucene:lucene-analysis-common:9.12.1")
-
+  // detect mimeType
+  implementation("org.apache.tika:tika-core:2.9.1")
   // Ffmpeg
   implementation("ws.schild:jave-core:3.5.0")
   implementation("ws.schild:jave-nativebin-linux64:3.5.0")

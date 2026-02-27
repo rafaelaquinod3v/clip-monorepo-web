@@ -3,14 +3,14 @@ package sv.com.clip.storage.internal
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import sv.com.clip.storage.api.StorageExternal
+import sv.com.clip.storage.api.StorageApi
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.UUID
 
 @Service
-class StorageService(properties: StorageProperties) : StorageExternal {
+class StorageService(properties: StorageProperties) : StorageApi {
   private val rootLocation = Paths.get(properties.location)
 
   @PostConstruct
@@ -38,5 +38,15 @@ class StorageService(properties: StorageProperties) : StorageExternal {
     } catch (e: Exception) {
       throw RuntimeException("Error al guardar el archivo: ${e.message}")
     }
+  }
+
+  override fun store(bytes: ByteArray): String {
+    val fileName = UUID.randomUUID().toString()
+    val path = rootLocation.resolve(Paths.get(fileName)).normalize().toAbsolutePath()
+    if (!path.startsWith(rootLocation.toAbsolutePath())) {
+      throw SecurityException("Path fuera del directorio permitido")
+    }
+    Files.write(path, bytes)
+    return fileName
   }
 }

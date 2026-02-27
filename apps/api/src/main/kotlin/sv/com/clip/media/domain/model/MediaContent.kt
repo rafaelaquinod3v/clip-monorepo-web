@@ -25,6 +25,7 @@ value class MediaContentIdentifier(val value: UUID): Identifier {
 @AggregateRoot
 data class MediaContent(
   val id: MediaContentIdentifier = MediaContentIdentifier.generate(),
+  val userId: UUID,
   val fileName: String,
   val originalFileName: String,
   val fileSize: Long,

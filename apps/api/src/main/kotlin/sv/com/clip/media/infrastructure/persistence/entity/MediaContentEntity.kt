@@ -21,6 +21,8 @@ class MediaContentEntity(
   @Id
   private val id: UUID,
   @Column(nullable = false)
+  val userId: UUID,
+  @Column(nullable = false)
   val fileName: String,
   @Column(nullable = false)
   val originalFileName: String,
@@ -38,6 +40,7 @@ class MediaContentEntity(
   fun toDomain() : MediaContent {
     return MediaContent(
       MediaContentIdentifier(this.id),
+      this.userId,
       this.fileName,
       this.originalFileName,
       this.fileSize,
@@ -51,6 +54,7 @@ class MediaContentEntity(
     fun fromDomain(mediaContent: MediaContent): MediaContentEntity {
       return MediaContentEntity(
         mediaContent.id.value,
+        mediaContent.userId,
         mediaContent.fileName,
         mediaContent.originalFileName,
         mediaContent.fileSize,

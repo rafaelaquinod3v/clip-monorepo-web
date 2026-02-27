@@ -30,23 +30,17 @@ class LibraryController(
 
   @PostMapping("/upload/epub")
   fun uploadEpub(@RequestParam("file") file: MultipartFile): ResponseEntity<String> {
-    // 1. Validar que no esté vacío
+
     if (file.isEmpty) {
       return ResponseEntity("El archivo está vacío", HttpStatus.BAD_REQUEST)
     }
 
-    // 2. Validar que sea un EPUB (opcional pero recomendado)
-    val contentType = file.contentType
-    if (contentType != "application/epub+zip") {
-      return ResponseEntity("Solo se permiten archivos EPUB", HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-    }
-
     // 3. Procesar el archivo (guardar en disco, DB o S3)
-    // val fileName = file.originalFilename
+
     val fileName =  importEpubService.save(file)
     println("Recibido ebook: $fileName de tamaño ${file.size} bytes")
-    val jsonlFileName = importEpubService.processEpubToJsonl(fileName)
-    println("Recibido jsonl: $jsonlFileName")
+    // val jsonlFileName = importEpubService.processEpubToJsonl(fileName)
+    //println("Recibido jsonl: $jsonlFileName")
     // 2. Definir ruta del JSONL de salida
 
     return ResponseEntity("Ebook '$fileName' subido con éxito", HttpStatus.OK)

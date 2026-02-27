@@ -2,9 +2,11 @@ package sv.com.clip.media.infrastructure.adapter
 
 import org.springframework.stereotype.Repository
 import sv.com.clip.media.domain.model.MediaContent
+import sv.com.clip.media.domain.model.MediaType
 import sv.com.clip.media.domain.repository.MediaContentRepository
 import sv.com.clip.media.infrastructure.persistence.entity.MediaContentEntity
 import sv.com.clip.media.infrastructure.persistence.repository.JpaMediaContentRepository
+import java.util.UUID
 
 @Repository
 class MediaContentAdapter(
@@ -14,5 +16,19 @@ class MediaContentAdapter(
     return jpaRepository
       .save(MediaContentEntity.fromDomain(media))
       .toDomain()
+  }
+
+  override fun findById(
+    id: UUID,
+    requestingUserId: UUID
+  ): MediaContent? {
+    return jpaRepository.findByIdAndUserId(id, requestingUserId)?.toDomain()
+  }
+
+  override fun findAllByUserIdAndMediaType(
+    userId: UUID,
+    mediaType: MediaType
+  ): List<MediaContent> {
+    return jpaRepository.findAllByUserIdAndMediaType(userId, mediaType).map { it.toDomain() }
   }
 }

@@ -16,7 +16,7 @@ interface BookState {
 })
 export class Epub {
   epubService = inject(EpubService);
-  readonly epubName = "645392f4-421d-4177-b9db-2fa724b0d69e_pg64317-images";
+  readonly epubName = "ae116030-fa4c-4c91-8f15-7cc37598e382";
   private offset = 0;
   private readonly LIMIT = 100; // Cuántas frases pedimos por vez
   private readonly UMBRAL_PRECARGA = 20; // Si quedan menos de 20 frases, cargamos más

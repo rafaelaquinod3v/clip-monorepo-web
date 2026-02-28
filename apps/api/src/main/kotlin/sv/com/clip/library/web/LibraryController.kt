@@ -2,6 +2,7 @@ package sv.com.clip.library.web
 
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -10,10 +11,13 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import sv.com.clip.config.CustomUserDetails
 import sv.com.clip.library.api.ImportRawTextSourceMaterialRequest
 import sv.com.clip.library.application.EpubService
 import sv.com.clip.library.application.ImportEpubService
 import sv.com.clip.library.application.SentenceEntry
+import sv.com.clip.media.api.MediaResponse
+import java.security.Principal
 
 @RestController
 @RequestMapping("/library")
@@ -70,5 +74,14 @@ class LibraryController(
     }
   }
 
-
+  @GetMapping("/epub/media-content")
+  fun getEpubMediaContent(
+    @AuthenticationPrincipal user: CustomUserDetails,
+    @RequestParam(defaultValue = "0") offset: Int,
+    @RequestParam(defaultValue = "20") limit: Int,
+    @RequestParam(defaultValue = "desc") sortOrder: String,
+    ): ResponseEntity<List<MediaResponse>> {
+    println("Get epub media content $offset, $limit, $sortOrder")
+    return ResponseEntity.ok(epubService.loadEpubMediaContent(user.id))
+  }
 }

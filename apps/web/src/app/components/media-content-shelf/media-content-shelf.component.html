@@ -1,0 +1,10 @@
+@if(contentType === 'EPUB') {
+    <section class="epub">
+        @for(item of mediaContentShelfItems(); track item.id) {
+            <div class="card">
+                <a [routerLink]="['/epub', item.fileName]">{{ getDisplayTitle(item) }}</a>
+            </div>
+        }
+    </section>
+}
+

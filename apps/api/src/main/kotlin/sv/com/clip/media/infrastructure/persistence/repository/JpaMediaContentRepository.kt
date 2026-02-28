@@ -1,6 +1,7 @@
 package sv.com.clip.media.infrastructure.persistence.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
+import sv.com.clip.media.domain.model.MediaContentMetadata
 import sv.com.clip.media.domain.model.MediaType
 import sv.com.clip.media.infrastructure.persistence.entity.MediaContentEntity
 import java.util.UUID

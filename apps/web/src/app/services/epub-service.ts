@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { MediaContentResponse } from '../models/media-content.model';
 
 export interface SentenceEntry{
   index: number;
@@ -28,5 +29,9 @@ export class EpubService {
   
   loadEpubJsonl(fileName: string, offset: number, limit: number) {
     return this.http.get<SentenceEntry[]>(`${this.apiUrl}/${fileName}/content?offset=${offset}&limit=${limit}`);
+  }
+
+  loadMediaContent(offset: number, limit: number, sortOrder: string) {
+    return this.http.get<MediaContentResponse[]>(`${this.apiUrl}/epub/media-content?offset=${offset}&limit=${limit}&sortOrder=${sortOrder}`);
   }
 }

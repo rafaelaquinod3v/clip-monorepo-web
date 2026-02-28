@@ -1,1 +1,117 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+  /* Primary */
+  --mat-sys-primary: #6750A4;
+  --mat-sys-on-primary: #FFFFFF;
+  --mat-sys-primary-container: #EADDFF;
+  --mat-sys-on-primary-container: #21005D;
+
+  /* Secondary */
+  --mat-sys-secondary: #625B71;
+  --mat-sys-on-secondary: #FFFFFF;
+  --mat-sys-secondary-container: #E8DEF8;
+  --mat-sys-on-secondary-container: #1D192B;
+
+  /* Tertiary */
+  --mat-sys-tertiary: #7D5260;
+  --mat-sys-on-tertiary: #FFFFFF;
+  --mat-sys-tertiary-container: #FFD8E4;
+  --mat-sys-on-tertiary-container: #31111D;
+
+  /* Error */
+  --mat-sys-error: #B3261E;
+  --mat-sys-on-error: #FFFFFF;
+  --mat-sys-error-container: #F9DEDC;
+  --mat-sys-on-error-container: #410E0B;
+
+  /* Surface */
+  --mat-sys-surface: #FEF7FF;
+  --mat-sys-on-surface: #1C1B1F;
+  --mat-sys-surface-variant: #E7E0EC;
+  --mat-sys-on-surface-variant: #49454F;
+  --mat-sys-surface-container: #F3EDF7;
+  --mat-sys-surface-container-high: #ECE6F0;
+  --mat-sys-surface-container-highest: #E6E0E9;
+  --mat-sys-surface-container-low: #F7F2FA;
+  --mat-sys-surface-container-lowest: #FFFFFF;
+
+  /* Background */
+  --mat-sys-background: #FEF7FF;
+  --mat-sys-on-background: #1C1B1F;
+
+  /* Outline */
+  --mat-sys-outline: #79747E;
+  --mat-sys-outline-variant: #CAC4D0;
+
+  /* Shape */
+  --mat-sys-shape-extra-small: 4px;
+  --mat-sys-shape-small: 8px;
+  --mat-sys-shape-medium: 12px;
+  --mat-sys-shape-large: 16px;
+  --mat-sys-shape-extra-large: 28px;
+  --mat-sys-shape-full: 9999px;
+
+  /* Tipografía */
+  --mat-sys-body-large-font: Roboto, sans-serif;
+  --mat-sys-body-large-size: 16px;
+  --mat-sys-body-large-weight: 400;
+  --mat-sys-body-medium-size: 14px;
+  --mat-sys-body-small-size: 12px;
+
+  --mat-sys-title-large-size: 22px;
+  --mat-sys-title-medium-size: 16px;
+  --mat-sys-title-small-size: 14px;
+
+  --mat-sys-headline-large-size: 32px;
+  --mat-sys-headline-medium-size: 28px;
+  --mat-sys-headline-small-size: 24px;
+
+  --mat-sys-display-large-size: 57px;
+  --mat-sys-display-medium-size: 45px;
+  --mat-sys-display-small-size: 36px;
+
+  --mat-sys-label-large-size: 14px;
+  --mat-sys-label-medium-size: 12px;
+  --mat-sys-label-small-size: 11px;
+
+    --mat-sys-level0: none;
+    --mat-sys-level1: 0px 1px 2px rgba(0,0,0,0.3), 0px 1px 3px 1px rgba(0,0,0,0.15);
+    --mat-sys-level2: 0px 1px 2px rgba(0,0,0,0.3), 0px 2px 6px 2px rgba(0,0,0,0.15);
+    --mat-sys-level3: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px rgba(0,0,0,0.3);
+    --mat-sys-level4: 0px 6px 10px 4px rgba(0,0,0,0.15), 0px 2px 3px rgba(0,0,0,0.3);
+    --mat-sys-level5: 0px 8px 12px 6px rgba(0,0,0,0.15), 0px 4px 4px rgba(0,0,0,0.3);
+
+    --mat-sys-body-large-font: 'Atkinson Hyperlegible', sans-serif;
+    font-family: 'Atkinson Hyperlegible', sans-serif;
+    font-size: 16px; /* mínimo recomendado para baja visión */
+    line-height: 1.5;
+}
+
+
+.dark-theme {
+  --mat-sys-primary: #D0BCFF;
+  --mat-sys-on-primary: #381E72;
+  --mat-sys-primary-container: #4F378B;
+  --mat-sys-on-primary-container: #EADDFF;
+
+  --mat-sys-secondary: #CCC2DC;
+  --mat-sys-on-secondary: #332D41;
+  --mat-sys-secondary-container: #4A4458;
+  --mat-sys-on-secondary-container: #E8DEF8;
+
+  --mat-sys-surface: #141218;
+  --mat-sys-on-surface: #E6E0E9;
+  --mat-sys-surface-variant: #49454F;
+  --mat-sys-on-surface-variant: #CAC4D0;
+  --mat-sys-surface-container: #211F26;
+  --mat-sys-surface-container-high: #2B2930;
+  --mat-sys-surface-container-highest: #36343B;
+  --mat-sys-surface-container-low: #1D1B20;
+  --mat-sys-surface-container-lowest: #0F0D13;
+
+  --mat-sys-background: #141218;
+  --mat-sys-on-background: #E6E0E9;
+
+  --mat-sys-outline: #938F99;
+  --mat-sys-outline-variant: #49454F;
+}

@@ -20,7 +20,7 @@ export const appRoutes: Route[] = [
         path: 'lector', component: Lector, canActivate: [authGuard]
     },
     {
-        path: 'epub', component: Epub, canActivate: [authGuard]
+        path: 'epub/:fileName', component: Epub, canActivate: [authGuard]
     },
     {
         path: '', redirectTo: '/login', pathMatch: 'full'

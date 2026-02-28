@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { Reader } from '../../components/reader/reader';
-import { Dictionary } from '../../components/dictionary/dictionary';
+import { MediaContentShelfComponent } from '../../components/media-content-shelf/media-content-shelf.component';
 
 @Component({
   selector: 'app-library',
-  imports: [Reader, Dictionary],
+  imports: [MediaContentShelfComponent],
   templateUrl: './library.html',
   styleUrl: './library.css',
 })

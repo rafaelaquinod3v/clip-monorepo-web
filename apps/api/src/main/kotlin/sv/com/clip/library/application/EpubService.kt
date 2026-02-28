@@ -4,10 +4,16 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.beans.factory.annotation.Value
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.springframework.stereotype.Service
+import sv.com.clip.media.api.MediaApi
+import sv.com.clip.media.api.MediaResponse
 import java.nio.file.Paths
+import java.util.UUID
 
 @Service
-class EpubService(@Value("\${storage.location}") private val storageLocation: String) {
+class EpubService(
+  @Value("\${storage.location}") private val storageLocation: String,
+  private val media: MediaApi,
+  ) {
 
   private val root = Paths.get(storageLocation)
   private val mapper = jacksonObjectMapper()
@@ -21,5 +27,9 @@ class EpubService(@Value("\${storage.location}") private val storageLocation: St
         mapper.readValue<SentenceEntry>(line)
       }.toList()
     }
+  }
+
+  fun loadEpubMediaContent(userId: UUID) : List<MediaResponse> {
+    return media.findAllByUserIdAndMediaType(userId, "EPUB")
   }
 }

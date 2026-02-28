@@ -18,7 +18,11 @@ class MediaContentAdapter(
       .toDomain()
   }
 
-  override fun findById(
+  override fun findById(id: UUID): MediaContent? {
+    return jpaRepository.findById(id).get().toDomain()
+  }
+
+  override fun findByIdAndUserId(
     id: UUID,
     requestingUserId: UUID
   ): MediaContent? {

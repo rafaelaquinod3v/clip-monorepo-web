@@ -1,6 +1,7 @@
-import { Component, ElementRef, HostListener, inject, signal, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { EpubService, SentenceEntry } from '../../services/epub-service';
 import { debounceTime, Subject } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 
 interface BookState {
   currentPageStart: number;
@@ -14,9 +15,11 @@ interface BookState {
   templateUrl: './epub.html',
   styleUrl: './epub.css',
 })
-export class Epub {
+export class Epub implements OnInit {
   epubService = inject(EpubService);
+  private route = inject(ActivatedRoute);
   readonly epubName = "ae116030-fa4c-4c91-8f15-7cc37598e382";
+  fileName: string | null = '';
   private offset = 0;
   private readonly LIMIT = 100; // Cuántas frases pedimos por vez
   private readonly UMBRAL_PRECARGA = 20; // Si quedan menos de 20 frases, cargamos más
@@ -42,6 +45,12 @@ export class Epub {
       this.recalculatePage();
     });
   }
+  
+  ngOnInit(): void {
+    this.fileName = this.route.snapshot.paramMap.get('fileName');
+    this.loadEpub();
+  }
+
   // Este decorador detecta cambios de tamaño y rotación de móvil
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
@@ -80,7 +89,7 @@ export class Epub {
 
   loadEpub() {
     // 1. Intentar recuperar estado previo
-    const saved = localStorage.getItem(`book_progress_${this.epubName}`);
+    const saved = localStorage.getItem(`book_progress_${this.fileName}`);
     
     if (saved) {
       const state: BookState = JSON.parse(saved);
@@ -175,7 +184,7 @@ checkFit(frases: SentenceEntry[]): number {
     this.isLoading = true;
     this.offset += this.LIMIT; // Aumentamos el offset para la siguiente tanda
 
-    this.epubService.loadEpubJsonl(this.epubName, this.offset, this.LIMIT)
+    this.epubService.loadEpubJsonl(this.fileName? this.fileName : this.epubName, this.offset, this.LIMIT)
       .subscribe({
         next: (newPhrases: SentenceEntry[]) => {
           // Unimos las frases nuevas a la lista maestra
@@ -196,7 +205,7 @@ checkFit(frases: SentenceEntry[]): number {
       offset: this.offset
     };
     // Guardamos usando el nombre del libro como llave única
-    localStorage.setItem(`book_progress_${this.epubName}`, JSON.stringify(state));
+    localStorage.setItem(`book_progress_${this.fileName}`, JSON.stringify(state));
   }
 
   private fetchPhrases() {
@@ -204,7 +213,7 @@ checkFit(frases: SentenceEntry[]): number {
     // Cargamos desde 0 hasta el offset actual + LIMIT para tener todo el historial disponible
     const totalToFetch = this.offset + this.LIMIT;
     
-    this.epubService.loadEpubJsonl(this.epubName, 0, totalToFetch)
+    this.epubService.loadEpubJsonl(this.fileName? this.fileName : this.epubName, 0, totalToFetch)
       .subscribe((response) => {
         this.allPhrases = response;
         this.renderCurrentPage();

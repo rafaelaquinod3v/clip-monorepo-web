@@ -1,6 +1,9 @@
 package sv.com.clip.config
 
 import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.JwtException
+import io.jsonwebtoken.MalformedJwtException
+import io.jsonwebtoken.security.SignatureException
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -47,10 +50,12 @@ class JwtFilter(private val jwtService: JwtService) : OncePerRequestFilter() {
 
       filterChain.doFilter(request, response)
     } catch (e: ExpiredJwtException) {
-      // CAPTURAMOS EL TOKEN VENCIDO
       handleAuthenticationError(response, "Token has expired", HttpServletResponse.SC_UNAUTHORIZED)
-    } catch (e: Exception) {
-      // CUALQUIER OTRO ERROR DE AUTH
+    } catch (e: SignatureException) {
+      handleAuthenticationError(response, "Invalid token signature", HttpServletResponse.SC_FORBIDDEN)
+    } catch (e: MalformedJwtException) {
+      handleAuthenticationError(response, "Malformed token", HttpServletResponse.SC_FORBIDDEN)
+    } catch (e: JwtException) {
       handleAuthenticationError(response, "Invalid token", HttpServletResponse.SC_FORBIDDEN)
     }
   }

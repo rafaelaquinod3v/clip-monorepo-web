@@ -32,4 +32,5 @@ data class MediaContent(
   val mimeType: String,
   val mediaType: MediaType,
   val uploadedAt: LocalDateTime = LocalDateTime.now(),
+  var metadata: MediaContentMetadata? = null,
 ) {}

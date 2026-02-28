@@ -1,0 +1,20 @@
+
+.epub {
+    display: flex;
+    flex-wrap: wrap;  /* para que pasen a la siguiente línea si no caben */
+    gap: 1rem;
+}
+
+.card {
+    background-color: var(--mat-sys-surface-container-low);
+    padding: 1rem;
+    box-shadow: var(--mat-sys-level1); 
+    border-radius: var(--mat-sys-shape-medium);  
+    text-align: center;
+    width: 150px;  /* o el tamaño que quieras */
+}
+
+.card a {
+    text-decoration: none;
+    color: var(--mat-sys-primary);
+}

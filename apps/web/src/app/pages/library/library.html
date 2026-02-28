@@ -1,5 +1,7 @@
-<div id="library-container">
-    <!-- <app-reader></app-reader> -->
-<!--     
-    <app-dictionary></app-dictionary> -->
-</div>
+<h1>Library</h1>
+
+<main class="library">
+    <app-media-content-shelf contentType="EPUB" [limit]="5"></app-media-content-shelf>
+    <hr>
+    <app-media-content-shelf contentType="PDF" [limit]="5"></app-media-content-shelf>
+</main>

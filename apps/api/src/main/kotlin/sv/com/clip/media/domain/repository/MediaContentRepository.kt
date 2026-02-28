@@ -6,6 +6,7 @@ import java.util.UUID
 
 interface MediaContentRepository {
   fun save(media: MediaContent) : MediaContent
-  fun findById(id : UUID, requestingUserId: UUID) : MediaContent?
+  fun findById(id: UUID) : MediaContent?
+  fun findByIdAndUserId(id : UUID, requestingUserId: UUID) : MediaContent?
   fun findAllByUserIdAndMediaType(userId: UUID, mediaType: MediaType) : List<MediaContent>
 }

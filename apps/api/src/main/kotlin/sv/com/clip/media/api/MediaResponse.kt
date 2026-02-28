@@ -11,4 +11,5 @@ data class MediaResponse(
   val mimeType: String,
   val mediaType: String,
   val uploadedAt: LocalDateTime,
+  val metadata: MediaContentMetadataDto?
 )

@@ -5,11 +5,11 @@ import jakarta.annotation.PostConstruct
 import nl.siegmann.epublib.domain.TOCReference
 import org.jsoup.Jsoup
 import nl.siegmann.epublib.epub.EpubReader
-import org.apache.tika.Tika
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import sv.com.clip.media.api.MediaApi
+import sv.com.clip.media.api.MediaContentMetadataRequest
 import sv.com.clip.storage.api.StorageApi
 import sv.com.clip.text.api.TextProcessorExternal
 import java.io.FileOutputStream
@@ -54,8 +54,9 @@ class ImportEpubService(
       val originalFilename = file.originalFilename
 
       val fileName = storage.store(bytes)
-      media.save(bytes, fileName, originalFilename)
-      processEpubToJsonl(fileName)
+      val metadata = processEpubToJsonl(fileName)
+      media.save(bytes, fileName, originalFilename, metadata)
+
       return fileName
   }
 
@@ -209,7 +210,7 @@ private val BANNED_TITLES = setOf(
     Regex("""nav""", RegexOption.IGNORE_CASE),
   )
 
-  fun processEpubToJsonl(fileName: String) {
+  fun processEpubToJsonl(fileName: String) : MediaContentMetadataRequest {
     val epubPath = root.resolve(fileName)
     val epubFile = epubPath.toFile()
     val jsonlName = "$fileName.jsonl"
@@ -217,6 +218,20 @@ private val BANNED_TITLES = setOf(
     jsonlFile.parentFile.mkdirs()
 
     val book = EpubReader().readEpub(epubFile.inputStream())
+
+    val title = book.title?.takeIf { it.isNotBlank() } ?: ""
+    val author = book.metadata.authors.firstOrNull()?.let {
+      listOfNotNull(
+        it.firstname?.takeIf { n -> n.isNotBlank() },
+        it.lastname?.takeIf { n -> n.isNotBlank() }
+      ).joinToString(" ")
+    }?.takeIf { it.isNotBlank() } ?: ""
+
+/*    media.updateMetadata(mediaId, MediaContentMetadataRequest(
+      "EPUB",
+      mapOf("title" to title, "author" to author)
+    ))*/
+
     var globalIndex = 0
     val spine = book.spine.spineReferences
 
@@ -287,6 +302,11 @@ private val BANNED_TITLES = setOf(
         }
       }
     }
+
+    return MediaContentMetadataRequest(
+      "EPUB",
+      mapOf("title" to title, "author" to author),
+    )
   }
 
   // Devuelve true si el bloque tiene demasiados indicios de copyright
@@ -303,5 +323,7 @@ private val BANNED_TITLES = setOf(
     }
     return null
   }
+
+
 
 }

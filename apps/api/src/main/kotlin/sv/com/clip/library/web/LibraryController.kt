@@ -78,7 +78,7 @@ class LibraryController(
   fun getEpubMediaContent(
     @AuthenticationPrincipal user: CustomUserDetails,
     @RequestParam(defaultValue = "0") offset: Int,
-    @RequestParam(defaultValue = "20") limit: Int,
+    @RequestParam(defaultValue = "10") limit: Int,
     @RequestParam(defaultValue = "desc") sortOrder: String,
     ): ResponseEntity<List<MediaResponse>> {
     println("Get epub media content $offset, $limit, $sortOrder")

@@ -10,8 +10,7 @@
 .reader-style {
   width: 90vw;   /* O el tamaño que decidieras */
   height: 70vh;
-  padding: 20px;
-  font-family: 'Georgia', serif;
+  padding: 2rem;
   font-size: 18px;
   line-height: 1.6;
   overflow: hidden; /* Evita scrolls durante el cálculo */

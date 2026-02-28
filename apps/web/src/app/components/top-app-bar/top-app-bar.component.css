@@ -1,0 +1,75 @@
+/* Core Top App Bar Styles */
+.top-app-bar {
+  display: flex;
+  align-items: center;
+  height: 64px; /* Standard M3 Small Top App Bar height */
+  padding: 0 16px;
+  background-color: var(--mat-sys-surface-container);
+  color: var(--mat-sys-on-surface);
+  box-shadow: var(--mat-sys-level2);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-sizing: border-box;
+}
+
+/* Title Styling */
+.top-app-bar-title {
+  flex: 1;
+  margin-left: 16px;
+  font-family: var(--mat-sys-body-large-font);
+  font-size: var(--mat-sys-title-large-size);
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Action Buttons Base */
+.icon-btn {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--mat-sys-shape-full);
+  color: var(--mat-sys-on-surface-variant);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.icon-btn:hover {
+  background-color: var(--mat-sys-surface-variant);
+}
+
+.icon-btn:active {
+  background-color: var(--mat-sys-outline-variant);
+}
+
+/* Simple CSS Icons (Placeholders for Material Icons) */
+.menu-icon {
+  width: 18px;
+  height: 2px;
+  background: currentColor;
+  position: relative;
+}
+.menu-icon::before, .menu-icon::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 2px;
+  background: currentColor;
+  left: 0;
+}
+.menu-icon::before { top: -6px; }
+.menu-icon::after { bottom: -6px; }
+
+.dot-icon {
+  width: 4px;
+  height: 4px;
+  background: currentColor;
+  border-radius: 50%;
+  box-shadow: 0 6px 0 currentColor, 0 -6px 0 currentColor;
+}

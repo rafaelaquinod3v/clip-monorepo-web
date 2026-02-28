@@ -20,7 +20,7 @@ export class Login {
     try {
       this.auth.login(credentials).subscribe({
         next: (res) => {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/library']);
         },
         error: (err) => {
           console.log(err);

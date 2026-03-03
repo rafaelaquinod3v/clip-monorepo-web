@@ -1,14 +1,13 @@
 package sv.com.clip.media.application.services
 
+import nl.siegmann.epublib.domain.Author
+import nl.siegmann.epublib.epub.EpubReader
+import org.apache.pdfbox.Loader
 import org.apache.tika.Tika
 import org.apache.tika.mime.MimeTypes
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
-import sv.com.clip.config.CustomUserDetails
 import sv.com.clip.media.api.MediaApi
 import sv.com.clip.media.api.MediaContentMetadataDto
-import sv.com.clip.media.api.MediaContentMetadataRequest
 import sv.com.clip.media.api.MediaResponse
 import sv.com.clip.media.domain.model.AudioMediaContentMetadata
 import sv.com.clip.media.domain.model.EpubMediaContentMetadata
@@ -18,6 +17,9 @@ import sv.com.clip.media.domain.model.MediaType
 import sv.com.clip.media.domain.model.PdfMediaContentMetadata
 import sv.com.clip.media.domain.model.VideoMediaContentMetadata
 import sv.com.clip.media.infrastructure.adapter.MediaContentAdapter
+import sv.com.clip.shared.pagination.PageQuery
+import ws.schild.jave.MultimediaObject
+import java.io.File
 import java.util.UUID
 
 @Service
@@ -26,15 +28,21 @@ class MediaService(
 ) : MediaApi {
 
   private val tika = Tika()
-  override fun save(bytes: ByteArray, fileName: String, originalFileName: String?, metadata: MediaContentMetadataRequest?): UUID {
 
-    val mimeType = tika.detect(bytes)  // desde bytes, no inputStream
+  private fun getMediaType(bytes: ByteArray): MediaType = buildMediaType(tika.detect(bytes))
+
+  override fun save(
+    userId: UUID,
+    bytes: ByteArray,
+    fileName: String,
+    originalFileName: String?
+  ): UUID {
+
+    val mimeType = tika.detect(bytes)
     val extension = MimeTypes.getDefaultMimeTypes().forName(mimeType).extension
     val mediaType = buildMediaType(mimeType)
-    val domainMetadata = metadata?.let { buildMediaContentMetadata(it) }
 
-    val userId = (SecurityContextHolder.getContext().authentication?.principal as? CustomUserDetails)?.id
-      ?: throw AuthenticationCredentialsNotFoundException("Usuario no autenticado")
+    val domainMetadata = extractMetadata(bytes, mediaType)
 
     val originalFileName = originalFileName?.takeIf { it.isNotBlank() }
       ?: "$fileName$extension"
@@ -43,7 +51,7 @@ class MediaService(
       userId = userId,
       fileName = fileName,
       originalFileName = originalFileName,
-      fileSize = bytes.size.toLong(),  // desde bytes
+      fileSize = bytes.size.toLong(),
       mimeType = mimeType,
       mediaType = mediaType,
       metadata = domainMetadata
@@ -71,7 +79,7 @@ class MediaService(
 
   override fun findAllByUserIdAndMediaType(
     userId: UUID,
-    mediaType: String
+    mediaType: String,
   ): List<MediaResponse> {
     return adapter.findAllByUserIdAndMediaType(userId, MediaType.valueOf(mediaType)).map { media ->
 
@@ -90,22 +98,108 @@ class MediaService(
     }
   }
 
-  private fun buildMediaContentMetadata(metadata: MediaContentMetadataRequest): MediaContentMetadata {
-    fun Map<String, Any?>.getString(key: String): String =
-      this[key]?.toString()?.takeIf { it.isNotBlank() } ?: ""
+  override fun findAllByUserIdAndMediaTypePageable(
+    userId: UUID,
+    mediaType: String,
+    pageQuery: PageQuery
+  ): List<MediaResponse> {
+    return adapter.findAllByUserIdAndMediaTypePageable(userId, MediaType.valueOf(mediaType), pageQuery).map { media ->
 
-    return when (metadata.contentType) {
-      "EPUB" -> EpubMediaContentMetadata(
-        title = metadata.values.getString("title"),
-        author = metadata.values.getString("author"),
+      val metadata = buildMediaContentMetadataDto(media)
+
+      MediaResponse(
+        media.id.value,
+        media.fileName,
+        media.originalFileName,
+        media.fileSize,
+        media.mimeType,
+        media.mediaType.name,
+        media.uploadedAt,
+        metadata
       )
-      "PDF" -> PdfMediaContentMetadata(
-        title = metadata.values.getString("title"),
-        author = metadata.values.getString("author"),
-      )
-      else -> throw IllegalArgumentException("Tipo no soportado: ${metadata.contentType}")
     }
   }
+
+  override fun findAllByUserIdAndMediaTypeInPageable(
+    userId: UUID,
+    mediaTypes: Collection<String>,
+    pageQuery: PageQuery
+  ): List<MediaResponse> {
+    return adapter.findAllByUserIdAndMediaTypeInPageable(userId, mediaTypes.map { MediaType.valueOf(it) }, pageQuery).map { media ->
+
+      val metadata = buildMediaContentMetadataDto(media)
+
+      MediaResponse(
+        media.id.value,
+        media.fileName,
+        media.originalFileName,
+        media.fileSize,
+        media.mimeType,
+        media.mediaType.name,
+        media.uploadedAt,
+        metadata
+      )
+    }
+  }
+
+  private fun extractMetadata(bytes: ByteArray, mediaType: MediaType): MediaContentMetadata? {
+    return when (mediaType) {
+      MediaType.EPUB -> extractEpubMetadata(bytes)
+      MediaType.PDF -> extractPdfMetadata(bytes)
+      MediaType.AUDIO -> extractAudioMetadata(bytes)
+      MediaType.VIDEO -> extractVideoMetadata(bytes)
+    }
+  }
+
+  private fun extractEpubMetadata(bytes: ByteArray): EpubMediaContentMetadata {
+    val book = EpubReader().readEpub(bytes.inputStream())
+    val title = book.title.orEmpty().trim()
+    val author = book.metadata.authors.firstOrNull()?.fullName().orEmpty()
+    return EpubMediaContentMetadata(title, author)
+  }
+
+  private fun extractPdfMetadata(bytes: ByteArray): PdfMediaContentMetadata {
+    Loader.loadPDF(bytes).use { document ->
+      val info = document.documentInformation
+      val title = info.title.orEmpty().trim()
+      val author = info.author.orEmpty().trim()
+      return PdfMediaContentMetadata(title, author)
+    }
+  }
+
+  private fun extractAudioMetadata(bytes: ByteArray): AudioMediaContentMetadata {
+    val tempFile = File.createTempFile("audio_", ".tmp").also { it.deleteOnExit() }
+    return try {
+      tempFile.writeBytes(bytes)
+      val info = MultimediaObject(tempFile).info
+      AudioMediaContentMetadata(
+        duration = info.duration,
+        bitrate  = info.audio.bitRate,
+      )
+    } finally {
+      tempFile.delete()
+    }
+  }
+
+
+  private fun extractVideoMetadata(bytes: ByteArray): VideoMediaContentMetadata {
+    val tempFile = File.createTempFile("video_", ".tmp").also { it.deleteOnExit() }
+    return try {
+      tempFile.writeBytes(bytes)
+      val info = MultimediaObject(tempFile).info
+      VideoMediaContentMetadata(
+        duration = info.duration,
+      )
+    } finally {
+      tempFile.delete()
+    }
+  }
+
+  private fun Author.fullName(): String =
+    listOfNotNull(
+      firstname?.takeIf { it.isNotBlank() },
+      lastname?.takeIf { it.isNotBlank() }
+    ).joinToString(" ")
 
   private fun buildMediaType(mimeType: String): MediaType {
     return when {

@@ -1,65 +1,36 @@
-package sv.com.clip.library.application
+package sv.com.clip.library.application.services
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import jakarta.annotation.PostConstruct
 import nl.siegmann.epublib.domain.TOCReference
-import org.jsoup.Jsoup
 import nl.siegmann.epublib.epub.EpubReader
+import org.jsoup.Jsoup
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import sv.com.clip.media.api.MediaApi
-import sv.com.clip.media.api.MediaContentMetadataRequest
+import sv.com.clip.library.application.SentenceEntry
+import sv.com.clip.shared.tts.cleanForTTS
 import sv.com.clip.storage.api.StorageApi
 import sv.com.clip.text.api.TextProcessorExternal
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 
-
 @Service
 class ImportEpubService(
-  @Value("\${storage.location}") private val storageLocation: String,
-  private val textProcessorService: TextProcessorExternal,
-  private val storage: StorageApi,
-  private val media: MediaApi,
+    @Value("\${storage.location}") private val storageLocation: String,
+    private val textProcessorService: TextProcessorExternal,
+    private val storage: StorageApi,
 ) {
 
   private val root = Paths.get(storageLocation)
   private val mapper = jacksonObjectMapper()
-
-  fun String.cleanForTTS(): String {
-    return this
-      // 1. Normalizar comillas elegantes/inclinadas
-      .replace("[\u201C\u201D\u201E\u201F\u2033\u2036]".toRegex(), "\"")
-      // 2. Normalizar apóstrofes
-      .replace("[\u2018\u2019\u201A\u201B\u2032\u2035]".toRegex(), "'")
-      // 3. Reemplazar guiones largos (em-dash) por comas o puntos para mejorar la entonación
-      .replace("\u2014", ", ")
-      // 4. Eliminar caracteres especiales no deseados (opcional)
-      .replace("[#*|]".toRegex(), "")
-      // 5. Normalizar espacios en blanco
-      .replace("\\s+".toRegex(), " ")
-      .trim()
-  }
 
   @PostConstruct
   fun init() {
     // Crea el directorio si no existe al arrancar la app
     Files.createDirectories(root)
   }
-
-  fun save(file: MultipartFile): String {
-      val bytes = file.bytes
-      val originalFilename = file.originalFilename
-
-      val fileName = storage.store(bytes)
-      val metadata = processEpubToJsonl(fileName)
-      media.save(bytes, fileName, originalFilename, metadata)
-
-      return fileName
-  }
-
 
 /*  private val BANNED_TITLES = setOf(
     // Front matter (Inicio)
@@ -210,7 +181,7 @@ private val BANNED_TITLES = setOf(
     Regex("""nav""", RegexOption.IGNORE_CASE),
   )
 
-  fun processEpubToJsonl(fileName: String) : MediaContentMetadataRequest {
+  fun processEpubToJsonl(fileName: String) {
     val epubPath = root.resolve(fileName)
     val epubFile = epubPath.toFile()
     val jsonlName = "$fileName.jsonl"
@@ -218,19 +189,6 @@ private val BANNED_TITLES = setOf(
     jsonlFile.parentFile.mkdirs()
 
     val book = EpubReader().readEpub(epubFile.inputStream())
-
-    val title = book.title?.takeIf { it.isNotBlank() } ?: ""
-    val author = book.metadata.authors.firstOrNull()?.let {
-      listOfNotNull(
-        it.firstname?.takeIf { n -> n.isNotBlank() },
-        it.lastname?.takeIf { n -> n.isNotBlank() }
-      ).joinToString(" ")
-    }?.takeIf { it.isNotBlank() } ?: ""
-
-/*    media.updateMetadata(mediaId, MediaContentMetadataRequest(
-      "EPUB",
-      mapOf("title" to title, "author" to author)
-    ))*/
 
     var globalIndex = 0
     val spine = book.spine.spineReferences
@@ -291,9 +249,9 @@ private val BANNED_TITLES = setOf(
         sentences.forEachIndexed { _, sentence ->
           if (sentence.isNotBlank()) {
             val entry = SentenceEntry(
-              chapterTitle,
-              sentence.trim().cleanForTTS(),
-              globalIndex
+                chapterTitle,
+                sentence.trim().cleanForTTS(),
+                globalIndex
             )
             writer.write(mapper.writeValueAsString(entry))
             writer.newLine()
@@ -302,11 +260,6 @@ private val BANNED_TITLES = setOf(
         }
       }
     }
-
-    return MediaContentMetadataRequest(
-      "EPUB",
-      mapOf("title" to title, "author" to author),
-    )
   }
 
   // Devuelve true si el bloque tiene demasiados indicios de copyright

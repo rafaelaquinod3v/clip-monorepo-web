@@ -14,3 +14,5 @@ export interface MediaContentResponse {
   uploadedAt: string;
   metadata: MediaContentMetadata | null;
 }
+
+export type MediaType = 'PDF' | 'EPUB' | 'VIDEO' | 'AUDIO';

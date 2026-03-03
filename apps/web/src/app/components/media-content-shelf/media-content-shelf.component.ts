@@ -1,6 +1,6 @@
 import { Component, inject, Input, OnInit, signal } from '@angular/core';
 import { EpubService } from '../../services/epub-service';
-import { MediaContentResponse } from '../../models/media-content.model';
+import { MediaContentResponse, MediaType } from '../../models/media-content.model';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -13,26 +13,19 @@ export class MediaContentShelfComponent implements OnInit {
 
   epubService = inject(EpubService);
 
-  @Input({required: true}) contentType!: string;
+  @Input({required: true}) contentTypes!: MediaType[];
   @Input({required: true}) limit = 10;
 
   private offset = 0;
-  private sortOrder = 'desc';
+  private sortOrder = 'DESC';
 
   mediaContentShelfItems = signal<MediaContentResponse[]>([])
 
   ngOnInit(): void {
-    this.epubService.loadMediaContent(this.offset, this.limit, this.sortOrder).subscribe((response) => {
+    this.epubService.loadMediaContent(this.offset, this.limit, "uploadedAt", this.sortOrder, this.contentTypes).subscribe((response) => {
       console.log(response);
       this.mediaContentShelfItems.set(response)
     });
-  }
-
-  getEpubMetadata(item: MediaContentResponse): { title: string; author: string } | null {
-    if (item.metadata?.type === 'EPUB') {
-      return item.metadata.fields as { title: string; author: string };
-    }
-    return null;
   }
 
   getDisplayTitle(item: MediaContentResponse): string {

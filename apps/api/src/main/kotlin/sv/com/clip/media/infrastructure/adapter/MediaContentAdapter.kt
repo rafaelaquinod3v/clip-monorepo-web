@@ -6,6 +6,8 @@ import sv.com.clip.media.domain.model.MediaType
 import sv.com.clip.media.domain.repository.MediaContentRepository
 import sv.com.clip.media.infrastructure.persistence.entity.MediaContentEntity
 import sv.com.clip.media.infrastructure.persistence.repository.JpaMediaContentRepository
+import sv.com.clip.shared.pagination.PageQuery
+import sv.com.clip.shared.pagination.toPageable
 import java.util.UUID
 
 @Repository
@@ -34,5 +36,21 @@ class MediaContentAdapter(
     mediaType: MediaType
   ): List<MediaContent> {
     return jpaRepository.findAllByUserIdAndMediaType(userId, mediaType).map { it.toDomain() }
+  }
+
+  override fun findAllByUserIdAndMediaTypePageable(
+    userId: UUID,
+    mediaType: MediaType,
+    pageQuery: PageQuery
+  ): List<MediaContent> {
+    return jpaRepository.findAllByUserIdAndMediaType(userId, mediaType, pageQuery.toPageable()).map { it.toDomain() }.content
+  }
+
+  override fun findAllByUserIdAndMediaTypeInPageable(
+    userId: UUID,
+    mediaTypes: Collection<MediaType>,
+    pageQuery: PageQuery
+  ): List<MediaContent> {
+    return jpaRepository.findAllByUserIdAndMediaTypeIn(userId, mediaTypes, pageQuery.toPageable()).map { it.toDomain() }.content
   }
 }

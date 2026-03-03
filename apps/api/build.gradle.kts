@@ -80,15 +80,6 @@ dependencies {
 
   // text chop
   implementation("org.apache.opennlp:opennlp-tools:2.3.0")
-
-  // epub
-  //implementation("nl.siegmann.epublib:epublib-core:3.1")
-  implementation("nl.siegmann.epublib:epublib-core:3.1") {
-    // Opcional: Excluir slf4j si entra en conflicto con Spring Boot
-    exclude(group = "org.slf4j")
-  }
-  implementation("org.jsoup:jsoup:1.15.4")
-  implementation("org.apache.commons:commons-compress:1.26.1")
  // implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
 
 
@@ -140,6 +131,15 @@ dependencies {
   implementation("org.apache.lucene:lucene-analysis-common:9.12.1")
   // detect mimeType
   implementation("org.apache.tika:tika-core:2.9.1")
+  // epub
+  implementation("nl.siegmann.epublib:epublib-core:3.1") {
+    // Excluir slf4j: entra en conflicto con Spring Boot
+    exclude(group = "org.slf4j")
+  }
+  implementation("org.jsoup:jsoup:1.15.4")
+  implementation("org.apache.commons:commons-compress:1.26.1")
+  // pdf
+  implementation("org.apache.pdfbox:pdfbox:3.0.3")
   // Ffmpeg
   implementation("ws.schild:jave-core:3.5.0")
   implementation("ws.schild:jave-nativebin-linux64:3.5.0")

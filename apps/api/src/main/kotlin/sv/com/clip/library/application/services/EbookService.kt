@@ -1,18 +1,21 @@
-package sv.com.clip.library.application
+package sv.com.clip.library.application.services
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import org.springframework.beans.factory.annotation.Value
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import sv.com.clip.library.application.SentenceEntry
 import sv.com.clip.media.api.MediaApi
 import sv.com.clip.media.api.MediaResponse
+import sv.com.clip.media.domain.model.MediaType
+import sv.com.clip.shared.pagination.PageQuery
 import java.nio.file.Paths
 import java.util.UUID
 
 @Service
-class EpubService(
-  @Value("\${storage.location}") private val storageLocation: String,
-  private val media: MediaApi,
+class EbookService(
+    @Value("\${storage.location}") private val storageLocation: String,
+    private val media: MediaApi,
   ) {
 
   private val root = Paths.get(storageLocation)
@@ -29,7 +32,7 @@ class EpubService(
     }
   }
 
-  fun loadEpubMediaContent(userId: UUID) : List<MediaResponse> {
-    return media.findAllByUserIdAndMediaType(userId, "EPUB")
+  fun loadEbookMediaContent(userId: UUID, mediaTypes: Collection<String>, pageQuery: PageQuery) : List<MediaResponse> {
+    return media.findAllByUserIdAndMediaTypeInPageable(userId, mediaTypes, pageQuery)
   }
 }

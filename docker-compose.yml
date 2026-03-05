@@ -9,12 +9,12 @@ services:
       resources:
         limits:
           memory: 3G  # Give it enough room to breathe
-    restart: unless-stopped
+    restart: no #unless-stopped
 
   ollama:
     image: ollama/ollama:latest
     container_name: ollama_local
-    restart: unless-stopped
+    restart: no #unless-stopped
     ports:
       - "11434:11434"
     volumes:
@@ -23,6 +23,7 @@ services:
   postgres:
     image: pgvector/pgvector:pg15  # O la versión más reciente disponible en 2026
     container_name: postgres_local
+    restart: no #unless-stopped
     environment:
       POSTGRES_DB: clip
       POSTGRES_USER: clip_user
@@ -34,6 +35,7 @@ services:
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin_local
+    restart: no #unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin

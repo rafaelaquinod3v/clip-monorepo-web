@@ -2,6 +2,7 @@ package sv.com.clip.library.application.listeners
 
 import org.springframework.modulith.events.ApplicationModuleListener
 import org.springframework.stereotype.Component
+import sv.com.clip.library.application.services.ImportAudioService
 import sv.com.clip.library.application.services.ImportEpubService
 import sv.com.clip.library.application.services.ImportPdfService
 import sv.com.clip.media.api.MediaApi
@@ -12,6 +13,7 @@ class MediaContentUploadedEventListener(
   private val mediaApi: MediaApi,
   private val importEpubService: ImportEpubService,
   private val importPdfService: ImportPdfService,
+  private val importAudioService: ImportAudioService,
 ) {
 
   @ApplicationModuleListener
@@ -29,7 +31,7 @@ class MediaContentUploadedEventListener(
       }
       "AUDIO" -> {
         println("Audio mediaResponse: $mediaResponse")
-        println("Audio generate jsonl transcription")
+        importAudioService.processAudioGenerateSRT(mediaResponse.fileName)
       }
       "VIDEO" -> {
         println("Video mediaResponse: $mediaResponse")

@@ -13,7 +13,7 @@ export class MediaContentShelfComponent implements OnInit {
 
   epubService = inject(EpubService);
 
-  @Input({required: true}) contentTypes!: MediaType[];
+  @Input({required: true}) mediaTypes!: MediaType[];
   @Input({required: true}) limit = 10;
 
   private offset = 0;
@@ -22,7 +22,7 @@ export class MediaContentShelfComponent implements OnInit {
   mediaContentShelfItems = signal<MediaContentResponse[]>([])
 
   ngOnInit(): void {
-    this.epubService.loadMediaContent(this.offset, this.limit, "uploadedAt", this.sortOrder, this.contentTypes).subscribe((response) => {
+    this.epubService.loadMediaContent(this.offset, this.limit, "uploadedAt", this.sortOrder, this.mediaTypes).subscribe((response) => {
       console.log(response);
       this.mediaContentShelfItems.set(response)
     });

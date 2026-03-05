@@ -1,9 +1,9 @@
 <h1>Library</h1>
 
 <main class="library">
-    <app-media-content-shelf [contentTypes]="ebookAllowedTypes" [limit]="4"></app-media-content-shelf>
+    <app-media-content-shelf [mediaTypes]="['EPUB', 'PDF']" [limit]="4"></app-media-content-shelf>
     <hr>
-    <app-media-content-shelf [contentTypes]="['AUDIO']" [limit]="4"></app-media-content-shelf>
+    <app-media-content-shelf [mediaTypes]="['AUDIO']" [limit]="4"></app-media-content-shelf>
     <hr>
-    <app-media-content-shelf [contentTypes]="['VIDEO']" [limit]="4"></app-media-content-shelf>
+    <app-media-content-shelf [mediaTypes]="['VIDEO']" [limit]="4"></app-media-content-shelf>
 </main>

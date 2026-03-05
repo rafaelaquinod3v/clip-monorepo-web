@@ -1,7 +1,7 @@
-@if(contentTypes.includes('EPUB') || contentTypes.includes('PDF')) {
+@if(mediaTypes.includes('EPUB') || mediaTypes.includes('PDF')) {
     <section class="media">
     @for(item of mediaContentShelfItems(); track item.id) {
-        @if(contentTypes.includes(item.mediaType)) {
+        @if(mediaTypes.includes(item.mediaType)) {
             <div class="card">
                 <a [routerLink]="['/library/' + item.mediaType.toLowerCase(), item.fileName]">
                     {{ getDisplayTitle(item) }}

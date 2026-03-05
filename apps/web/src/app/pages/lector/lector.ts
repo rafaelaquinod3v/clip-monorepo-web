@@ -16,6 +16,21 @@ export class Lector {
   ebookService = inject(EpubService);
 
   onFileSelected(event: any) {
+    const input = event.target as HTMLInputElement;
+    const allowedTypes = ['.epub', '.pdf', '.mp3'];
+
+    if (input.files) {
+      Array.from(input.files).forEach(file => {
+        const extension = '.' + file.name.split('.').pop()?.toLowerCase();
+        
+        if (allowedTypes.includes(extension)) {
+          console.log('Archivo válido:', file.name);
+          // procesar archivo...
+        } else {
+          console.warn('Tipo no permitido:', file.name);
+        }
+      });
+    }
     this.selectedFile = event.target.files[0]; // Captura el primer archivo
   }
 

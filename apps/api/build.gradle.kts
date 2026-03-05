@@ -5,14 +5,13 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
 
 plugins {
   // Sincroniza todas las versiones de Kotlin a la 2.2.21
-  kotlin("jvm") version "2.2.21"
-  kotlin("plugin.spring") version "2.2.21"
-  kotlin("plugin.jpa") version "2.2.21" // Actualizado de 1.9.22
+  kotlin("jvm")
+  kotlin("plugin.spring")
+  kotlin("plugin.jpa")
 
-  id("org.springframework.boot") version "4.0.1"
-  id("io.spring.dependency-management") version "1.1.7"
-  id("org.flywaydb.flyway") version "11.20.1"
-  //id("org.graalvm.python") version "25.0.2"
+  id("org.springframework.boot")
+  id("io.spring.dependency-management")
+  id("org.flywaydb.flyway")
 }
 // These are specific to the GraalVM Python Plugin
 /*graalPy {

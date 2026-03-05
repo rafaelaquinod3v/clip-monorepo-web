@@ -49,4 +49,20 @@ class StorageService(properties: StorageProperties) : StorageApi {
     Files.write(path, bytes)
     return fileName
   }
+
+  override fun load(fileName: String): ByteArray? {
+    return try {
+      val filePath = rootLocation.resolve(Paths.get(fileName)).normalize()
+      if (!filePath.startsWith(rootLocation.toAbsolutePath())) {
+        throw SecurityException("Path fuera del directorio permitido")
+      }
+      if(Files.exists(filePath) && Files.isReadable(filePath)) {
+        Files.readAllBytes(filePath)
+      }else {
+        null
+      }
+    } catch (e: Exception) {
+      throw RuntimeException("No se pudo leer el archivo: ${e.message}")
+    }
+  }
 }

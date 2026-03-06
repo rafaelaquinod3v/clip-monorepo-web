@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { PdfComponent } from './pdf.component';
+import { EbookPageComponent } from './ebook-page.component';
 
-describe('PdfComponent', () => {
-  let component: PdfComponent;
-  let fixture: ComponentFixture<PdfComponent>;
+describe('EbookPageComponent', () => {
+  let component: EbookPageComponent;
+  let fixture: ComponentFixture<EbookPageComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PdfComponent],
+      imports: [EbookPageComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(PdfComponent);
+    fixture = TestBed.createComponent(EbookPageComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

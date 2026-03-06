@@ -3,7 +3,7 @@
     @for(item of mediaContentShelfItems(); track item.id) {
         @if(mediaTypes.includes(item.mediaType)) {
             <div class="card">
-                <a [routerLink]="['/library/' + item.mediaType.toLowerCase(), item.fileName]">
+                <a [routerLink]="['/library/ebook', item.id]">
                     {{ getDisplayTitle(item) }}
                 </a>
             </div>

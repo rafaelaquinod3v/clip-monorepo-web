@@ -17,7 +17,7 @@ export class Lector {
 
   onFileSelected(event: any) {
     const input = event.target as HTMLInputElement;
-    const allowedTypes = ['.epub', '.pdf', '.mp3'];
+    const allowedTypes = ['.epub', '.pdf'];
 
     if (input.files) {
       Array.from(input.files).forEach(file => {

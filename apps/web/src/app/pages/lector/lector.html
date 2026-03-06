@@ -18,5 +18,5 @@
 
 <hr>
 <h2>upload</h2>
-<input type="file" (change)="onFileSelected($event)" accept=".epub,.pdf,.mp3,application/epub+zip,application/pdf,audio/mpeg">
+<input type="file" (change)="onFileSelected($event)" accept=".epub,.pdf,application/epub+zip,application/pdf">
 <button (click)="onUpload()" [disabled]="!selectedFile">Subir Ebook</button>

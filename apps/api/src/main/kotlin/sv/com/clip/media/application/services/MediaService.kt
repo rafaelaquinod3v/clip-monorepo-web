@@ -9,17 +9,13 @@ import org.springframework.stereotype.Service
 import sv.com.clip.media.api.MediaApi
 import sv.com.clip.media.api.MediaContentMetadataDto
 import sv.com.clip.media.api.MediaResponse
-import sv.com.clip.media.domain.model.AudioMediaContentMetadata
 import sv.com.clip.media.domain.model.EpubMediaContentMetadata
 import sv.com.clip.media.domain.model.MediaContent
 import sv.com.clip.media.domain.model.MediaContentMetadata
 import sv.com.clip.media.domain.model.MediaType
 import sv.com.clip.media.domain.model.PdfMediaContentMetadata
-import sv.com.clip.media.domain.model.VideoMediaContentMetadata
 import sv.com.clip.media.infrastructure.adapter.MediaContentAdapter
 import sv.com.clip.shared.pagination.PageQuery
-import ws.schild.jave.MultimediaObject
-import java.io.File
 import java.util.UUID
 
 @Service
@@ -146,8 +142,7 @@ class MediaService(
     return when (mediaType) {
       MediaType.EPUB -> extractEpubMetadata(bytes)
       MediaType.PDF -> extractPdfMetadata(bytes)
-      MediaType.AUDIO -> extractAudioMetadata(bytes)
-      MediaType.VIDEO -> extractVideoMetadata(bytes)
+      else -> throw IllegalArgumentException("Unsupported media type")
     }
   }
 
@@ -167,34 +162,6 @@ class MediaService(
     }
   }
 
-  private fun extractAudioMetadata(bytes: ByteArray): AudioMediaContentMetadata {
-    val tempFile = File.createTempFile("audio_", ".tmp").also { it.deleteOnExit() }
-    return try {
-      tempFile.writeBytes(bytes)
-      val info = MultimediaObject(tempFile).info
-      AudioMediaContentMetadata(
-        duration = info.duration,
-        bitrate  = info.audio.bitRate,
-      )
-    } finally {
-      tempFile.delete()
-    }
-  }
-
-
-  private fun extractVideoMetadata(bytes: ByteArray): VideoMediaContentMetadata {
-    val tempFile = File.createTempFile("video_", ".tmp").also { it.deleteOnExit() }
-    return try {
-      tempFile.writeBytes(bytes)
-      val info = MultimediaObject(tempFile).info
-      VideoMediaContentMetadata(
-        duration = info.duration,
-      )
-    } finally {
-      tempFile.delete()
-    }
-  }
-
   private fun Author.fullName(): String =
     listOfNotNull(
       firstname?.takeIf { it.isNotBlank() },
@@ -205,8 +172,6 @@ class MediaService(
     return when {
       mimeType == "application/epub+zip" -> MediaType.EPUB
       mimeType == "application/pdf" -> MediaType.PDF
-      mimeType.startsWith("audio/") -> MediaType.AUDIO
-      mimeType.startsWith("video/") -> MediaType.VIDEO
       else -> throw IllegalArgumentException("Tipo de archivo no soportado: $mimeType")
     }
   }
@@ -216,8 +181,6 @@ class MediaService(
       when (it) {
         is EpubMediaContentMetadata  -> MediaContentMetadataDto("EPUB",  mapOf("title" to it.title, "author" to it.author))
         is PdfMediaContentMetadata   -> MediaContentMetadataDto("PDF",   mapOf("title" to it.title, "author" to it.author))
-        is AudioMediaContentMetadata -> MediaContentMetadataDto("AUDIO", mapOf("duration" to it.duration, "bitrate" to it.bitrate))
-        is VideoMediaContentMetadata -> MediaContentMetadataDto("VIDEO", mapOf("duration" to it.duration))
       }
     }
   }

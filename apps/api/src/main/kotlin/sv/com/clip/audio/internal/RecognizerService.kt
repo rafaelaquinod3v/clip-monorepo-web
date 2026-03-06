@@ -61,7 +61,9 @@ fun getTimestampsFromAudio(samples: FloatArray, sampleRate: Float): OfflineRecog
     println("Timestamps size: ${result.timestamps.size}")
     // Ensure native resources are released
     stream.release()
-
+    result.tokens.zip(result.timestamps.toList()).take(30).forEach { (tok, ts) ->
+      println("TOKEN: '${tok}' (bytes: ${tok.toByteArray().joinToString(",")}) @ $ts")
+    }
     return result
   }
 }

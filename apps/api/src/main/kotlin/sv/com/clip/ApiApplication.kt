@@ -9,6 +9,5 @@ import org.springframework.boot.runApplication
 class ApiApplication
 
 fun main(args: Array<String>) {
-  println("Hello World")
 	runApplication<ApiApplication>(*args)
 }

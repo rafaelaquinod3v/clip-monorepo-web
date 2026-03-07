@@ -4,9 +4,8 @@ import { Login } from './pages/login/login';
 import { authGuard } from './guards/auth-guard';
 import { Library } from './pages/library/library';
 import { Lector } from './pages/lector/lector';
-import { Epub } from './components/epub/epub';
+import { EbookReaderComponent } from './components/ebook-reader/ebook-reader.component';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
-import { PdfPageComponent } from './pages/pdf/pdf-page.component';
 import { EbookPageComponent } from './pages/ebook/ebook-page.component';
 
 export const appRoutes: Route[] = [
@@ -19,8 +18,7 @@ export const appRoutes: Route[] = [
                 { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
                 { path: 'library', component: Library, canActivate: [authGuard] },
                 { path: 'lector', component: Lector, canActivate: [authGuard] },
-                { path: 'library/epub/:fileName', component: Epub, canActivate: [authGuard] },
-                { path: 'library/pdf/:id', component: PdfPageComponent, canActivate: [authGuard] },
+                { path: 'library/epub/:fileName', component: EbookReaderComponent, canActivate: [authGuard] },
                 { path: 'library/ebook/:id', component: EbookPageComponent, canActivate: [authGuard] },
                 { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
             ]

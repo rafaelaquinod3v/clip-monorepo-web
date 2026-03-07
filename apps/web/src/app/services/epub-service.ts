@@ -40,4 +40,8 @@ export class EpubService {
       .append('mediaTypes', mediaTypes.join(','))
     return this.http.get<MediaContentResponse[]>(`${this.apiUrl}/media-content/ebook`, {params});
   }
+
+  findEbookMediaContentById(id: string | null) {
+    return this.http.get<MediaContentResponse>(`${this.apiUrl}/media-content/ebook/${id}`);
+  }
 }

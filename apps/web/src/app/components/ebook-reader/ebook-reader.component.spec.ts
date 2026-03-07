@@ -1,13 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Epub } from './epub';
+import { EbookReaderComponent } from './ebook-reader.component';
 
-describe('Epub', () => {
-  let component: Epub;
-  let fixture: ComponentFixture<Epub>;
+describe('EbookReader', () => {
+  let component: EbookReaderComponent;
+  let fixture: ComponentFixture<EbookReaderComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Epub],
+      imports: [EbookReaderComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Epub);

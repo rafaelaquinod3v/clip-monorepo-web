@@ -10,22 +10,21 @@ interface BookState {
 }
 
 @Component({
-  selector: 'app-epub',
+  selector: 'app-ebook-reader',
   imports: [],
-  templateUrl: './epub.html',
-  styleUrl: './epub.css',
+  templateUrl: './ebook-reader.component.html',
+  styleUrl: './ebook-reader.component.css',
 })
-export class Epub implements OnInit {
+export class EbookReaderComponent implements OnInit {
   epubService = inject(EpubService);
   private route = inject(ActivatedRoute);
   readonly epubName = "ae116030-fa4c-4c91-8f15-7cc37598e382";
   fileName: string | null = '';
+  id: string | null = '';
   private offset = 0;
   private readonly LIMIT = 100; // Cuántas frases pedimos por vez
   private readonly UMBRAL_PRECARGA = 20; // Si quedan menos de 20 frases, cargamos más
-  private isLoading = false; // Evita peticiones duplicadas
-
-  
+  private isLoading = false; // Evita peticiones duplicadas  
   
   // Pila de índices donde comenzó cada página visitada
   pageHistory: number[] = [];
@@ -47,8 +46,12 @@ export class Epub implements OnInit {
   }
   
   ngOnInit(): void {
-    this.fileName = this.route.snapshot.paramMap.get('fileName');
-    this.loadEpub();
+    this.id = this.route.snapshot.paramMap.get('id');
+    this.epubService.findEbookMediaContentById(this.id).subscribe(response => {
+      this.fileName = response.fileName; 
+      console.log(response);
+      this.loadEpub();
+    });
   }
 
   // Este decorador detecta cambios de tamaño y rotación de móvil

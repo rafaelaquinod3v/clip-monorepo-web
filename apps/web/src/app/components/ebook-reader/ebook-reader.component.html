@@ -5,9 +5,7 @@
     <button [disabled]="pageHistory.length === 0" (click)="prev()">prev</button>
     <button [disabled]="currentPageStart() >= allPhrases.length" (click)="next()">next</button>
 </div>
-<div #mainReader class="reader-style">
-  {{ content() }}
-</div>
+<div #mainReader class="reader-style" [innerHTML]="content()"></div>
 
 <!-- El contenedor "fantasma" para cálculos (oculto) -->
 <div #ghost class="reader-style ghost-hidden"></div>

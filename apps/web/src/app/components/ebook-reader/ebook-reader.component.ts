@@ -2,6 +2,7 @@ import { Component, ElementRef, HostListener, inject, OnInit, signal, ViewChild 
 import { EpubService, SentenceEntry } from '../../services/epub-service';
 import { debounceTime, Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
+import { Pagination } from './pagination';
 
 interface BookState {
   currentPageStart: number;
@@ -75,16 +76,18 @@ export class EbookReaderComponent implements OnInit {
     // 1. Obtenemos las frases desde donde nos quedamos
     const phrasesFromCurrent = this.allPhrases.slice(this.currentPageStart());
 
-    // 2. Calculamos cuántas caben en el espacio actual
-    const count = this.checkFit(phrasesFromCurrent);
-
+/*     // 2. Calculamos cuántas caben en el espacio actual
+    //const count = this.checkFit(phrasesFromCurrent);
+    const count = Pagination.checkFit(phrasesFromCurrent.map(s => s.text), this.ghostElement.nativeElement);
     // 3. Tomamos solo esas frases y las unimos
     const visibleText = phrasesFromCurrent
       .slice(0, count)
       .map(p => p.text)
-      .join(' ');
+      .join(' '); */
 
     // 4. Actualizamos la señal visual
+    const phrases = phrasesFromCurrent.map(s => s.text);
+    const visibleText = Pagination.generateContentPage(phrases, this.ghostElement.nativeElement);
     this.content.set(visibleText);
   }
 
@@ -110,16 +113,6 @@ export class EbookReaderComponent implements OnInit {
     // Nota: Para que el historial funcione, necesitamos cargar desde el inicio 
     // hasta el offset actual, o al menos el bloque actual.
     this.fetchPhrases();
-
-
-/*     this.epubService.loadEpubJsonl(this.epubName, this.offset, this.LIMIT).subscribe((response: SentenceEntry[]) => {
-      console.log(response);
-
-      this.allPhrases = response; // Guardamos todo el "pool" de frases
-      this.currentPageStart.set(0); // Empezamos por el principio
-      this.renderCurrentPage();
-
-    }); */
   }
   prev() {
     console.log("prev");
@@ -137,7 +130,8 @@ export class EbookReaderComponent implements OnInit {
   next() {
     console.log("next");
     const phrasesFromCurrent = this.allPhrases.slice(this.currentPageStart());
-    const count = this.checkFit(phrasesFromCurrent);
+    //const count = this.checkFit(phrasesFromCurrent);
+    const count = Pagination.checkFit(phrasesFromCurrent.map(s => s.text), this.ghostElement.nativeElement);
 
     // El nuevo inicio es el inicio anterior + las que acabamos de leer
     const nextIndex = this.currentPageStart() + count;

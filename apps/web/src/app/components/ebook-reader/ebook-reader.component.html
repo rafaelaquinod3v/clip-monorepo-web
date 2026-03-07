@@ -6,7 +6,7 @@
     <button [disabled]="currentPageStart() >= allPhrases.length" (click)="next()">next</button>
 </div>
 <div #mainReader class="reader-style" [innerHTML]="content()"></div>
-
+<app-audio-stream-player></app-audio-stream-player>
 <!-- El contenedor "fantasma" para cálculos (oculto) -->
 <div #ghost class="reader-style ghost-hidden"></div>
 

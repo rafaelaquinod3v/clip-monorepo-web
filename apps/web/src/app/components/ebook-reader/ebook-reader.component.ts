@@ -3,6 +3,9 @@ import { EpubService, SentenceEntry } from '../../services/epub-service';
 import { debounceTime, Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { Pagination } from './pagination';
+import { WordTimestamp } from '../../models/ebook.model';
+import { SpeechService } from '../../services/speech-service';
+import { AudioStreamPlayerComponent } from '../audio-stream-player/audio-stream-player.component';
 
 interface BookState {
   currentPageStart: number;
@@ -12,12 +15,13 @@ interface BookState {
 
 @Component({
   selector: 'app-ebook-reader',
-  imports: [],
+  imports: [AudioStreamPlayerComponent],
   templateUrl: './ebook-reader.component.html',
   styleUrl: './ebook-reader.component.css',
 })
 export class EbookReaderComponent implements OnInit {
   epubService = inject(EpubService);
+  speechService = inject(SpeechService);
   private route = inject(ActivatedRoute);
   readonly epubName = "ae116030-fa4c-4c91-8f15-7cc37598e382";
   fileName: string | null = '';
@@ -26,6 +30,7 @@ export class EbookReaderComponent implements OnInit {
   private readonly LIMIT = 100; // Cuántas frases pedimos por vez
   private readonly UMBRAL_PRECARGA = 20; // Si quedan menos de 20 frases, cargamos más
   private isLoading = false; // Evita peticiones duplicadas  
+  private wordTimestamps: WordTimestamp[] = [];
   
   // Pila de índices donde comenzó cada página visitada
   pageHistory: number[] = [];
@@ -53,6 +58,11 @@ export class EbookReaderComponent implements OnInit {
       console.log(response);
       this.loadEpub();
     });
+    this.speechService.wordMetadata$.subscribe((timestamps: WordTimestamp[]) => {
+      this.wordTimestamps = [...this.wordTimestamps, ...timestamps];
+      // Añadir data-start y data-end a los spans ya renderizados
+      //this.applyTimestampsToSpans();
+    });
   }
 
   // Este decorador detecta cambios de tamaño y rotación de móvil
@@ -70,25 +80,17 @@ export class EbookReaderComponent implements OnInit {
     // usando las frases que ya tienes cargadas
     this.renderCurrentPage(); 
   }
+
+  @ViewChild(AudioStreamPlayerComponent) streamPlayer!: AudioStreamPlayerComponent;
+
   renderCurrentPage() {
     if (this.allPhrases.length === 0) return;
-
-    // 1. Obtenemos las frases desde donde nos quedamos
-    const phrasesFromCurrent = this.allPhrases.slice(this.currentPageStart());
-
-/*     // 2. Calculamos cuántas caben en el espacio actual
-    //const count = this.checkFit(phrasesFromCurrent);
-    const count = Pagination.checkFit(phrasesFromCurrent.map(s => s.text), this.ghostElement.nativeElement);
-    // 3. Tomamos solo esas frases y las unimos
-    const visibleText = phrasesFromCurrent
-      .slice(0, count)
-      .map(p => p.text)
-      .join(' '); */
-
-    // 4. Actualizamos la señal visual
-    const phrases = phrasesFromCurrent.map(s => s.text);
-    const visibleText = Pagination.generateContentPage(phrases, this.ghostElement.nativeElement);
-    this.content.set(visibleText);
+    const phrasesFromCurrent = this.allPhrases.slice(this.currentPageStart()).map(s => s.text);
+    const {html, plainText} = Pagination.generatePageContent(phrasesFromCurrent, this.ghostElement.nativeElement);
+    this.content.set(html);
+    this.wordTimestamps = [];
+    this.streamPlayer.initStream();
+    this.speechService.streamBookAudiov2(plainText);
   }
 
   @ViewChild('ghost') ghostElement!: ElementRef<HTMLElement>;
@@ -153,29 +155,6 @@ export class EbookReaderComponent implements OnInit {
     }
     this.saveProgress();
   }
-
-// Usa setTimeout(0) para forzar al navegador a procesar el layout antes de medir
-checkFit(frases: SentenceEntry[]): number {
-  const ghost = this.ghostElement.nativeElement;
-  ghost.innerHTML = ''; 
-  let count = 0;
-
-  for (let i = 0; i < frases.length; i++) {
-    const previousHTML = ghost.innerHTML;
-    ghost.innerHTML += frases[i].text + " "; // Añadimos la frase actual
-
-    // IMPORTANTE: Si el contenido (scrollHeight) es estrictamente MAYOR 
-    // al contenedor (clientHeight), la frase actual (i) es la que causó el desborde.
-    if (ghost.scrollHeight > ghost.clientHeight) {
-      console.log(`¡Desborde en frase ${i}! Solo caben ${i} frases.`);
-      ghost.innerHTML = previousHTML; // Opcional: revertir para dejar el ghost exacto
-      return i; // Retornamos la cantidad de frases que SÍ cupieron (0 hasta i-1)
-    }
-    
-    count++;
-  }
-  return count; // Si recorre todo y no desborda, caben todas
-}
 
   private preloadNextPhrases() {
     this.isLoading = true;

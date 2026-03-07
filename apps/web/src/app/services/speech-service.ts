@@ -21,6 +21,9 @@ export class SpeechService {
 
   private audioChunkSubject = new Subject<Uint8Array>();
   audioChunk$ = this.audioChunkSubject.asObservable();
+
+  private streamEndSubject = new Subject<void>();
+  streamEnd$ = this.streamEndSubject.asObservable();
   
   wordMetadata$ = new Subject<any>();
   
@@ -37,29 +40,19 @@ async streamBookAudiov2(text: string, voice = 'af_heart') {
 
   while (reader) {
     const { done, value } = await reader.read();
-    if (done) break;
+    if (done) {
+      this.streamEndSubject.next();
+      break;
+    }
 
     buffer += decoder.decode(value, { stream: true });
 
-    // Lógica para separar objetos JSON {"audio":...}{"audio":...}
-    // Buscamos el cierre de una llave y la apertura de la siguiente
-    let boundary = buffer.indexOf('}{');
+    const lines = buffer.split('\n');
     
-    while (boundary !== -1) {
-      const completeJson = buffer.substring(0, boundary + 1);
-      this.processJsonObject(completeJson);
-      
-      buffer = buffer.substring(boundary + 1);
-      boundary = buffer.indexOf('}{');
-    }
+    buffer = lines.pop() || ""; // Guardamos el fragmento incompleto
 
-    // Si el backend envía un objeto por línea (\n), esto también ayuda:
-    if (buffer.includes('\n')) {
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || ""; // Guardamos el último trozo incompleto
-        for (const line of lines) {
-            if (line.trim()) this.processJsonObject(line);
-        }
+    for (const line of lines) {
+      if (line.trim()) this.processJsonObject(line);
     }
   }
 }
@@ -93,17 +86,5 @@ private processJsonObject(jsonString: string) {
   }
   synthesize(text: string) {
     return this.http.get<TtsResponse>(`${this.apiUrl}/synthesize?text=${text}`);
-  }
-
-/*   downloadAudio(text: string) {
-    return this.http.get(`${this.apiUrl}/download-audio?text=${text}`, {responseType: 'blob', observe: 'response'});
-  } */
-
-/*   generateSpeech(text: string) {
-    return this.http.get(`${this.apiUrl}/generate-speech?text=${text}`, {
-      responseType: 'blob'
-    });
-  } */
-
-  
+  }  
 }

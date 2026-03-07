@@ -1,0 +1,3 @@
+<button (click)="togglePlay()" [disabled]="!isLoaded()">
+  {{ isPlaying() ? 'Pause' : 'Play' }}
+</button>

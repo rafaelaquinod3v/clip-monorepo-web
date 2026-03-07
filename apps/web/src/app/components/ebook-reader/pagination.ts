@@ -1,3 +1,9 @@
+export interface PageResult {
+    html: string;
+    count: number;
+    plainText: string;
+}
+
 export class Pagination {
     static checkFit(phrases: string[], container: HTMLElement): number {
         container.innerHTML = '';
@@ -15,13 +21,19 @@ export class Pagination {
         return count;
     }
 
-    static generateContentPage(phrases: string[], container: HTMLElement): string {
+    static generatePageContent(phrases: string[], container: HTMLElement): PageResult {
         const capacity = Pagination.checkFit(phrases, container);
+
+        const visiblePhrases = phrases.slice(0, capacity);
+
         const contentPage = 
-            phrases
-                .slice(0, capacity)
+            visiblePhrases
                 .map(phrase => phrase.split(' ').map(word => `<span>${word}</span>`).join(' '))
                 .join(' ');
-        return contentPage;
+
+        const plainText = visiblePhrases.join(' ');
+        
+        return {html: contentPage, count: capacity, plainText};
     }
 }
+

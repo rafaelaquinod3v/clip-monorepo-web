@@ -42,6 +42,9 @@ export class EbookReaderComponent implements OnInit {
 
   // El contenido que se muestra (un subconjunto de allPhrases)
   content = signal<string>("");
+
+  isFirstPage = signal(true);
+
   // Creamos un disparador para el redimensionamiento
   private resizeSubject = new Subject<void>();
   constructor() {
@@ -86,10 +89,12 @@ export class EbookReaderComponent implements OnInit {
   renderCurrentPage() {
     if (this.allPhrases.length === 0) return;
     const phrasesFromCurrent = this.allPhrases.slice(this.currentPageStart()).map(s => s.text);
-    const {html, plainText} = Pagination.generatePageContent(phrasesFromCurrent, this.ghostElement.nativeElement);
+    const {html, count ,plainText} = Pagination.generatePageContent(phrasesFromCurrent, this.ghostElement.nativeElement);
     this.content.set(html);
     this.wordTimestamps = [];
-    this.streamPlayer.initStream();
+    this.streamPlayer.initStream(this.isFirstPage());
+    console.log('Frases en pantalla:', count);
+    console.log('Texto enviado al TTS:', plainText);
     this.speechService.streamBookAudiov2(plainText);
   }
 
@@ -117,6 +122,8 @@ export class EbookReaderComponent implements OnInit {
     this.fetchPhrases();
   }
   prev() {
+    this.isFirstPage.set(false);
+    this.streamPlayer.endStream();
     console.log("prev");
     if (this.pageHistory.length > 0) {
       // Recuperamos el último índice guardado
@@ -130,6 +137,8 @@ export class EbookReaderComponent implements OnInit {
     this.saveProgress();
   }
   next() {
+    this.isFirstPage.set(false);
+    this.streamPlayer.endStream();
     console.log("next");
     const phrasesFromCurrent = this.allPhrases.slice(this.currentPageStart());
     //const count = this.checkFit(phrasesFromCurrent);

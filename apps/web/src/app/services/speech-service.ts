@@ -24,10 +24,15 @@ export class SpeechService {
 
   private streamEndSubject = new Subject<void>();
   streamEnd$ = this.streamEndSubject.asObservable();
+
+  private totalChunksSubject = new Subject<number>();
+  totalChunks$ = this.totalChunksSubject.asObservable();
+  private chunkCount = 0;
   
   wordMetadata$ = new Subject<any>();
   
 async streamBookAudiov2(text: string, voice = 'af_heart') {
+  this.chunkCount = 0;
   const response = await fetch('http://localhost:8080/api/audio/stream-book', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -41,6 +46,8 @@ async streamBookAudiov2(text: string, voice = 'af_heart') {
   while (reader) {
     const { done, value } = await reader.read();
     if (done) {
+      console.log('Stream terminado, total chunks:', this.chunkCount);
+      this.totalChunksSubject.next(this.chunkCount);
       this.streamEndSubject.next();
       break;
     }
@@ -57,16 +64,18 @@ async streamBookAudiov2(text: string, voice = 'af_heart') {
   }
 }
 
-private processJsonObject(jsonString: string) {
+/* private processJsonObject(jsonString: string) {
   try {
     const data = JSON.parse(jsonString);
     
     if (data.timestamps) this.wordMetadata$.next(data.timestamps);
     console.log(data.timestamps);
     if (data.audio) {
+      this.chunkCount++;
       const binary = atob(data.audio);
       const bytes = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      console.log('Chunk recibido, tamaño:', bytes.length);
       this.audioChunkSubject.next(bytes);
     }
   } catch (e) {
@@ -74,7 +83,35 @@ private processJsonObject(jsonString: string) {
     console.debug("Esperando más datos para completar el JSON...");
   }
 }
+ */
 
+  private processJsonObject(jsonString: string) {
+    try {
+      const data = JSON.parse(jsonString);
+      
+      if (data.timestamps && data.timestamps.length > 0) {
+        this.wordMetadata$.next(data.timestamps);
+      }
+      
+      if (data.audio) {
+        const binary = atob(data.audio);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+        // Solo contar chunks reales, ignorar padding (1920 bytes con timestamps vacíos)
+        const isPadding = bytes.length <= 1920 && (!data.timestamps || data.timestamps.length === 0);
+        
+        if (!isPadding) {
+          this.chunkCount++;
+        }
+
+        console.log(`Chunk ${isPadding ? '(padding)' : '#' + this.chunkCount}, tamaño: ${bytes.length}`);
+        this.audioChunkSubject.next(bytes); // igual lo enviamos para reproducir
+      }
+    } catch (e) {
+      console.debug("JSON incompleto");
+    }
+  }
 
   private http = inject(HttpClient);
   private readonly apiUrl = 'http://localhost:8080/api/audio';

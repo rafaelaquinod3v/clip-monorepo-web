@@ -30,8 +30,14 @@ export class SpeechService {
   private chunkCount = 0;
   
   wordMetadata$ = new Subject<any>();
-  
+
+  private prefetchChunks: Uint8Array[] = [];
+  private isPrefetching = false;
+
+  private isStreaming = false;
+
 async streamBookAudiov2(text: string, voice = 'af_heart') {
+  this.isStreaming = true;
   this.chunkCount = 0;
   const response = await fetch('http://localhost:8080/api/audio/stream-book', {
     method: 'POST',
@@ -48,6 +54,7 @@ async streamBookAudiov2(text: string, voice = 'af_heart') {
     if (done) {
       console.log('Stream terminado, total chunks:', this.chunkCount);
       this.totalChunksSubject.next(this.chunkCount);
+      this.isStreaming = false;
       this.streamEndSubject.next();
       break;
     }
@@ -103,4 +110,60 @@ async streamBookAudiov2(text: string, voice = 'af_heart') {
   synthesize(text: string) {
     return this.http.get<TtsResponse>(`${this.apiUrl}/synthesize?text=${text}`);
   }  
+
+  async prefetchNextPage(text: string, voice = 'af_heart') {
+    //if (this.isPrefetching) return;
+    if (this.isPrefetching || this.isStreaming) return;
+    this.isPrefetching = true;
+    this.prefetchChunks = []; // limpiar prefetch anterior
+
+    const response = await fetch('http://localhost:8080/api/audio/stream-book', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voice })
+    });
+
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (reader) {
+      const { done, value } = await reader.read();
+      if (done) {
+        this.isPrefetching = false;
+        break;
+      }
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      for (const line of lines) {
+        if (line.trim()) this.processPrefetchJson(line);
+      }
+    }
+  }
+
+  private processPrefetchJson(jsonString: string) {
+    try {
+      const data = JSON.parse(jsonString);
+      if (data.audio) {
+        const binary = atob(data.audio);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        this.prefetchChunks.push(bytes);
+      }
+    } catch (e) {
+      console.log(`${e}`)
+    }
+  }
+
+  // Devuelve los chunks prefetcheados y los limpia
+  consumePrefetch(): Uint8Array[] {
+    const chunks = [...this.prefetchChunks];
+    this.prefetchChunks = [];
+    return chunks;
+  }
+
+  hasPrefetch(): boolean {
+    return this.prefetchChunks.length > 0 && !this.isPrefetching;
+  }
 }

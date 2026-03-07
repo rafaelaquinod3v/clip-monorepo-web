@@ -31,7 +31,8 @@ export class EbookReaderComponent implements OnInit {
   private readonly UMBRAL_PRECARGA = 20; // Si quedan menos de 20 frases, cargamos más
   private isLoading = false; // Evita peticiones duplicadas  
   private wordTimestamps: WordTimestamp[] = [];
-  
+  private lastRenderedCount = 0;
+
   // Pila de índices donde comenzó cada página visitada
   pageHistory: number[] = [];
   // Índice de la primera frase que se ve actualmente en pantalla
@@ -66,6 +67,9 @@ export class EbookReaderComponent implements OnInit {
       // Añadir data-start y data-end a los spans ya renderizados
       //this.applyTimestampsToSpans();
     });
+    this.speechService.streamEnd$.subscribe(() => {
+      this.prefetchNextPage(this.lastRenderedCount);
+    });
   }
 
   // Este decorador detecta cambios de tamaño y rotación de móvil
@@ -85,7 +89,7 @@ export class EbookReaderComponent implements OnInit {
   }
 
   @ViewChild(AudioStreamPlayerComponent) streamPlayer!: AudioStreamPlayerComponent;
-
+/* 
   renderCurrentPage() {
     if (this.allPhrases.length === 0) return;
     const phrasesFromCurrent = this.allPhrases.slice(this.currentPageStart()).map(s => s.text);
@@ -96,7 +100,57 @@ export class EbookReaderComponent implements OnInit {
     console.log('Frases en pantalla:', count);
     console.log('Texto enviado al TTS:', plainText);
     this.speechService.streamBookAudiov2(plainText);
+  } */
+ renderCurrentPage() {
+    if (this.allPhrases.length === 0) return;
+
+    const phrasesFromCurrent = this.allPhrases
+      .slice(this.currentPageStart())
+      .map(s => s.text);
+
+    const { html, plainText, count } = Pagination.generatePageContent(
+      phrasesFromCurrent,
+      this.ghostElement.nativeElement
+    );
+
+    this.lastRenderedCount = count; 
+
+    this.content.set(html);
+    this.wordTimestamps = [];
+    this.streamPlayer.stopStream();
+    this.streamPlayer.initStream(this.isFirstPage());
+
+    // Si hay prefetch listo, alimentar el player directamente
+/*     if (this.speechService.hasPrefetch()) {
+      const chunks = this.speechService.consumePrefetch();
+      this.streamPlayer.feedPrefetchedChunks(chunks);
+    } else {
+      this.speechService.streamBookAudiov2(plainText);
+    } */
+ this.speechService.streamBookAudiov2(plainText);
+    // Precargamos la siguiente página en background
+    //this.prefetchNextPage(count);
+   // setTimeout(() => this.prefetchNextPage(count), 100);
   }
+
+  private prefetchNextPage(currentCount: number) {
+    const nextIndex = this.currentPageStart() + currentCount;
+    if (nextIndex >= this.allPhrases.length) return;
+
+    const nextPhrases = this.allPhrases
+      .slice(nextIndex)
+      .map(s => s.text);
+
+    // Calculamos cuántas frases caben en la siguiente página usando el ghost
+    const { plainText } = Pagination.generatePageContent(
+      nextPhrases,
+      this.ghostElement.nativeElement
+    );
+
+    console.log('Prefetching siguiente página...');
+    this.speechService.prefetchNextPage(plainText);
+  }
+
 
   @ViewChild('ghost') ghostElement!: ElementRef<HTMLElement>;
 

@@ -212,4 +212,9 @@ export class AudioStreamPlayerComponent implements OnDestroy {
     this.isPlaying.set(false);
     this.timeChange.emit(-1);
   }
+
+  // Alimentar el player con chunks ya disponibles
+  feedPrefetchedChunks(chunks: Uint8Array[]) {
+    chunks.forEach(chunk => this.appendChunk(chunk));
+  }
 }

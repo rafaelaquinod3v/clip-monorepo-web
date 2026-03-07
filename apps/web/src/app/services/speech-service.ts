@@ -64,27 +64,6 @@ async streamBookAudiov2(text: string, voice = 'af_heart') {
   }
 }
 
-/* private processJsonObject(jsonString: string) {
-  try {
-    const data = JSON.parse(jsonString);
-    
-    if (data.timestamps) this.wordMetadata$.next(data.timestamps);
-    console.log(data.timestamps);
-    if (data.audio) {
-      this.chunkCount++;
-      const binary = atob(data.audio);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-      console.log('Chunk recibido, tamaño:', bytes.length);
-      this.audioChunkSubject.next(bytes);
-    }
-  } catch (e) {
-    // Si falla, probablemente el JSON aún está incompleto
-    console.debug("Esperando más datos para completar el JSON...");
-  }
-}
- */
-
   private processJsonObject(jsonString: string) {
     try {
       const data = JSON.parse(jsonString);

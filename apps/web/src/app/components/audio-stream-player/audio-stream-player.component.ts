@@ -66,25 +66,6 @@ export class AudioStreamPlayerComponent implements OnDestroy {
     this.currentUrl = URL.createObjectURL(this.mediaSource);
     this.audio.src = this.currentUrl;
 
-/*     this.mediaSource.addEventListener('sourceopen', () => {
-      this.sourceBuffer = this.mediaSource!.addSourceBuffer('audio/mpeg');
-
-      this.sourceBuffer.addEventListener('updateend', () => {
-        // Procesar cola si había chunks esperando
-        if (this.chunkQueue.length > 0 && !this.sourceBuffer!.updating) {
-          this.sourceBuffer!.appendBuffer(this.chunkQueue.shift()!);
-        }
-        // Si el stream terminó y ya no hay cola, cerrar
-        if (this.streamEnded && this.chunkQueue.length === 0) {
-          if (this.mediaSource?.readyState === 'open') {
-            this.mediaSource.endOfStream();
-          }
-        }
-      });
-
-      this.isLoaded.set(true);
-    }); */
-
     this.mediaSource.addEventListener('sourceopen', () => {
       if (!this.mediaSource) return;
 
@@ -97,12 +78,6 @@ export class AudioStreamPlayerComponent implements OnDestroy {
           const chunk = this.chunkQueue.shift();
           if (chunk) this.sourceBuffer.appendBuffer(chunk);
         }
-
-/*         if (this.streamEnded && this.chunkQueue.length === 0) {
-          if (this.mediaSource?.readyState === 'open') {
-            this.mediaSource.endOfStream();
-          }
-        } */
        this.tryEndStream();
       });
 
@@ -151,24 +126,6 @@ export class AudioStreamPlayerComponent implements OnDestroy {
       this.stopSyncLoop();
     }
   }
-
-/*   private appendChunk(chunk: Uint8Array) {
-    if (!this.sourceBuffer) return;
-
-    // Garantizamos ArrayBuffer puro, no SharedArrayBuffer
-    const buffer = chunk.buffer.slice(
-        chunk.byteOffset, 
-        chunk.byteOffset + chunk.byteLength
-      ) as ArrayBuffer;
-
-      const safeChunk = new Uint8Array(buffer);
-
-      if (this.sourceBuffer.updating) {
-        this.chunkQueue.push(safeChunk);
-      } else {
-        this.sourceBuffer.appendBuffer(safeChunk);
-      }
-  } */
 
   private appendChunk(chunk: Uint8Array) {
     if (!this.sourceBuffer) return;

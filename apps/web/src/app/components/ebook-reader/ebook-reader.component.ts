@@ -71,6 +71,7 @@ export class EbookReaderComponent implements OnInit {
       //this.applyTimestampsToSpans();
     });
     this.speechService.streamEnd$.subscribe(() => {
+      console.log('streamEnd$ recibido, iniciando prefetch...');
       this.prefetchNextPage(this.lastRenderedCount);
     });
   }
@@ -115,7 +116,7 @@ export class EbookReaderComponent implements OnInit {
     this.speechService.streamBookAudiov2(plainText);
   } */
 
-    renderCurrentPage() {
+/*     renderCurrentPage() {
   if (this.allPhrases.length === 0) return;
 
   const phrasesFromCurrent = this.allPhrases
@@ -145,7 +146,49 @@ export class EbookReaderComponent implements OnInit {
       this.speechService.streamBookAudiov2(plainText);
   
   }, this.AUDIO_DEBOUNCE_MS);
-}
+} */
+
+  renderCurrentPage() {
+    if (this.allPhrases.length === 0) return;
+
+    const phrasesFromCurrent = this.allPhrases
+      .slice(this.currentPageStart())
+      .map(s => s.text);
+
+    const { html, plainText, count } = Pagination.generatePageContent(
+      phrasesFromCurrent,
+      this.ghostElement.nativeElement
+    );
+
+    this.lastRenderedCount = count;
+    this.content.set(html);
+    this.wordTimestamps = [];
+
+    
+    // Cancelar todo lo que esté en curso y limpiar timer
+    
+    if (this.audioDebounceTimer) {
+      clearTimeout(this.audioDebounceTimer);
+      this.audioDebounceTimer = null;
+      this.speechService.cancelAll(); // ← aborta fetch y prefetch      
+    }
+
+    this.streamPlayer.stopStream();
+    this.streamPlayer.initStream(this.isFirstPage());
+
+    this.audioDebounceTimer = setTimeout(() => {
+      this.audioDebounceTimer = null;
+      if (this.speechService.hasPrefetch()) {
+        console.log('Usando prefetch disponible');
+        const chunks = this.speechService.consumePrefetch();
+        this.streamPlayer.feedPrefetchedChunks(chunks);
+        // como ya tenemos todos los chunks, cerramos el stream
+        this.streamPlayer.endStream();
+      } else {
+        this.speechService.streamBookAudiov2(plainText);
+      }
+    }, this.AUDIO_DEBOUNCE_MS);
+  }
 
   private prefetchNextPage(currentCount: number) {
     const nextIndex = this.currentPageStart() + currentCount;

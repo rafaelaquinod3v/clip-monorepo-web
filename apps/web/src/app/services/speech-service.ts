@@ -36,7 +36,7 @@ export class SpeechService {
 
   private isStreaming = false;
 
-async streamBookAudiov2(text: string, voice = 'af_heart') {
+/* async streamBookAudiov2(text: string, voice = 'af_heart') {
   this.isStreaming = true;
   this.chunkCount = 0;
   const response = await fetch('http://localhost:8080/api/audio/stream-book', {
@@ -69,7 +69,7 @@ async streamBookAudiov2(text: string, voice = 'af_heart') {
       if (line.trim()) this.processJsonObject(line);
     }
   }
-}
+} */
 
   private processJsonObject(jsonString: string) {
     try {
@@ -111,7 +111,7 @@ async streamBookAudiov2(text: string, voice = 'af_heart') {
     return this.http.get<TtsResponse>(`${this.apiUrl}/synthesize?text=${text}`);
   }  
 
-  async prefetchNextPage(text: string, voice = 'af_heart') {
+/*   async prefetchNextPage(text: string, voice = 'af_heart') {
     
     if (this.isPrefetching || this.isStreaming) return;
     this.isPrefetching = true;
@@ -139,6 +139,119 @@ async streamBookAudiov2(text: string, voice = 'af_heart') {
       for (const line of lines) {
         if (line.trim()) this.processPrefetchJson(line);
       }
+    }
+  } */
+
+
+    private streamAbortController: AbortController | null = null;
+private prefetchAbortController: AbortController | null = null;
+
+/* cancelAll() {
+  this.streamAbortController?.abort();
+  this.prefetchAbortController?.abort();
+  this.prefetchChunks = [];
+  this.isStreaming = false;
+  this.isPrefetching = false;
+} */
+  // En vez de limpiar siempre, solo cancelar si aún está en progreso
+  cancelAll() {
+    this.streamAbortController?.abort();
+    this.isStreaming = false;
+
+    // Solo cancelar prefetch si AÚN está descargando
+    // Si ya terminó, conservar los chunks
+    if (this.isPrefetching) {
+      this.prefetchAbortController?.abort();
+      this.prefetchChunks = [];
+      this.isPrefetching = false;
+    }
+  }
+
+async streamBookAudiov2(text: string, voice = 'af_heart') {
+  this.streamAbortController?.abort(); // cancelar anterior
+  this.streamAbortController = new AbortController();
+  this.isStreaming = true;
+  this.chunkCount = 0;
+
+  try {
+    const response = await fetch('http://localhost:8080/api/audio/stream-book', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voice }),
+      signal: this.streamAbortController.signal // ← permite cancelar
+    });
+
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (reader) {
+      const { done, value } = await reader.read();
+      if (done) {
+        console.log('Stream terminado, total chunks:', this.chunkCount);
+        this.totalChunksSubject.next(this.chunkCount);
+        this.isStreaming = false;
+        this.streamEndSubject.next();
+        break;
+      }
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || "";
+      for (const line of lines) {
+        if (line.trim()) this.processJsonObject(line);
+      }
+    }
+  } catch (e: any) {
+    if (e.name === 'AbortError') {
+      console.log('Stream cancelado');
+    } else {
+      console.error('Stream error:', e);
+    }
+    this.isStreaming = false;
+  }
+}
+
+async prefetchNextPage(text: string, voice = 'af_heart') {
+  if (this.isPrefetching || this.isStreaming) return;
+
+  this.prefetchAbortController?.abort();
+  this.prefetchAbortController = new AbortController();
+  this.isPrefetching = true;
+  this.prefetchChunks = [];
+
+  try {
+    const response = await fetch('http://localhost:8080/api/audio/stream-book', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voice }),
+      signal: this.prefetchAbortController.signal // ← permite cancelar
+    });
+
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (reader) {
+        const { done, value } = await reader.read();
+        if (done) {
+          this.isPrefetching = false;
+          break;
+        }
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        for (const line of lines) {
+          if (line.trim()) this.processPrefetchJson(line);
+        }
+      }
+    } catch (e: any) {
+      if (e.name === 'AbortError') {
+        console.log('Prefetch cancelado');
+        this.prefetchChunks = [];
+      } else {
+        console.error('Prefetch error:', e);
+      }
+      this.isPrefetching = false;
     }
   }
 

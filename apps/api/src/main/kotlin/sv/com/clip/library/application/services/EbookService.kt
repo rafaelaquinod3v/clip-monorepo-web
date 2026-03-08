@@ -35,4 +35,8 @@ class EbookService(
   fun loadEbookMediaContent(userId: UUID, mediaTypes: Collection<String>, pageQuery: PageQuery) : List<MediaResponse> {
     return media.findAllByUserIdAndMediaTypeInPageable(userId, mediaTypes, pageQuery)
   }
+
+  fun findEbookMediaContentById(id: UUID, userId: UUID): MediaResponse? {
+    return media.findById(id, userId)
+  }
 }

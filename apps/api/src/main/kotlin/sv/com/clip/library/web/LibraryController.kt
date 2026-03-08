@@ -13,6 +13,7 @@ import sv.com.clip.library.application.SentenceEntry
 import sv.com.clip.media.api.MediaResponse
 import sv.com.clip.shared.pagination.PageQuery
 import sv.com.clip.shared.pagination.SortOrder
+import java.util.UUID
 
 @RestController
 @RequestMapping("/library")
@@ -51,5 +52,13 @@ class LibraryController(
 
     val pageQuery = PageQuery(offset, limit, sortField, SortOrder.valueOf(sortOrder))
     return ResponseEntity.ok(ebookService.loadEbookMediaContent(user.id, mediaTypes, pageQuery))
+  }
+
+  @GetMapping("/media-content/ebook/{id}")
+  fun getEBook(
+    @PathVariable id: UUID,
+    @AuthenticationPrincipal user: CustomUserDetails,
+  ) : ResponseEntity<MediaResponse> {
+    return ResponseEntity.ok(ebookService.findEbookMediaContentById(id, user.id))
   }
 }

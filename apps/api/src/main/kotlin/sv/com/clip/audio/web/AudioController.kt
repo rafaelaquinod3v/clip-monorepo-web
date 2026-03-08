@@ -1,7 +1,9 @@
 package sv.com.clip.audio.web
 
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.context.request.async.AsyncWebRequest
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import sv.com.clip.audio.internal.TTSService
 
@@ -27,9 +29,16 @@ class AudioController(private val ttsService: TTSService,) {
   }
 
   @PostMapping("/stream-book")
-  fun streamTextToNDJson(@RequestBody request: Map<String, String>): ResponseEntity<StreamingResponseBody> {
+  fun streamTextToNDJson(
+    asyncRequest: AsyncWebRequest,
+    httpRequest: HttpServletRequest,
+    @RequestBody request: Map<String, String>
+  ): ResponseEntity<StreamingResponseBody> {
+    asyncRequest.setTimeout(300000L) // 5 minutos solo para este endpoint
     val fullText = request["text"] ?: throw IllegalArgumentException("Text is required")
     val voice = request["voice"] ?: "af_heart"
+
+    println(fullText)
 
     val responseBody = StreamingResponseBody { outputStream ->
       // Delegamos TODA la lógica al servicio

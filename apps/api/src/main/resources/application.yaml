@@ -70,9 +70,9 @@ spring:
 
 logging:
   level:
-    root: DEBUG
+    #root: DEBUG
     org:
-      springframework: DEBUG
+      #springframework: DEBUG
       hibernate:
         stat: DEBUG
       flywaydb: DEBUG

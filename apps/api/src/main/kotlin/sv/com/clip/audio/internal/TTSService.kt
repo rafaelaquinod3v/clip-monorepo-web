@@ -2,11 +2,14 @@ package sv.com.clip.audio.internal
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.k2fsa.sherpa.onnx.*
+import jakarta.servlet.AsyncEvent
+import jakarta.servlet.AsyncListener
+import jakarta.servlet.http.HttpServletRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.*
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
 import org.springframework.http.MediaType
@@ -27,6 +30,7 @@ import ws.schild.jave.MultimediaObject
 import ws.schild.jave.encode.AudioAttributes
 import ws.schild.jave.encode.EncodingAttributes
 import java.io.File
+import java.io.IOException
 import java.io.OutputStream
 import java.net.http.HttpClient
 import java.time.Duration
@@ -158,6 +162,7 @@ class TTSService(
     val sentences = textProcessor.splitBySentence(fullText)
 
     sentences.forEach { sentence ->
+      println(sentence)
       if (sentence.isBlank()) return@forEach
 
       val kokoroRequest = mapOf(
@@ -186,6 +191,125 @@ class TTSService(
       }
     }
   }
+  fun streamTextSplitBySentenceAsync(
+    fullText: String,
+    voice: String,
+    outputStream: OutputStream,
+    httpRequest: HttpServletRequest
+  ) {
+    val sentences = textProcessor.splitBySentence(fullText)
+      .filter { it.isNotBlank() }
+      .map { it.trim() }
+
+    val job = Job()
+
+    // Spring notifica cuando el cliente se desconecta
+    httpRequest.asyncContext?.addListener(object : AsyncListener {
+      override fun onComplete(event: AsyncEvent) = Unit
+      override fun onStartAsync(event: AsyncEvent) = Unit
+      override fun onTimeout(event: AsyncEvent) { job.cancel() }
+      override fun onError(event: AsyncEvent) { job.cancel() }
+    })
+
+    runBlocking(job) {
+      try {
+        val deferredResults = sentences.mapIndexed { index, sentence ->
+          async(Dispatchers.IO) {
+            ensureActive() // ← cancela si el job fue cancelado
+            println(sentence)
+            val kokoroRequest = mapOf(
+              "input" to sentence,
+              "voice" to voice,
+              "model" to "kokoro",
+              "stream" to true,
+              "response_format" to "mp3"
+            )
+            try {
+              val responseEntity = restClient.post()
+                .uri("/dev/captioned_speech")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(kokoroRequest)
+                .retrieve()
+                .toEntity<Resource>()
+
+              index to responseEntity.body?.inputStream?.readBytes()
+            } catch (e: Exception) {
+              if (e is CancellationException) throw e // propagar cancelación
+              println("Error procesando sentencia: $sentence - ${e.message}")
+              index to null
+            }
+          }
+        }
+
+        deferredResults
+          .awaitAll()
+          .sortedBy { it.first }
+          .forEach { (_, bytes) ->
+            ensureActive() // ← verificar antes de cada escritura
+            if (bytes != null) {
+              outputStream.write(bytes)
+              outputStream.write("\n".toByteArray())
+              outputStream.flush()
+            }
+          }
+      } catch (e: CancellationException) {
+        println("Stream cancelado por desconexión del cliente")
+      } finally {
+        job.cancel() // asegurarse de limpiar
+      }
+    }
+  }
+
+
+
+
+/*  fun streamTextSplitBySentenceAsync(fullText: String, voice: String, outputStream: OutputStream, httpRequest: HttpServletRequest) {
+    val sentences = textProcessor.splitBySentence(fullText)
+      .filter { it.isNotBlank() }
+      .map { it.trim() }
+
+    runBlocking {
+      // Lanzar todas las frases en paralelo
+      val deferredResults = sentences.mapIndexed { index, sentence ->
+        async(Dispatchers.IO) {
+          println(sentence)
+          val kokoroRequest = mapOf(
+            "input" to sentence,
+            "voice" to voice,
+            "model" to "kokoro",
+            "stream" to true,
+            "response_format" to "mp3"
+          )
+          try {
+            val responseEntity = restClient.post()
+              .uri("/dev/captioned_speech")
+              .contentType(MediaType.APPLICATION_JSON)
+              .body(kokoroRequest)
+              .retrieve()
+              .toEntity<Resource>()
+
+            index to responseEntity.body?.inputStream?.readBytes()
+          } catch (e: Exception) {
+            println("Error procesando sentencia: $sentence - ${e.message}")
+            index to null
+          }
+        }
+      }
+
+      // Escribir en orden conforme terminan
+      deferredResults
+        .awaitAll()
+        .sortedBy { it.first }
+        .forEach { (_, bytes) ->
+          if (bytes != null) {
+            outputStream.write(bytes)
+            outputStream.write("\n".toByteArray())
+            outputStream.flush()
+          }
+        }
+    }
+  }*/
+
 
   fun generateMp3(text: String, voice: String = "af_heart"): ByteArray {
 

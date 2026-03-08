@@ -35,13 +35,29 @@ export class SpeechService {
   private isPrefetching = false;
 
   private isStreaming = false;
+  private timeOffset = 0;
+  private readonly AUDIO_START_DELAY = 0.5;
 
-  private processJsonObject(jsonString: string) {
+/*   private processJsonObject(jsonString: string) {
     try {
       const data = JSON.parse(jsonString);
       
-      if (data.timestamps && data.timestamps.length > 0) {
+    if (data.timestamps && data.timestamps.length > 0) {
         this.wordMetadata$.next(data.timestamps);
+      }
+      if (data.timestamps && data.timestamps.length > 0) {
+        // Aplicar offset acumulado a cada timestamp
+        const adjusted = data.timestamps.map((t: any) => ({
+          ...t,
+          start_time: t.start_time + this.timeOffset,
+          end_time: t.end_time + this.timeOffset,
+        }));
+
+        // El nuevo offset es el end_time máximo de esta frase
+        const maxEnd = Math.max(...data.timestamps.map((t: any) => t.end_time));
+        this.timeOffset += maxEnd;
+
+        this.wordMetadata$.next(adjusted);
       }
       
       if (data.audio) {
@@ -62,7 +78,62 @@ export class SpeechService {
     } catch (e) {
       console.debug("JSON incompleto");
     }
+  } */
+
+private async processJsonObject(jsonString: string) {
+  try {
+    const data = JSON.parse(jsonString);
+
+    if (data.audio) {
+      const binary = atob(data.audio);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+      const isPadding = bytes.length <= 1920 && (!data.timestamps || data.timestamps.length === 0);
+
+      if (!isPadding && data.timestamps?.length > 0) {
+        // Calcular duración real del chunk
+        const duration = await this.getAudioDuration(bytes);
+        console.log(`maxEnd timestamps: ${Math.max(...data.timestamps.map((t: any) => t.end_time))}s, duración real: ${duration}s`);
+
+        const adjusted = data.timestamps.map((t: any) => ({
+          ...t,
+          start_time: t.start_time + this.timeOffset + this.AUDIO_START_DELAY,
+          end_time: t.end_time + this.timeOffset + this.AUDIO_START_DELAY,
+        }));
+
+        this.timeOffset += duration; // ← usar duración real
+        this.wordMetadata$.next(adjusted);
+        this.chunkCount++;
+      }
+
+      this.audioChunkSubject.next(bytes);
+    }
+  } catch (e) {
+    console.debug("JSON incompleto");
   }
+}
+
+private getAudioDuration(bytes: Uint8Array): Promise<number> {
+  return new Promise(resolve => {
+    const safeBuffer = bytes.buffer.slice(
+      bytes.byteOffset,
+      bytes.byteOffset + bytes.byteLength
+    ) as ArrayBuffer;
+    
+    const blob = new Blob([safeBuffer], { type: 'audio/mpeg' });
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    audio.addEventListener('loadedmetadata', () => {
+      URL.revokeObjectURL(url);
+      resolve(audio.duration);
+    });
+    audio.addEventListener('error', () => {
+      URL.revokeObjectURL(url);
+      resolve(0);
+    });
+  });
+}
 
   private http = inject(HttpClient);
   private readonly apiUrl = 'http://localhost:8080/api/audio';
@@ -95,6 +166,7 @@ private prefetchAbortController: AbortController | null = null;
   }
 
 async streamBookAudiov2(text: string, voice = 'af_heart') {
+  this.timeOffset = 0;
   this.streamAbortController?.abort(); // cancelar anterior
   this.streamAbortController = new AbortController();
   this.isStreaming = true;

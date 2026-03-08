@@ -5,8 +5,9 @@
     </svg>
   </button>
 
-  <div #mainReader class="reader-style" [innerHTML]="content()"></div>
-
+  <!-- <div #mainReader class="reader-style"><span class="highlight">hola</span></div> -->
+  <!-- <div #mainReader class="reader-style" [innerHTML]="content()"></div> -->
+   <div #mainReader class="reader-style"></div>
   <button class="nav-btn" [disabled]="currentPageStart() >= allPhrases.length" (click)="next()">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="9,18 15,12 9,6"/>
@@ -14,5 +15,6 @@
   </button>
 </div>
 
-<app-audio-stream-player></app-audio-stream-player>
+<!-- <app-audio-stream-player></app-audio-stream-player> -->
+<app-audio-stream-player (timeChange)="onTimeChange($event)"></app-audio-stream-player>
 <div #ghost class="reader-style ghost-hidden"></div>

@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, inject, OnInit, signal, ViewChild, ViewEncapsulation } from '@angular/core';
 import { EpubService, SentenceEntry } from '../../services/epub-service';
 import { debounceTime, Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
@@ -18,8 +18,10 @@ interface BookState {
   imports: [AudioStreamPlayerComponent],
   templateUrl: './ebook-reader.component.html',
   styleUrl: './ebook-reader.component.css',
+  encapsulation: ViewEncapsulation.None,
 })
 export class EbookReaderComponent implements OnInit {
+  private cdr = inject(ChangeDetectorRef);
   epubService = inject(EpubService);
   speechService = inject(SpeechService);
   private route = inject(ActivatedRoute);
@@ -67,8 +69,11 @@ export class EbookReaderComponent implements OnInit {
     });
     this.speechService.wordMetadata$.subscribe((timestamps: WordTimestamp[]) => {
       this.wordTimestamps = [...this.wordTimestamps, ...timestamps];
+      console.log('Timestamps recibidos:', timestamps[0]);
       // Añadir data-start y data-end a los spans ya renderizados
-      //this.applyTimestampsToSpans();
+     // this.cdr.detectChanges(); 
+      this.applyTimestampsToSpans();
+      //setTimeout(() => this.applyTimestampsToSpans(), 0);
     });
     this.speechService.streamEnd$.subscribe(() => {
       console.log('streamEnd$ recibido, iniciando prefetch...');
@@ -107,7 +112,8 @@ export class EbookReaderComponent implements OnInit {
     );
 
     this.lastRenderedCount = count;
-    this.content.set(html);
+    //this.content.set(html);
+    this.mainReaderElement.nativeElement.innerHTML = html;
     this.wordTimestamps = [];
 
     
@@ -135,6 +141,68 @@ export class EbookReaderComponent implements OnInit {
       }
     }, this.AUDIO_DEBOUNCE_MS);
 
+  }
+
+  @ViewChild('mainReader') mainReaderElement!: ElementRef<HTMLElement>;
+
+  // Aplicar timestamps a los spans del reader
+  private applyTimestampsToSpans() {
+    const spans = this.mainReaderElement.nativeElement
+      .querySelectorAll<HTMLElement>('span');
+
+    spans.forEach((span, index) => {
+      const ts = this.wordTimestamps[index];
+      if (ts) {
+        span.dataset['start'] = ts.start_time.toString();
+        span.dataset['end'] = ts.end_time.toString();
+      }
+    });
+    // Ver los primeros 3 spans con sus timestamps
+    const allSpans = this.mainReaderElement.nativeElement.querySelectorAll<HTMLElement>('span');
+    allSpans.forEach((span, i) => {
+      if (i < 3) console.log(`span[${i}]: "${span.textContent}" start=${span.dataset['start']} end=${span.dataset['end']}`);
+    });
+  }
+
+  onTimeChange(currentTime: number) {
+    if (currentTime === -1) {
+      this.clearHighlight();
+      return;
+    }
+
+    const spans = this.mainReaderElement.nativeElement
+      .querySelectorAll<HTMLElement>('span[data-start]');
+
+/*     console.log(`currentTime: ${currentTime}, spans con timestamp: ${spans.length}`);
+
+    spans.forEach(span => {
+      if(span.dataset['start'] && span.dataset['end']) {
+        const start = parseFloat(span.dataset['start']);
+        const end = parseFloat(span.dataset['end']);
+        span.classList.toggle('highlight', currentTime >= start && currentTime < end);
+      }
+      
+    }); */
+    // Ver si algún span hace match
+    //let matched = false;
+    spans.forEach(span => {
+      if(span.dataset['start'] && span.dataset['end']) {
+        const start = parseFloat(span.dataset['start']);
+        const end = parseFloat(span.dataset['end']);
+        const isActive = currentTime >= start && currentTime < end;
+       // if (isActive) {
+         // matched = true;
+          //console.log(`MATCH: "${span.textContent}" start=${start} end=${end} currentTime=${currentTime}`);
+        //}
+        span.classList.toggle('highlight', isActive);
+      }
+    });
+  }
+
+  private clearHighlight() {
+    this.mainReaderElement.nativeElement
+      .querySelectorAll<HTMLElement>('.highlight')
+      .forEach(s => s.classList.remove('highlight'));
   }
 
   private prefetchNextPage(currentCount: number) {

@@ -55,7 +55,7 @@ export class AudioStreamPlayerComponent implements OnDestroy {
   }
 
   // Llamar esto antes de cada nuevo stream
-  initStream(requireManualPlay = false) {
+/*   initStream(requireManualPlay = false) {
     this.isReady.set(false);
     this.stopStream();
     this.cleanup();
@@ -101,7 +101,57 @@ export class AudioStreamPlayerComponent implements OnDestroy {
       this.isLoaded.set(false);
       this.stopSyncLoop();
     };
-  }
+  } */
+
+    initStream(requireManualPlay = false) {
+  this.stopStream();
+  this.cleanup();
+
+  // ← Crear nuevo elemento Audio para evitar listeners acumulados
+  this.audio = new Audio();
+
+  this.isReady.set(false);
+  this.totalChunks = null;
+  this.receivedChunks = 0;
+  this.streamEnded = false;
+  this.chunkQueue = [];
+  this.hasStartedPlaying = false;
+  this.requireManualPlay = requireManualPlay;
+
+  this.mediaSource = new MediaSource();
+  this.currentUrl = URL.createObjectURL(this.mediaSource);
+  this.audio.src = this.currentUrl;
+
+  this.mediaSource.addEventListener('sourceopen', () => {
+    if (!this.mediaSource) return;
+    this.sourceBuffer = this.mediaSource.addSourceBuffer('audio/mpeg');
+
+    this.sourceBuffer.addEventListener('updateend', () => {
+      if (!this.sourceBuffer) return;
+      if (this.chunkQueue.length > 0 && !this.sourceBuffer.updating) {
+        const chunk = this.chunkQueue.shift();
+        if (chunk) this.sourceBuffer.appendBuffer(chunk);
+      }
+      this.tryEndStream();
+    });
+
+    this.isLoaded.set(true);
+  });
+
+  this.audio.addEventListener('ended', () => {
+    this.zone.run(() => {
+      this.stopSyncLoop();
+      this.isPlaying.set(false);
+      this.timeChange.emit(-1);
+    });
+  });
+
+  this.audio.onerror = (e) => {
+    console.error('StreamAudioPlayer error:', e);
+    this.isLoaded.set(false);
+    this.stopSyncLoop();
+  };
+}
 
   // Llamar esto cuando el backend termine de enviar chunks
   endStream() {
@@ -183,7 +233,7 @@ export class AudioStreamPlayerComponent implements OnDestroy {
     }
   }
 
-  private cleanup() {
+/*   private cleanup() {
     this.stopSyncLoop();
     this.audio.pause();
     this.audio.src = '';
@@ -195,7 +245,35 @@ export class AudioStreamPlayerComponent implements OnDestroy {
       URL.revokeObjectURL(this.currentUrl);
       this.currentUrl = null;
     }
+  } */
+ private cleanup() {
+  this.stopSyncLoop();
+  this.audio.pause();
+  this.audio.src = '';
+
+  // ← Cerrar MediaSource explícitamente antes de soltar la referencia
+  if (this.mediaSource && this.mediaSource.readyState === 'open') {
+    try {
+      if (this.sourceBuffer) {
+        this.mediaSource.removeSourceBuffer(this.sourceBuffer);
+      }
+      this.mediaSource.endOfStream();
+    } catch (e) {
+      console.warn('cleanup MediaSource error:', e);
+    }
   }
+
+  this.mediaSource = null;
+  this.sourceBuffer = null;
+  this.isLoaded.set(false);
+  this.isReady.set(false);
+  this.isPlaying.set(false);
+
+  if (this.currentUrl) {
+    URL.revokeObjectURL(this.currentUrl);
+    this.currentUrl = null;
+  }
+}
 
   private tryEndStream() {
     console.log(`tryEndStream → recibidos: ${this.receivedChunks}, total: ${this.totalChunks}, cola: ${this.chunkQueue.length}, updating: ${this.sourceBuffer?.updating}`);

@@ -112,7 +112,7 @@ async streamBookAudiov2(text: string, voice = 'af_heart') {
   }  
 
   async prefetchNextPage(text: string, voice = 'af_heart') {
-    //if (this.isPrefetching) return;
+    
     if (this.isPrefetching || this.isStreaming) return;
     this.isPrefetching = true;
     this.prefetchChunks = []; // limpiar prefetch anterior

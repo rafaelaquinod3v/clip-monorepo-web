@@ -11,6 +11,7 @@ import { SpeechService } from '../../services/speech-service';
 export class AudioStreamPlayerComponent implements OnDestroy {
  isPlaying = signal(false);
   isLoaded = signal(false);
+  isReady = signal(false); // ← tiene al menos un chunk y puede reproducir
   timeChange = output<number>();
 
   private zone = inject(NgZone);
@@ -28,6 +29,8 @@ export class AudioStreamPlayerComponent implements OnDestroy {
   private receivedChunks = 0;
   private requireManualPlay = false;
   private hasStartedPlaying = false;
+  
+
 
   constructor() {
     this.chunkSubscription = this.speechService.audioChunk$.subscribe(chunk => {
@@ -53,6 +56,7 @@ export class AudioStreamPlayerComponent implements OnDestroy {
 
   // Llamar esto antes de cada nuevo stream
   initStream(requireManualPlay = false) {
+    this.isReady.set(false);
     this.stopStream();
     this.cleanup();
     this.totalChunks = null;   // reset
@@ -142,6 +146,11 @@ export class AudioStreamPlayerComponent implements OnDestroy {
       this.sourceBuffer.appendBuffer(safeChunk);
     }
 
+    // Marcar como listo al recibir el primer chunk real
+    if (!this.isReady() && safeChunk.length > 1920) {
+      this.zone.run(() => this.isReady.set(true));
+    }
+
     // ← Iniciar reproducción con el primer chunk si no requiere play manual
     if (!this.hasStartedPlaying && !this.requireManualPlay) {
       this.hasStartedPlaying = true;
@@ -200,9 +209,6 @@ export class AudioStreamPlayerComponent implements OnDestroy {
         console.log('Cerrando stream, todos los chunks procesados');
         this.mediaSource.endOfStream();
       }
-/*       if(!this.requireManualPlay) {
-        this.togglePlay();
-      } */
     }
   }
 

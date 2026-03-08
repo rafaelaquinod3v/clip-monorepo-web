@@ -10,8 +10,19 @@
       </svg>
     </div>
   } @else {
-    <button (click)="togglePlay()">
-      {{ isPlaying() ? 'Pause' : 'Play' }}
+    <button (click)="togglePlay()" class="play-btn">
+      @if (isPlaying()) {
+        <!-- Pause icon -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="6" y="4" width="4" height="16" rx="1"/>
+          <rect x="14" y="4" width="4" height="16" rx="1"/>
+        </svg>
+      } @else {
+        <!-- Play icon -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5,3 19,12 5,21"/>
+        </svg>
+      }
     </button>
   }
 </div>

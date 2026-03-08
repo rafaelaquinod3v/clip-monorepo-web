@@ -1,39 +1,58 @@
-/* .fluido {
-  
-  width: clamp(300px, 50vw, 800px); 
-  height: clamp(200px, 40vh, 500px);
-  overflow: hidden;
-  line-height: 1.5; 
-  font-size: 18px;
-} */
+.reader-container {
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  width: 90vw;
+  box-sizing: border-box;
+}
 
 .reader-style {
-  width: 90vw;   /* O el tamaño que decidieras */
+  width: 90vw;
   height: 70vh;
   padding: 2rem;
   font-size: 2rem;
   line-height: 1.6;
-  overflow: hidden; /* Evita scrolls durante el cálculo */
-  box-sizing: border-box; /* Fundamental para que el padding no altere el alto */
+  overflow: hidden;
+  box-sizing: border-box;
   display: block;
+  flex: 1; /* ← ocupa el espacio disponible entre los botones */
 }
 
 .ghost-hidden {
   position: absolute;
-  top: -9999px;      /* Lo mandamos lejos de la vista */
-  visibility: hidden; 
+  top: -9999px;
+  visibility: hidden;
   pointer-events: none;
 }
 
-.controls {
-    display: flex;
-    width: 90vw;
-    padding: 20px;
-    box-sizing: border-box; 
-    /*  justify-content: space-between; */
-    justify-content: center; /* Centra todo el grupo de hijos */
-    gap: 20px;               /* Separa a los hijos con un espacio fijo */
-  
-    /* Opcional: si quieres centrar verticalmente también */
-    align-items: center; 
+.nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  border-radius: 50%;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  flex-shrink: 0; /* ← no se encoge aunque el texto sea largo */
+}
+
+.nav-btn {
+  padding: 12px;
+}
+
+.nav-btn svg {
+  width: 40px;
+  height: 40px;
+}
+
+.nav-btn:hover:not(:disabled) {
+  color: #111;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.nav-btn:disabled {
+  color: #ccc;
+  cursor: default;
 }

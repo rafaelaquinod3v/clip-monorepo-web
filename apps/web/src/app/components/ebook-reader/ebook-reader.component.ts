@@ -94,60 +94,6 @@ export class EbookReaderComponent implements OnInit {
 
   @ViewChild(AudioStreamPlayerComponent) streamPlayer!: AudioStreamPlayerComponent;
 
-/*  renderCurrentPage() {
-    if (this.allPhrases.length === 0) return;
-
-    const phrasesFromCurrent = this.allPhrases
-      .slice(this.currentPageStart())
-      .map(s => s.text);
-
-    const { html, plainText, count } = Pagination.generatePageContent(
-      phrasesFromCurrent,
-      this.ghostElement.nativeElement
-    );
-
-    this.lastRenderedCount = count; 
-
-    this.content.set(html);
-    this.wordTimestamps = [];
-    this.streamPlayer.stopStream();
-    this.streamPlayer.initStream(this.isFirstPage());
-
-    this.speechService.streamBookAudiov2(plainText);
-  } */
-
-/*     renderCurrentPage() {
-  if (this.allPhrases.length === 0) return;
-
-  const phrasesFromCurrent = this.allPhrases
-    .slice(this.currentPageStart())
-    .map(s => s.text);
-
-  const { html, plainText, count } = Pagination.generatePageContent(
-    phrasesFromCurrent,
-    this.ghostElement.nativeElement
-  );
-
-  this.lastRenderedCount = count;
-  this.content.set(html); // ← el texto se actualiza inmediatamente
-  this.wordTimestamps = [];
-
-  // Cancelar fetch anterior si el usuario sigue navegando
-  if (this.audioDebounceTimer) {
-    clearTimeout(this.audioDebounceTimer);
-    this.audioDebounceTimer = null;
-  }
-
-  this.streamPlayer.stopStream();
-  this.streamPlayer.initStream(this.isFirstPage());
-
-  // Esperar antes de pedir el audio
-  this.audioDebounceTimer = setTimeout(() => {
-      this.speechService.streamBookAudiov2(plainText);
-  
-  }, this.AUDIO_DEBOUNCE_MS);
-} */
-
   renderCurrentPage() {
     if (this.allPhrases.length === 0) return;
 
@@ -188,6 +134,7 @@ export class EbookReaderComponent implements OnInit {
         this.speechService.streamBookAudiov2(plainText);
       }
     }, this.AUDIO_DEBOUNCE_MS);
+
   }
 
   private prefetchNextPage(currentCount: number) {

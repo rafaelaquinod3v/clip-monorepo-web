@@ -1,18 +1,17 @@
 package sv.com.clip.library.web
 
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import sv.com.clip.config.CustomUserDetails
 import sv.com.clip.library.application.services.EbookService
 import sv.com.clip.library.application.SentenceEntry
 import sv.com.clip.media.api.MediaResponse
 import sv.com.clip.shared.pagination.PageQuery
 import sv.com.clip.shared.pagination.SortOrder
+import sv.com.clip.user.api.CurrentUserId
 import java.util.UUID
 
 @RestController
@@ -42,7 +41,7 @@ class LibraryController(
 
   @GetMapping("/media-content/ebook")
   fun getEpubMediaContent(
-    @AuthenticationPrincipal user: CustomUserDetails,
+    @CurrentUserId userId: UUID,
     @RequestParam(defaultValue = "0") offset: Int,
     @RequestParam(defaultValue = "10") limit: Int,
     @RequestParam(defaultValue = "createdAt") sortField: String,
@@ -51,14 +50,14 @@ class LibraryController(
     ): ResponseEntity<List<MediaResponse>> {
 
     val pageQuery = PageQuery(offset, limit, sortField, SortOrder.valueOf(sortOrder))
-    return ResponseEntity.ok(ebookService.loadEbookMediaContent(user.id, mediaTypes, pageQuery))
+    return ResponseEntity.ok(ebookService.loadEbookMediaContent(userId, mediaTypes, pageQuery))
   }
 
   @GetMapping("/media-content/ebook/{id}")
   fun getEBook(
+    @CurrentUserId userId: UUID,
     @PathVariable id: UUID,
-    @AuthenticationPrincipal user: CustomUserDetails,
   ) : ResponseEntity<MediaResponse> {
-    return ResponseEntity.ok(ebookService.findEbookMediaContentById(id, user.id))
+    return ResponseEntity.ok(ebookService.findEbookMediaContentById(id, userId))
   }
 }

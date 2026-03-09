@@ -1,4 +1,4 @@
-package sv.com.clip.config
+package sv.com.clip.auth.infrastructure.security
 
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.JwtException
@@ -13,6 +13,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
+import sv.com.clip.auth.infrastructure.security.CustomUserDetails
+import sv.com.clip.auth.infrastructure.security.JwtService
 
 @Component
 class JwtFilter(private val jwtService: JwtService) : OncePerRequestFilter() {

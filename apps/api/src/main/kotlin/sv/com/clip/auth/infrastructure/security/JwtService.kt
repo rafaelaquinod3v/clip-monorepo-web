@@ -1,11 +1,10 @@
-package sv.com.clip.config
+package sv.com.clip.auth.infrastructure.security
 
-import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import org.springframework.stereotype.Component
-import java.util.*
-
+import java.util.Date
+import java.util.UUID
 
 @Component
 class JwtService {
@@ -23,8 +22,13 @@ class JwtService {
 
   fun validateToken(token: String): String? = getPayload(token).subject
 
-  fun extractRoles(token: String): List<String> =
-    getPayload(token)["roles"] as List<String>
+/*  fun extractRoles(token: String): List<String> =
+    getPayload(token)["roles"] as List<String>*/
+
+  fun extractRoles(token: String): List<String> {
+    val roles = getPayload(token)["roles"] as? List<*>
+    return roles?.filterIsInstance<String>() ?: emptyList()
+  }
 
   fun extractUserId(token: String): UUID =
     UUID.fromString(getPayload(token)["userId"] as String)

@@ -1387,6 +1387,7 @@
 ├── build.log
 ├── docker-compose.yml
 ├── eslint.config.mjs
+├── estructura.txt
 ├── gradle
 │   ├── libs.versions.toml
 │   └── wrapper
@@ -1414,4 +1415,4 @@
 ├── structure.txt
 └── tsconfig.base.json
 
-253 directories, 1162 files
+253 directories, 1163 files

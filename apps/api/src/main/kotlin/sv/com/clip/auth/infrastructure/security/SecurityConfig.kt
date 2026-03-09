@@ -1,4 +1,4 @@
-package sv.com.clip.config
+package sv.com.clip.auth.infrastructure.security
 
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.annotation.Bean
@@ -9,7 +9,6 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import sv.com.clip.config.JwtFilter
 
 @Configuration
 @EnableWebSecurity

@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs';
 import { Router } from '@angular/router';
 
-const apiUrl = 'http://localhost:8080/api/users/login';
+const apiUrl = 'http://localhost:8080/api/v1/auth/login';
 
 @Injectable({
   providedIn: 'root',

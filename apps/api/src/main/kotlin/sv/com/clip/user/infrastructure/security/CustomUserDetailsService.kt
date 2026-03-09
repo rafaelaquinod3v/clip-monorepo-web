@@ -1,18 +1,20 @@
-package sv.com.clip.user
+package sv.com.clip.user.infrastructure.security
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Service
+import sv.com.clip.user.infrastructure.persistance.UserJpaRepository
 
 @Service
-class CustomUserDetailsService(private val userRepository: UserRepository) : UserDetailsService {
+class CustomUserDetailsService(private val userJpaRepository: UserJpaRepository) : UserDetailsService {
   override fun loadUserByUsername(username: String): UserDetails {
-    val user = userRepository.findByUsername(username)
+    val user = userJpaRepository.findByUsername(username)
       ?: throw UsernameNotFoundException("Usuario no encontrado")
 
-    return org.springframework.security.core.userdetails.User(
+    return User(
       user.username,
       user.password,
       user.roles.map { SimpleGrantedAuthority(it) }

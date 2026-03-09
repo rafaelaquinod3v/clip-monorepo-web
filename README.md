@@ -1,3 +1,8 @@
+# genera structura de carpetas y archivos para analisis
+tree . -I "node_modules|build|dist|.git|target|.idea|bin|venv" > estructura.txt
+npm run tree
+
+
 # Desktop
 npx nx serve desktop-ui
 npx nx build desktop-main --watch

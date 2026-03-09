@@ -82,39 +82,6 @@ class TTSService(
     tts = OfflineTts(mainConfig)
   }
 
-/*  fun streamTextSplitBySentence(fullText: String, voice: String, outputStream: OutputStream) = runBlocking {
-    val sentences = textProcessor.splitBySentence(fullText).filter { it.isNotBlank() }
-    val objectMapper = ObjectMapper() // O inyéctalo si ya tienes uno en Spring
-
-    // 1. Lanzamos todas las peticiones a Kokoro en paralelo
-    val deferredResponses = sentences.map { sentence ->
-      async(Dispatchers.IO) {
-        //fetchFullJsonResponse(sentence.trim(), voice)
-        semaphore.withPermit {
-          println(sentence)
-          fetchFullJsonResponse(sentence.trim(), voice)
-        }
-      }
-    }
-
-    // 2. Escribimos en el stream respetando el orden de las frases
-    deferredResponses.forEach { deferred ->
-      try {
-        val jsonMap = deferred.await() // Esperamos a que la frase esté lista
-        if (jsonMap != null && jsonMap.isNotEmpty()) {
-          // Convertimos el Mapa a un String JSON de una sola línea
-          val jsonLine = objectMapper.writeValueAsString(jsonMap)
-
-          outputStream.write(jsonLine.toByteArray())
-          outputStream.write("\n".toByteArray()) // Separador NDJSON
-          outputStream.flush()
-        }
-      } catch (e: Exception) {
-        println("Error procesando fragmento JSON: ${e.message}")
-      }
-    }
-  }*/
-
   private fun fetchFullJsonResponse(sentence: String, voice: String): Map<String, Any>? {
     val kokoroRequest = mapOf(
       "input" to sentence,
@@ -260,55 +227,6 @@ class TTSService(
     }
   }
 
-
-
-
-/*  fun streamTextSplitBySentenceAsync(fullText: String, voice: String, outputStream: OutputStream, httpRequest: HttpServletRequest) {
-    val sentences = textProcessor.splitBySentence(fullText)
-      .filter { it.isNotBlank() }
-      .map { it.trim() }
-
-    runBlocking {
-      // Lanzar todas las frases en paralelo
-      val deferredResults = sentences.mapIndexed { index, sentence ->
-        async(Dispatchers.IO) {
-          println(sentence)
-          val kokoroRequest = mapOf(
-            "input" to sentence,
-            "voice" to voice,
-            "model" to "kokoro",
-            "stream" to true,
-            "response_format" to "mp3"
-          )
-          try {
-            val responseEntity = restClient.post()
-              .uri("/dev/captioned_speech")
-              .contentType(MediaType.APPLICATION_JSON)
-              .body(kokoroRequest)
-              .retrieve()
-              .toEntity<Resource>()
-
-            index to responseEntity.body?.inputStream?.readBytes()
-          } catch (e: Exception) {
-            println("Error procesando sentencia: $sentence - ${e.message}")
-            index to null
-          }
-        }
-      }
-
-      // Escribir en orden conforme terminan
-      deferredResults
-        .awaitAll()
-        .sortedBy { it.first }
-        .forEach { (_, bytes) ->
-          if (bytes != null) {
-            outputStream.write(bytes)
-            outputStream.write("\n".toByteArray())
-            outputStream.flush()
-          }
-        }
-    }
-  }*/
 
 
   fun generateMp3(text: String, voice: String = "af_heart"): ByteArray {

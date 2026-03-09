@@ -2,7 +2,9 @@
   "name": "@clip-monorepo/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "tree": "tree . -I 'node_modules|build|dist|.git|target|.idea|bin|venv|.nx' > structure.txt"
+  },
   "private": true,
   "devDependencies": {
     "@angular-devkit/core": "~21.0.0",

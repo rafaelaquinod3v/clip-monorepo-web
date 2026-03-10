@@ -10,23 +10,6 @@ import sv.com.clip.tts.domain.TtsPort
 @RequestMapping("/api/v1/tts")
 class TtsController(private val ttsPort: TtsPort) {
 
-/*  @GetMapping("/speak", produces = ["audio/mpeg"])
-  fun generateMp3Audio(@RequestParam text: String): ResponseEntity<ByteArray> {
-    val mp3Data = ttsService.generateMp3(text)
-
-    val headers = HttpHeaders()
-    headers.contentType = MediaType.parseMediaType("audio/mpeg")
-    headers.contentDisposition = ContentDisposition.inline().filename("speech.mp3").build()
-
-    return ResponseEntity(mp3Data, headers, HttpStatus.OK)
-  }*/
-
-/*  @GetMapping("/synthesize")
-  fun synthesize(@RequestParam text: String): ResponseEntity<Map<String, Any>> {
-    val result = ttsService.generateAudioWithSync(text)
-    return ResponseEntity.ok(result)
-  }*/
-
   @PostMapping("/stream")
   fun streamTextToNDJson(
     asyncRequest: AsyncWebRequest,
@@ -35,8 +18,6 @@ class TtsController(private val ttsPort: TtsPort) {
     asyncRequest.setTimeout(300000L) // 5 minutos solo para este endpoint
     val fullText = request["text"] ?: throw IllegalArgumentException("Text is required")
     val voice = request["voice"] ?: "af_heart"
-
-    println(fullText)
 
     val responseBody = StreamingResponseBody { outputStream ->
       // Delegamos TODA la lógica al servicio

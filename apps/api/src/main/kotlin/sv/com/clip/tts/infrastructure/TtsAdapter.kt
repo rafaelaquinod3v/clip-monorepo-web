@@ -26,7 +26,6 @@ class TtsAdapter(
   //private val recognizerService: RecognizerService,
   private val textProcessor: TextProcessorExternal,
   private val objectMapper: ObjectMapper,
- // private val audioService: AudioService,
 ) : TtsPort {
   //private val tts: OfflineTts
   // Configuramos el cliente una sola vez (Bean o init)
@@ -36,140 +35,6 @@ class TtsAdapter(
       .build()).apply { setReadTimeout(Duration.ofSeconds(60)) })
     .baseUrl("http://localhost:8880")
     .build()
-
-  init {
-/*    val modelResource = ClassPathResource("models/en_US-amy-low.onnx").file.absolutePath
-    val tokensResource = ClassPathResource("models/tokens.txt").file.absolutePath
-    val dataDirResource = ClassPathResource("models/espeak-ng-data").file.absolutePath
-    // 1. Build VITS Config
-    val vitsConfig = OfflineTtsVitsModelConfig.builder()
-      .setModel(modelResource)
-      .setTokens(tokensResource)
-      .setDataDir(dataDirResource)
-      .setNoiseScale(0.667f)
-      .setNoiseScaleW(0.8f)
-      .setLengthScale(1f)
-      .build()
-
-    // 2. Build Model Config (Includes VITS and threading)
-    val modelConfig = OfflineTtsModelConfig.builder()
-      .setVits(vitsConfig)
-      .setNumThreads(4)
-      .setDebug(false)
-      .setProvider("cpu")
-      .build()
-
-    // 3. Build Main TTS Config
-    val mainConfig = OfflineTtsConfig.builder()
-      .setModel(modelConfig)
-      .build()
-
-    // 4. Instantiate the engine
-    tts = OfflineTts(mainConfig)*/
-  }
-
-
-  fun streamTextSplitBySentenceSync(fullText: String, voice: String, outputStream: OutputStream) {
-    val sentences = textProcessor.splitBySentence(fullText)
-
-    sentences.forEach { sentence ->
-      println(sentence)
-      if (sentence.isBlank()) return@forEach
-
-      val kokoroRequest = mapOf(
-        "input" to sentence.trim(),
-        "voice" to voice,
-        "model" to "kokoro",
-        "stream" to true,
-        "response_format" to "mp3"
-      )
-
-      try {
-        val responseEntity = restClient.post()
-          .uri("/dev/captioned_speech")
-          .contentType(MediaType.APPLICATION_JSON)
-          .body(kokoroRequest)
-          .retrieve()
-          .toEntity<Resource>()
-
-          responseEntity.body?.inputStream?.use { inputStream ->
-            inputStream.copyTo(outputStream)
-            outputStream.write("\n".toByteArray())
-            outputStream.flush()
-          }
-      } catch (e: Exception) {
-        println("Error procesando sentencia: $sentence - ${e.message}")
-      }
-    }
-  }
-  fun streamTextSplitBySentenceAsync(
-    fullText: String,
-    voice: String,
-    outputStream: OutputStream,
-    httpRequest: HttpServletRequest
-  ) {
-    val sentences = textProcessor.splitBySentence(fullText)
-      .filter { it.isNotBlank() }
-      .map { it.trim() }
-
-    val job = Job()
-
-    // Spring notifica cuando el cliente se desconecta
-    httpRequest.asyncContext?.addListener(object : AsyncListener {
-      override fun onComplete(event: AsyncEvent) = Unit
-      override fun onStartAsync(event: AsyncEvent) = Unit
-      override fun onTimeout(event: AsyncEvent) { job.cancel() }
-      override fun onError(event: AsyncEvent) { job.cancel() }
-    })
-
-    runBlocking(job) {
-      try {
-        val deferredResults = sentences.mapIndexed { index, sentence ->
-          async(Dispatchers.IO) {
-            ensureActive() // ← cancela si el job fue cancelado
-            println(sentence)
-            val kokoroRequest = mapOf(
-              "input" to sentence,
-              "voice" to voice,
-              "model" to "kokoro",
-              "stream" to true,
-              "response_format" to "mp3"
-            )
-            try {
-              val responseEntity = restClient.post()
-                .uri("/dev/captioned_speech")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(kokoroRequest)
-                .retrieve()
-                .toEntity<Resource>()
-
-              index to responseEntity.body?.inputStream?.readBytes()
-            } catch (e: Exception) {
-              if (e is CancellationException) throw e // propagar cancelación
-              println("Error procesando sentencia: $sentence - ${e.message}")
-              index to null
-            }
-          }
-        }
-
-        deferredResults
-          .awaitAll()
-          .sortedBy { it.first }
-          .forEach { (_, bytes) ->
-            ensureActive() // ← verificar antes de cada escritura
-            if (bytes != null) {
-              outputStream.write(bytes)
-              outputStream.write("\n".toByteArray())
-              outputStream.flush()
-            }
-          }
-      } catch (e: CancellationException) {
-        println("Stream cancelado por desconexión del cliente")
-      } finally {
-        job.cancel() // asegurarse de limpiar
-      }
-    }
-  }
 
   override fun textSplitBySentenceSync(
     fullText: String,
@@ -210,71 +75,7 @@ class TtsAdapter(
     }
   }
 
-/*  override fun textSplitBySentenceSync(
-    fullText: String,
-    voice: String,
-    outputStream: OutputStream
-  ) {
-    val sentences = textProcessor.splitBySentence(fullText)
-
-    sentences.forEach { sentence ->
-      if (sentence.isBlank()) return@forEach
-
-      val kokoroRequest = mapOf(
-        "model" to "tts-1",
-        "input" to sentence.trim(),
-        "voice" to voice,
-        "response_format" to "mp3"
-        // sin "stream" — Kokoros devuelve el MP3 completo de la oración
-      )
-
-      try {
-        val audioBytes = restClient.post()
-          .uri("/v1/audio/speech")
-          .contentType(MediaType.APPLICATION_JSON)
-          .body(kokoroRequest)
-          .retrieve()
-          .body(ByteArray::class.java)
-
-        audioBytes?.let {
-          outputStream.write(it)
-          outputStream.flush()
-        }
-      } catch (e: Exception) {
-        println("Error procesando sentencia: $sentence - ${e.message}")
-      }
-    }
-  }*/
-
-/*  fun generateMp3(text: String, voice: String = "af_heart"): ByteArray {
-
-    val kokoroRequest = mapOf(
-      "input" to text.trim(),
-      "voice" to voice,
-      "model" to "kokoro",
-      "stream" to false,
-      "response_format" to "mp3"
-    )
-
-    return try {
-      val response = restClient.post()
-        .uri("/v1/audio/speech")
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(kokoroRequest)
-        .retrieve()
-        .toEntity<Resource>()
-
-
-      val responseBytes = response.body?.inputStream?.readAllBytes() ?: ByteArray(0)
-
-      return responseBytes
-    } catch (e: Exception) {
-      println("Error generando WAV: ${e.message}")
-      ByteArray(0)
-    }
-  }*/
-
-  // kokoro_local
+// kokoro_local
 /*  fun generateAudioWithSync(text: String): Map<String, Any> {
 
     val samples = generateSpeech(text) //audio.samples
@@ -329,8 +130,6 @@ class TtsAdapter(
       "alignment" to wordAlignments
     )
   }*/
-
-
 
 }
 

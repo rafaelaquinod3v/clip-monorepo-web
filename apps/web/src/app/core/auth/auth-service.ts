@@ -2,8 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs';
 import { Router } from '@angular/router';
-
-const apiUrl = 'http://localhost:8080/api/v1/auth/login';
+import { environment } from '../../../environments/environment';
+import { API_PATHS } from '../constants/api-paths';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +12,7 @@ export class AuthService {
   private client = inject(HttpClient);
   private router = inject(Router);
   login(credentials: any) {
-    return this.client.post(apiUrl, credentials).pipe(tap((response: any) => {
+    return this.client.post(`${environment.apiUrl}${API_PATHS.auth.login}`, credentials).pipe(tap((response: any) => {
       localStorage.setItem('token', response.token);
     }));
   }

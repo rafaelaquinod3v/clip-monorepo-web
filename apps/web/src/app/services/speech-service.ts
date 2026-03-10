@@ -136,7 +136,7 @@ private getAudioDuration(bytes: Uint8Array): Promise<number> {
 }
 
   private http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/audio';
+  private readonly apiUrl = 'http://localhost:8080/api/v1/tts';
 
   speak(text: string) {
     return this.http.get(`${this.apiUrl}/speak?text=${text}`, {
@@ -173,7 +173,7 @@ async streamBookAudiov2(text: string, voice = 'af_heart') {
   this.chunkCount = 0;
 
   try {
-    const response = await fetch('http://localhost:8080/api/audio/stream-book', {
+    const response = await fetch(`${this.apiUrl}/stream`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, voice }),
@@ -219,7 +219,7 @@ async prefetchNextPage(text: string, voice = 'af_heart') {
   this.prefetchChunks = [];
 
   try {
-    const response = await fetch('http://localhost:8080/api/audio/stream-book', {
+    const response = await fetch(`${this.apiUrl}/stream`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, voice }),

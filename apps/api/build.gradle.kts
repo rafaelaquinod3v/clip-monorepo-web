@@ -38,11 +38,11 @@ extensions.configure<JavaPluginExtension> {
 dependencies {
 
   // Esto incluirá tanto el puente Java como la librería nativa
-  implementation(fileTree("libs") { include("*.jar") })
-/*  implementation(files(
+  //implementation(fileTree("libs") { include("*.jar") })
+  implementation(files(
     "libs/sherpa-onnx-native-lib-linux-x64-v1.12.10.jar",
     "libs/sherpa-onnx-v1.12.10.jar"
-  ))*/
+  ))
 
   // WebSockets y Mensajería STOMP
   implementation("org.springframework.boot:spring-boot-starter-websocket")
@@ -62,8 +62,8 @@ dependencies {
   implementation("org.springframework.ai:spring-ai-starter-model-ollama")
 
   // Kokoro
-  implementation("com.microsoft.onnxruntime:onnxruntime:1.17.1")
-  implementation("net.java.dev.jna:jna:5.13.0")
+  //implementation("com.microsoft.onnxruntime:onnxruntime:1.17.1")
+  //implementation("net.java.dev.jna:jna:5.13.0")
 
   //
 

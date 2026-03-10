@@ -1,4 +1,4 @@
-package sv.com.clip.audio.internal
+package sv.com.clip.tts.infrastructure
 
 import org.springframework.stereotype.Service
 import ws.schild.jave.Encoder

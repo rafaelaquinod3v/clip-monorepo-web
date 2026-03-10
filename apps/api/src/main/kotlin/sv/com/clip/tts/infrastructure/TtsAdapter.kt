@@ -1,48 +1,31 @@
-package sv.com.clip.audio.internal
+package sv.com.clip.tts.infrastructure
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.k2fsa.sherpa.onnx.*
 import jakarta.servlet.AsyncEvent
 import jakarta.servlet.AsyncListener
 import jakarta.servlet.http.HttpServletRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.*
-import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
 import org.springframework.http.MediaType
 import org.springframework.http.client.JdkClientHttpRequestFactory
-
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
-import org.springframework.web.client.body
 import org.springframework.web.client.toEntity
 import sv.com.clip.text.api.TextProcessorExternal
-
-
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.util.Base64
-import ws.schild.jave.Encoder
-import ws.schild.jave.MultimediaObject
-import ws.schild.jave.encode.AudioAttributes
-import ws.schild.jave.encode.EncodingAttributes
-import java.io.File
-import java.io.IOException
+import sv.com.clip.tts.domain.TtsPort
 import java.io.OutputStream
 import java.net.http.HttpClient
 import java.time.Duration
 
-@Service
-class TTSService(
-  private val recognizerService: RecognizerService,
+@Component
+class TtsAdapter(
+  //private val recognizerService: RecognizerService,
   private val textProcessor: TextProcessorExternal,
-  private val audioService: AudioService,
-) {
-  private val semaphore = Semaphore(3)
-  private val tts: OfflineTts
+ // private val audioService: AudioService,
+) : TtsPort {
+  //private val tts: OfflineTts
   // Configuramos el cliente una sola vez (Bean o init)
   private val restClient = RestClient.builder()
     .requestFactory(JdkClientHttpRequestFactory(HttpClient.newBuilder()
@@ -52,7 +35,7 @@ class TTSService(
     .build()
 
   init {
-    val modelResource = ClassPathResource("models/en_US-amy-low.onnx").file.absolutePath
+/*    val modelResource = ClassPathResource("models/en_US-amy-low.onnx").file.absolutePath
     val tokensResource = ClassPathResource("models/tokens.txt").file.absolutePath
     val dataDirResource = ClassPathResource("models/espeak-ng-data").file.absolutePath
     // 1. Build VITS Config
@@ -79,53 +62,11 @@ class TTSService(
       .build()
 
     // 4. Instantiate the engine
-    tts = OfflineTts(mainConfig)
+    tts = OfflineTts(mainConfig)*/
   }
 
-  private fun fetchFullJsonResponse(sentence: String, voice: String): Map<String, Any>? {
-    val kokoroRequest = mapOf(
-      "input" to sentence,
-      "voice" to voice,
-      "model" to "kokoro",
-      "stream" to true,
-      "response_format" to "mp3" // O "wav" según prefieras
-    )
 
-    return try {
-      // Obtenemos el JSON completo que incluye "audio" y "tokens"/"timestamps"
-      restClient.post()
-        .uri("/dev/captioned_speech")
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(kokoroRequest)
-        .retrieve()
-        .body<Map<String, Any>>()
-    } catch (e: Exception) {
-      null
-    }
-  }
-
-  fun streamTextSincrono(fullText: String, voice: String, outputStream: OutputStream) {
-    val sentences = textProcessor.splitBySentence(fullText).filter { it.isNotBlank() }
-    val objectMapper = ObjectMapper()
-
-    sentences.forEach { sentence ->
-      try {
-        // Una por una, aprovechando toda la CPU para cada frase
-        val jsonMap = fetchFullJsonResponse(sentence.trim(), voice)
-
-        if (jsonMap != null) {
-          val jsonLine = objectMapper.writeValueAsString(jsonMap)
-          outputStream.write(jsonLine.toByteArray())
-          outputStream.write("\n".toByteArray())
-          outputStream.flush() // Enviamos al cliente inmediatamente
-        }
-      } catch (e: Exception) {
-        println("Error en frase: $sentence - ${e.message}")
-      }
-    }
-  }
-
-  fun streamTextSplitBySentenceSync(fullText: String, voice: String, outputStream: OutputStream) {
+  override fun streamTextSplitBySentenceSync(fullText: String, voice: String, outputStream: OutputStream) {
     val sentences = textProcessor.splitBySentence(fullText)
 
     sentences.forEach { sentence ->
@@ -229,7 +170,7 @@ class TTSService(
 
 
 
-  fun generateMp3(text: String, voice: String = "af_heart"): ByteArray {
+/*  fun generateMp3(text: String, voice: String = "af_heart"): ByteArray {
 
     val kokoroRequest = mapOf(
       "input" to text.trim(),
@@ -247,7 +188,7 @@ class TTSService(
         .retrieve()
         .toEntity<Resource>()
 
-      // Leemos todo el inputStream y lo convertimos a ByteArray
+
       val responseBytes = response.body?.inputStream?.readAllBytes() ?: ByteArray(0)
 
       return responseBytes
@@ -255,26 +196,10 @@ class TTSService(
       println("Error generando WAV: ${e.message}")
       ByteArray(0)
     }
-  }
-
-  fun generateSpeech(text: String, voice: String = "af_heart"): ByteArray? {
-
-    val requestBody = mapOf(
-      "input" to text,
-      "voice" to voice,
-      "model" to "tts-1",
-      "response_format" to "wav"
-    )
-
-    return restClient.post()
-      .uri("/audio/speech")
-      .body(requestBody)
-      .retrieve()
-      .body<ByteArray>() // Recibes los bytes del audio
-  }
+  }*/
 
   // kokoro_local
-  fun generateAudioWithSync(text: String): Map<String, Any> {
+/*  fun generateAudioWithSync(text: String): Map<String, Any> {
 
     val samples = generateSpeech(text) //audio.samples
     val sampleRate = 24000 ///audio.sampleRate
@@ -327,7 +252,7 @@ class TTSService(
       "audio" to Base64.getEncoder().encodeToString(audioService.convertWavToMp3(samples)),
       "alignment" to wordAlignments
     )
-  }
+  }*/
 
 
 

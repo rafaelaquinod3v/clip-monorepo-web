@@ -1,4 +1,4 @@
-package sv.com.clip.audio.internal
+package sv.com.clip.asr.infrastructure
 
 import com.k2fsa.sherpa.onnx.FeatureConfig
 import com.k2fsa.sherpa.onnx.OfflineModelConfig
@@ -8,10 +8,11 @@ import com.k2fsa.sherpa.onnx.OfflineRecognizerConfig
 import com.k2fsa.sherpa.onnx.OfflineRecognizerResult
 import jakarta.annotation.PostConstruct
 import org.springframework.core.io.ClassPathResource
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
+import sv.com.clip.asr.domain.AsrPort
 
-@Service
-class RecognizerService {
+@Component
+class AsrAdapter : AsrPort {
   private lateinit var recognizer: OfflineRecognizer
   @PostConstruct
   fun init() {
@@ -45,7 +46,7 @@ class RecognizerService {
     recognizer = OfflineRecognizer(config)
   }
 
-fun getTimestampsFromAudio(samples: FloatArray, sampleRate: Float): OfflineRecognizerResult {
+  override fun getTimestampsFromAudio(samples: FloatArray, sampleRate: Float): OfflineRecognizerResult {
     val stream = recognizer.createStream()
     if (samples.isEmpty()) {
       println("Received empty audio for timestamping.")

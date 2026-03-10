@@ -1,8 +1,7 @@
 package sv.com.clip.library.application.services
 
-import com.k2fsa.sherpa.onnx.OfflineRecognizerResult
 import org.springframework.stereotype.Service
-import sv.com.clip.audio.internal.RecognizerService
+import sv.com.clip.asr.api.AsrProvider
 import sv.com.clip.storage.api.StorageApi
 import ws.schild.jave.Encoder
 import ws.schild.jave.MultimediaObject
@@ -15,10 +14,10 @@ import java.nio.ByteOrder
 @Service
 class ImportAudioService(
   private val storageApi: StorageApi,
-  private val recognizerService: RecognizerService,
+  private val asrProvider: AsrProvider,
 ) {
   private data class Word(val text: String, val startTime: Float)
-  fun processAudioGenerateSRT(fileName: String) {
+/*  fun processAudioGenerateSRT(fileName: String) {
     val audioBytes = storageApi.load(fileName)
       ?: throw RuntimeException("No se pudo leer el archivo: $fileName")
 
@@ -39,7 +38,7 @@ class ImportAudioService(
     chunks.forEach { chunk ->
       val chunkBytes = chunk.readBytes()
       val audioFloats = decodeMp3To24kHzMono(chunkBytes)
-      val result = recognizerService.getTimestampsFromAudio(audioFloats, 24000f)
+      val result = asrProvider.getTimestampsFromAudio(audioFloats, 24000f)
 
       // Agregar offset de tiempo para que los timestamps sean globales
       allTokens.addAll(result.tokens.toList())
@@ -55,8 +54,8 @@ class ImportAudioService(
     tempInput.delete() // limpiar archivo original temporal
 
     // Formatear SRT con todos los tokens y timestamps combinados
-/*    val srt = formatToSRTFromRaw(allTokens, allTimestamps)
-    println("Srt: $srt")*/
+*//*    val srt = formatToSRTFromRaw(allTokens, allTimestamps)
+    println("Srt: $srt")*//*
     val lrc = formatToLrcKaraoke(
       tokens = allTokens,
       timestamps = allTimestamps,
@@ -65,7 +64,7 @@ class ImportAudioService(
     println("Lrc: $lrc")
     val savedName = storageApi.store(lrc.toByteArray(Charsets.UTF_8))
     println("Subtítulo guardado como: $savedName")
-  }
+  }*/
 
   // Nuevo formatToSRT que acepta listas directamente
   private fun formatToSRTFromRaw(tokens: List<String>, timestamps: List<Float>): String {

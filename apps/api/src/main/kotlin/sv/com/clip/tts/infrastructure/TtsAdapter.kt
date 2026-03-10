@@ -1,5 +1,6 @@
 package sv.com.clip.tts.infrastructure
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.AsyncEvent
 import jakarta.servlet.AsyncListener
 import jakarta.servlet.http.HttpServletRequest
@@ -18,11 +19,13 @@ import sv.com.clip.tts.domain.TtsPort
 import java.io.OutputStream
 import java.net.http.HttpClient
 import java.time.Duration
+import java.util.Base64
 
 @Component
 class TtsAdapter(
   //private val recognizerService: RecognizerService,
   private val textProcessor: TextProcessorExternal,
+  private val objectMapper: ObjectMapper,
  // private val audioService: AudioService,
 ) : TtsPort {
   //private val tts: OfflineTts
@@ -66,7 +69,7 @@ class TtsAdapter(
   }
 
 
-  override fun streamTextSplitBySentenceSync(fullText: String, voice: String, outputStream: OutputStream) {
+  fun streamTextSplitBySentenceSync(fullText: String, voice: String, outputStream: OutputStream) {
     val sentences = textProcessor.splitBySentence(fullText)
 
     sentences.forEach { sentence ->
@@ -168,7 +171,80 @@ class TtsAdapter(
     }
   }
 
+  override fun textSplitBySentenceSync(
+    fullText: String,
+    voice: String,
+    outputStream: OutputStream
+  ) {
+    val sentences = textProcessor.splitBySentence(fullText)
+    val validSentences = sentences.filter { it.isNotBlank() }
 
+    validSentences.forEachIndexed { _, sentence ->
+      val kokoroRequest = mapOf(
+        "model" to "tts-1",
+        "input" to sentence.trim(),
+        "voice" to voice,
+        "response_format" to "mp3"
+      )
+
+      try {
+        val audioBytes = restClient.post()
+          .uri("/v1/audio/speech")
+          .contentType(MediaType.APPLICATION_JSON)
+          .body(kokoroRequest)
+          .retrieve()
+          .body(ByteArray::class.java)
+
+        audioBytes?.let {
+          val chunk = mapOf(
+            "audio" to Base64.getEncoder().encodeToString(it),
+            "timestamps" to emptyList<Any>()
+          )
+          val line = objectMapper.writeValueAsString(chunk) + "\n"
+          outputStream.write(line.toByteArray())
+          outputStream.flush()
+        }
+      } catch (e: Exception) {
+        println("Error procesando sentencia: $sentence - ${e.message}")
+      }
+    }
+  }
+
+/*  override fun textSplitBySentenceSync(
+    fullText: String,
+    voice: String,
+    outputStream: OutputStream
+  ) {
+    val sentences = textProcessor.splitBySentence(fullText)
+
+    sentences.forEach { sentence ->
+      if (sentence.isBlank()) return@forEach
+
+      val kokoroRequest = mapOf(
+        "model" to "tts-1",
+        "input" to sentence.trim(),
+        "voice" to voice,
+        "response_format" to "mp3"
+        // sin "stream" — Kokoros devuelve el MP3 completo de la oración
+      )
+
+      try {
+        val audioBytes = restClient.post()
+          .uri("/v1/audio/speech")
+          .contentType(MediaType.APPLICATION_JSON)
+          .body(kokoroRequest)
+          .retrieve()
+          .body(ByteArray::class.java)
+
+        audioBytes?.let {
+          outputStream.write(it)
+          outputStream.flush()
+        }
+      } catch (e: Exception) {
+        println("Error procesando sentencia: $sentence - ${e.message}")
+      }
+    }
+  }*/
 
 /*  fun generateMp3(text: String, voice: String = "af_heart"): ByteArray {
 

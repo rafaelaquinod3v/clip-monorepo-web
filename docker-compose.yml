@@ -1,16 +1,12 @@
 services:
   kokoro-tts:
-    image: ghcr.io/remsky/kokoro-fastapi-cpu:latest
-    #container_name: kokoro_local
-    #ports:
-    #  - "8880:8880"
-    shm_size: '2gb' # IMPORTANT: PyTorch needs shared memory
-    deploy:
-      replicas: 2
-      resources:
-        limits:
-          memory: 3G  # Give it enough room to breathe
-    restart: no #unless-stopped
+    image: ghcr.io/lucasjinreal/kokoros:main  # Rust — reemplaza kokoro-fastapi-cpu
+    container_name: kokoro_tts_local
+    # Sin shm_size — Rust no necesita shared memory de PyTorch
+    # Sin replicas por ahora — Kokoros usa --instances internamente
+    command: openai  # levanta el servidor HTTP compatible OpenAI
+    restart: no
+    # Puerto interno 3000 (distinto al 8880 de FastAPI)
 
   nginx:
     image: nginx

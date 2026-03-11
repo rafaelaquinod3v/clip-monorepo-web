@@ -2,12 +2,13 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { form, FormField, required, minLength } from '@angular/forms/signals';
 import { DELICIOUS_TTS, JUNGLE, STRESS_TTS, TEST_TTS, WELCOME_TO_THE_JUNGLE } from './text.const';
 import { AnalyzeText } from '../../services/analyze-text';
-import { LearningService } from '../../services/learning-service';
+/* import { LearningService } from '../../services/learning-service'; */
 import { SpeechService, TtsResponse, WordAlignment } from '../../services/speech-service';
 import { AudioPlayer } from '../audio-player/audio-player';
 import { base64ToMp3Fast } from './audio';
 import { handleKeyDownHelper, handleWordClickEnterOrSpaceHelper } from './keyboard-mouse';
 import { WordAnalysis, updateOptimisticLocalUserWordStatusHelper } from './helper';
+import { LearningService } from '../../features/vocabulary/data-access/learning-service';
 
 @Component({
   selector: 'app-reader',

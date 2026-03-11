@@ -1,5 +1,5 @@
 import { Component, inject, Input, OnInit, signal } from '@angular/core';
-import { EpubService } from '../../../../services/epub-service';
+import { LibraryService } from '../../data-access/library.service';
 import { MediaContentResponse, MediaType } from '../../../../models/media-content.model';
 import { RouterLink } from '@angular/router';
 
@@ -12,7 +12,7 @@ import { RouterLink } from '@angular/router';
 })
 export class MediaContentShelfComponent implements OnInit {
 
-  epubService = inject(EpubService);
+  libraryService = inject(LibraryService);
 
   @Input({required: true}) mediaTypes!: MediaType[];
   @Input({required: true}) limit = 10;
@@ -23,7 +23,7 @@ export class MediaContentShelfComponent implements OnInit {
   mediaContentShelfItems = signal<MediaContentResponse[]>([])
 
   ngOnInit(): void {
-    this.epubService.loadMediaContent(this.offset, this.limit, "uploadedAt", this.sortOrder, this.mediaTypes).subscribe((response) => {
+    this.libraryService.loadMediaContent(this.offset, this.limit, "uploadedAt", this.sortOrder, this.mediaTypes).subscribe((response) => {
       console.log(response);
       this.mediaContentShelfItems.set(response)
     });

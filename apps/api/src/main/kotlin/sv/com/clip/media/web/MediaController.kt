@@ -13,7 +13,7 @@ import sv.com.clip.user.api.CurrentUserId
 import java.util.UUID
 
 @RestController
-@RequestMapping("/media-content")
+@RequestMapping("/api/v1/media-content")
 class MediaController(
   private val uploadMediaContentCommandHandler: UploadMediaContentCommandHandler,
 ) {

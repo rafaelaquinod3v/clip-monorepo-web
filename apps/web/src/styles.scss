@@ -1,125 +1,122 @@
+/* 
+─────────────────────────────────────────────
+  1. Directivas de Tailwind — siempre primero
+───────────────────────────────────────────── 
+*/
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* You can add global styles to this file, and also import other style files */
+/* 
+─────────────────────────────────────────────
+  2. Fuentes
+───────────────────────────────────────────── 
+*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');
+
+/* 
+─────────────────────────────────────────────
+  3. CSS Custom Properties — light mode (default)
+───────────────────────────────────────────── 
+*/
 :root {
-  /* Primary */
-  --mat-sys-primary: #6750a4;
-  --mat-sys-on-primary: #ffffff;
-  --mat-sys-primary-container: #eaddff;
-  --mat-sys-on-primary-container: #21005d;
+/*  Vocabulario — paleta Wong, accesible para daltonismo */
+  --color-word-unknown:    #F0F0F0;  /* // UNKNOWN(0)    — casi invisible */
+  --color-word-new:        #56B4E9;  /* // NEW(1)        — azul cielo */
+  --color-word-recognized: #E69F00;  /* // RECOGNIZED(2) — naranja */
+  --color-word-familiar:   #009E73;  /* // FAMILIAR(3)   — verde azulado */
+  --color-word-learned:    #CC79A7;  /* // LEARNED(4)    — violeta rosado */
+/*  KNOWN(5) = transparent — no necesita variable */
+  --color-word-not-found:  #D55E00;  /* // NOT_FOUND(-1) — rojo-naranja */
+  --color-word-ignored:    #BBBBBB;  /* // IGNORED(999)  — gris neutro */
+  --color-karaoke:         #FEF08A;  /* // resaltado karaoke */
 
-  /* Secondary */
-  --mat-sys-secondary: #625b71;
-  --mat-sys-on-secondary: #ffffff;
-  --mat-sys-secondary-container: #e8def8;
-  --mat-sys-on-secondary-container: #1d192b;
+  /* Superficies */
+  --color-bg:              #FFFFFF;
+  --color-bg-secondary:    #F9FAFB;
+  --color-surface:         #FFFFFF;
+  --color-border:          #E5E7EB;
 
-  /* Tertiary */
-  --mat-sys-tertiary: #7d5260;
-  --mat-sys-on-tertiary: #ffffff;
-  --mat-sys-tertiary-container: #ffd8e4;
-  --mat-sys-on-tertiary-container: #31111d;
+  /* Texto */
+  --color-text-primary:    #111827;
+  --color-text-secondary:  #6B7280;
 
-  /* Error */
-  --mat-sys-error: #b3261e;
-  --mat-sys-on-error: #ffffff;
-  --mat-sys-error-container: #f9dedc;
-  --mat-sys-on-error-container: #410e0b;
+  /* Marca y foco */
+  --color-brand:           #3B82F6;
+  --color-focus-ring:      #3B82F6;
 
-  /* Surface */
-  --mat-sys-surface: #fef7ff;
-  --mat-sys-on-surface: #1c1b1f;
-  --mat-sys-surface-variant: #e7e0ec;
-  --mat-sys-on-surface-variant: #49454f;
-  --mat-sys-surface-container: #f3edf7;
-  --mat-sys-surface-container-high: #ece6f0;
-  --mat-sys-surface-container-highest: #e6e0e9;
-  --mat-sys-surface-container-low: #f7f2fa;
-  --mat-sys-surface-container-lowest: #ffffff;
-
-  /* Background */
-  --mat-sys-background: #fef7ff;
-  --mat-sys-on-background: #1c1b1f;
-
-  /* Outline */
-  --mat-sys-outline: #79747e;
-  --mat-sys-outline-variant: #cac4d0;
-
-  /* Shape */
-  --mat-sys-shape-extra-small: 4px;
-  --mat-sys-shape-small: 8px;
-  --mat-sys-shape-medium: 12px;
-  --mat-sys-shape-large: 16px;
-  --mat-sys-shape-extra-large: 28px;
-  --mat-sys-shape-full: 9999px;
-
-  /* Tipografía */
-  --mat-sys-body-large-font: Roboto, sans-serif;
-  --mat-sys-body-large-size: 16px;
-  --mat-sys-body-large-weight: 400;
-  --mat-sys-body-medium-size: 14px;
-  --mat-sys-body-small-size: 12px;
-
-  --mat-sys-title-large-size: 22px;
-  --mat-sys-title-medium-size: 16px;
-  --mat-sys-title-small-size: 14px;
-
-  --mat-sys-headline-large-size: 32px;
-  --mat-sys-headline-medium-size: 28px;
-  --mat-sys-headline-small-size: 24px;
-
-  --mat-sys-display-large-size: 57px;
-  --mat-sys-display-medium-size: 45px;
-  --mat-sys-display-small-size: 36px;
-
-  --mat-sys-label-large-size: 14px;
-  --mat-sys-label-medium-size: 12px;
-  --mat-sys-label-small-size: 11px;
-
-  --mat-sys-level0: none;
-  --mat-sys-level1:
-    0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
-  --mat-sys-level2:
-    0px 1px 2px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
-  --mat-sys-level3:
-    0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.3);
-  --mat-sys-level4:
-    0px 6px 10px 4px rgba(0, 0, 0, 0.15), 0px 2px 3px rgba(0, 0, 0, 0.3);
-  --mat-sys-level5:
-    0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px rgba(0, 0, 0, 0.3);
-
-  --mat-sys-body-large-font: 'Atkinson Hyperlegible', sans-serif;
-  font-family: 'Atkinson Hyperlegible', sans-serif;
-  font-size: 16px; /* mínimo recomendado para baja visión */
-  line-height: 1.5;
+  /* Tipografía base */
+  --font-ui:     'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-reader: 'Atkinson Hyperlegible', Georgia, serif;
 }
 
-.dark-theme {
-  --mat-sys-primary: #d0bcff;
-  --mat-sys-on-primary: #381e72;
-  --mat-sys-primary-container: #4f378b;
-  --mat-sys-on-primary-container: #eaddff;
+/* 
+─────────────────────────────────────────────
+  4. CSS Custom Properties — dark mode
+     Se activa cuando ThemeService añade html.dark
+───────────────────────────────────────────── 
+*/
+html.dark {
+  --color-word-unknown:    #2A2A2A;
+  --color-word-new:        #0072B2;
+  --color-word-recognized: #B87D00;
+  --color-word-familiar:   #007A59;
+  --color-word-learned:    #AA5588;
+  --color-word-not-found:  #B84A00;
+  --color-word-ignored:    #666666;
+  --color-karaoke:         #713F12;
 
-  --mat-sys-secondary: #ccc2dc;
-  --mat-sys-on-secondary: #332d41;
-  --mat-sys-secondary-container: #4a4458;
-  --mat-sys-on-secondary-container: #e8def8;
+  --color-bg:              #111827;
+  --color-bg-secondary:    #1F2937;
+  --color-surface:         #1F2937;
+  --color-border:          #374151;
 
-  --mat-sys-surface: #141218;
-  --mat-sys-on-surface: #e6e0e9;
-  --mat-sys-surface-variant: #49454f;
-  --mat-sys-on-surface-variant: #cac4d0;
-  --mat-sys-surface-container: #211f26;
-  --mat-sys-surface-container-high: #2b2930;
-  --mat-sys-surface-container-highest: #36343b;
-  --mat-sys-surface-container-low: #1d1b20;
-  --mat-sys-surface-container-lowest: #0f0d13;
+  --color-text-primary:    #F9FAFB;
+  --color-text-secondary:  #9CA3AF;
 
-  --mat-sys-background: #141218;
-  --mat-sys-on-background: #e6e0e9;
+  --color-brand:           #60A5FA;
+  --color-focus-ring:      #60A5FA;
+}
 
-  --mat-sys-outline: #938f99;
-  --mat-sys-outline-variant: #49454f;
+/* 
+─────────────────────────────────────────────
+  5. Estilos base globales
+───────────────────────────────────────────── 
+*/
+html {
+  font-family: var(--font-ui);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg);
+  color-scheme: light;          /* ayuda al navegador a adaptar scrollbars y inputs */
+
+  &.dark {
+    color-scheme: dark;
+  }
+}
+
+/* 
+─────────────────────────────────────────────
+  6. Focus ring global — accesibilidad
+───────────────────────────────────────────── 
+*/
+*:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/*
+─────────────────────────────────────────────
+  7. Animaciones — respeta prefers-reduced-motion
+───────────────────────────────────────────── 
+*/
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

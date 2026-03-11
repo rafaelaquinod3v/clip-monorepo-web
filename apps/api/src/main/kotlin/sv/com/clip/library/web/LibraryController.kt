@@ -15,7 +15,7 @@ import sv.com.clip.user.api.CurrentUserId
 import java.util.UUID
 
 @RestController
-@RequestMapping("/library")
+@RequestMapping("/api/v1/library")
 class LibraryController(
   private val ebookService: EbookService,
 

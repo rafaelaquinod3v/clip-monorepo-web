@@ -13,7 +13,7 @@ export interface SentenceEntry{
   providedIn: 'root',
 })
 export class EpubService {
-  private apiUrl = 'http://localhost:8080/library';
+  private apiUrl = 'http://localhost:8080/api/v1/library';
 
   http = inject(HttpClient);
 
@@ -22,7 +22,7 @@ export class EpubService {
     // El nombre 'file' debe coincidir con @RequestParam("file") en tu Kotlin
     formData.append('file', file); 
 
-    return this.http.post(`http://localhost:8080/media-content/upload`, formData, {
+    return this.http.post(`${this.apiUrl}/media-content/upload`, formData, {
       responseType: 'text'
     });
   }
@@ -31,7 +31,7 @@ export class EpubService {
     return this.http.get<SentenceEntry[]>(`${this.apiUrl}/${fileName}/content?offset=${offset}&limit=${limit}`);
   }
 
-  loadMediaContent(offset: number, limit: number, sortField: string, sortOrder: string, mediaTypes: MediaType[]) {
+/*   loadMediaContent(offset: number, limit: number, sortField: string, sortOrder: string, mediaTypes: MediaType[]) {
     const params = new HttpParams()
       .set('offset', offset)
       .set('limit', limit)
@@ -39,7 +39,7 @@ export class EpubService {
       .set('sortOrder', sortOrder)
       .append('mediaTypes', mediaTypes.join(','))
     return this.http.get<MediaContentResponse[]>(`${this.apiUrl}/media-content/ebook`, {params});
-  }
+  } */
 
   findEbookMediaContentById(id: string | null) {
     return this.http.get<MediaContentResponse>(`${this.apiUrl}/media-content/ebook/${id}`);

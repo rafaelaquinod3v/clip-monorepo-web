@@ -1,5 +1,5 @@
 import { Route } from '@angular/router';
-import { Library } from './pages/library/library';
+import { Library } from './features/library/library/library';
 import { Lector } from './pages/lector/lector';
 import { EbookReaderComponent } from './components/ebook-reader/ebook-reader.component';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';

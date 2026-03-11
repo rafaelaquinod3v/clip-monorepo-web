@@ -1,7 +1,8 @@
 import { Component, ElementRef, inject, ViewChild } from '@angular/core';
-import { SpeechService } from '../../services/speech-service';
+/* import { SpeechService } from '../../services/speech-service'; */
 import { STRESS_TTS, TEST_TTS, TEST_TTS_2, WELCOME_TO_THE_JUNGLE } from '../../components/reader/text.const';
 import { EpubService } from '../../services/epub-service';
+import { SpeechService } from '../../features/audio/data-access/speech-service';
 
 @Component({
   selector: 'app-lector',

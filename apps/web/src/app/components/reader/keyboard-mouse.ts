@@ -1,4 +1,6 @@
-import { SpeechService } from "../../services/speech-service";
+/* import { SpeechService } from "../../services/speech-service"; */
+
+import { SpeechService } from "../../features/audio/data-access/speech-service";
 
 // keyboard.ts
 export function handleKeyDownHelper(event: KeyboardEvent): string | undefined {    

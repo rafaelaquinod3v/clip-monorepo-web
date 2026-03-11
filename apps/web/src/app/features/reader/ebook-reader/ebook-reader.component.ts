@@ -6,7 +6,8 @@ import { Pagination } from './pagination';
 import { AudioStreamPlayerComponent } from '../../../components/audio-stream-player/audio-stream-player.component';
 import { EpubService, SentenceEntry } from '../../../services/epub-service';
 import { WordTimestamp } from '../../../models/ebook.model';
-import { SpeechService } from '../../../services/speech-service';
+import { SpeechService } from '../../audio/data-access/speech-service';
+/* import { SpeechService } from '../../../services/speech-service'; */
 /* import { WordTimestamp } from '../../models/ebook.model';
 import { SpeechService } from '../../services/speech-service';
 import { AudioStreamPlayerComponent } from '../audio-stream-player/audio-stream-player.component'; */

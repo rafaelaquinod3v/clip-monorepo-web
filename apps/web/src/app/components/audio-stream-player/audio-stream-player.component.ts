@@ -1,6 +1,7 @@
 import { Component, inject, NgZone, OnDestroy, output, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { SpeechService } from '../../services/speech-service';
+import { SpeechService } from '../../features/audio/data-access/speech-service';
+/* import { SpeechService } from '../../services/speech-service'; */
 
 @Component({
   selector: 'app-audio-stream-player',

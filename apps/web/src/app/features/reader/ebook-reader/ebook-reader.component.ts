@@ -1,11 +1,15 @@
 import { ChangeDetectorRef, Component, ElementRef, HostListener, inject, OnInit, signal, ViewChild, ViewEncapsulation } from '@angular/core';
-import { EpubService, SentenceEntry } from '../../services/epub-service';
+//import { EpubService, SentenceEntry } from '../../services/epub-service';
 import { debounceTime, Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { Pagination } from './pagination';
-import { WordTimestamp } from '../../models/ebook.model';
+import { AudioStreamPlayerComponent } from '../../../components/audio-stream-player/audio-stream-player.component';
+import { EpubService, SentenceEntry } from '../../../services/epub-service';
+import { WordTimestamp } from '../../../models/ebook.model';
+import { SpeechService } from '../../../services/speech-service';
+/* import { WordTimestamp } from '../../models/ebook.model';
 import { SpeechService } from '../../services/speech-service';
-import { AudioStreamPlayerComponent } from '../audio-stream-player/audio-stream-player.component';
+import { AudioStreamPlayerComponent } from '../audio-stream-player/audio-stream-player.component'; */
 
 interface BookState {
   currentPageStart: number;

@@ -1,12 +1,12 @@
 import { Route } from '@angular/router';
 import { Library } from './features/library/library/library';
 import { Lector } from './pages/lector/lector';
-import { EbookReaderComponent } from './components/ebook-reader/ebook-reader.component';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
-import { EbookPageComponent } from './pages/ebook/ebook-page.component';
+import { EbookPageComponent } from './features/reader/ebook/ebook-page.component';
 import { authGuard } from './core/auth/auth-guard';
 import { Dashboard } from './features/progress/dashboard/dashboard';
 import { Login } from './features/auth/login/login';
+import { EbookReaderComponent } from './features/reader/ebook-reader/ebook-reader.component';
 
 export const appRoutes: Route[] = [
     {

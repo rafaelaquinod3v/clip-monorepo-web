@@ -1,7 +1,8 @@
 import { Component, inject, Input, OnInit, signal } from '@angular/core';
-import { EpubService } from '../../services/epub-service';
-import { MediaContentResponse, MediaType } from '../../models/media-content.model';
+import { EpubService } from '../../../../services/epub-service';
+import { MediaContentResponse, MediaType } from '../../../../models/media-content.model';
 import { RouterLink } from '@angular/router';
+
 
 @Component({
   selector: 'app-media-content-shelf',

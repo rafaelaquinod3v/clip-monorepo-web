@@ -503,6 +503,7 @@
 │   │   ├── eslint.config.mjs
 │   │   ├── project.json
 │   │   ├── public
+│   │   │   ├── clip.png
 │   │   │   └── favicon.ico
 │   │   ├── src
 │   │   │   ├── app
@@ -573,6 +574,8 @@
 │   │   │   │   │   │   │       ├── media-content-shelf.component.spec.ts
 │   │   │   │   │   │   │       └── media-content-shelf.component.ts
 │   │   │   │   │   │   ├── data-access
+│   │   │   │   │   │   │   ├── library.service.spec.ts
+│   │   │   │   │   │   │   └── library.service.ts
 │   │   │   │   │   │   └── library
 │   │   │   │   │   │       ├── library.css
 │   │   │   │   │   │       ├── library.html
@@ -641,6 +644,7 @@
 │   │   │   ├── main.ts
 │   │   │   ├── polyfills-global.js
 │   │   │   └── styles.scss
+│   │   ├── tailwind.config.js
 │   │   ├── tsconfig.app.json
 │   │   ├── tsconfig.json
 │   │   └── tsconfig.spec.json
@@ -665,6 +669,24 @@
 ├── gradlew.bat
 ├── jest.config.ts
 ├── jest.preset.js
+├── libs
+│   └── learning
+│       ├── README.md
+│       ├── eslint.config.mjs
+│       ├── jest.config.cts
+│       ├── project.json
+│       ├── src
+│       │   ├── index.ts
+│       │   ├── lib
+│       │   │   └── learning
+│       │   │       ├── learning.css
+│       │   │       ├── learning.html
+│       │   │       ├── learning.spec.ts
+│       │   │       └── learning.ts
+│       │   └── test-setup.ts
+│       ├── tsconfig.json
+│       ├── tsconfig.lib.json
+│       └── tsconfig.spec.json
 ├── nginx.conf
 ├── nx.json
 ├── package-lock.json
@@ -682,4 +704,4 @@
 ├── structure.txt
 └── tsconfig.base.json
 
-243 directories, 440 files
+248 directories, 457 files

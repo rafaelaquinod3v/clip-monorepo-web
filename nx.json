@@ -88,6 +88,10 @@
       "linter": "none",
       "unitTestRunner": "jest",
       "e2eTestRunner": "playwright"
+    },
+    "@nx/angular:library": {
+      "linter": "eslint",
+      "unitTestRunner": "jest"
     }
   }
 }

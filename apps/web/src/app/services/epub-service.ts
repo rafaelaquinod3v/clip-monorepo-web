@@ -17,7 +17,7 @@ export class EpubService {
 
   http = inject(HttpClient);
 
-  upload(file: File): Observable<any> {
+/*   upload(file: File): Observable<any> {
     const formData = new FormData();
     // El nombre 'file' debe coincidir con @RequestParam("file") en tu Kotlin
     formData.append('file', file); 
@@ -25,7 +25,7 @@ export class EpubService {
     return this.http.post(`${this.apiUrl}/media-content/upload`, formData, {
       responseType: 'text'
     });
-  }
+  } */
   
   loadEpubJsonl(fileName: string, offset: number, limit: number) {
     return this.http.get<SentenceEntry[]>(`${this.apiUrl}/${fileName}/content?offset=${offset}&limit=${limit}`);

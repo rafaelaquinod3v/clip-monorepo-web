@@ -277,8 +277,6 @@
 │   │       │   │               │   ├── infrastructure
 │   │       │   │               │   └── web
 │   │       │   │               │       └── LibraryController.kt
-│   │       │   │               ├── localization
-│   │       │   │               │   └── TraslationProviderService.kt
 │   │       │   │               ├── media
 │   │       │   │               │   ├── api
 │   │       │   │               │   │   ├── MediaApi.kt
@@ -353,7 +351,9 @@
 │   │       │   │               │   │   └── TtsPort.kt
 │   │       │   │               │   ├── infrastructure
 │   │       │   │               │   │   ├── AudioService.kt
-│   │       │   │               │   │   └── TtsAdapter.kt
+│   │       │   │               │   │   ├── TtsAdapter.kt
+│   │       │   │               │   │   └── config
+│   │       │   │               │   │       └── TtsProperties.kt
 │   │       │   │               │   └── web
 │   │       │   │               │       └── TtsController.kt
 │   │       │   │               └── user
@@ -442,24 +442,6 @@
 │   │                           ├── ModularityTest.kt
 │   │                           └── config
 │   │                               └── TestConfig.kt
-│   ├── desktop-legacy
-│   │   ├── forge.config.js
-│   │   ├── package.json
-│   │   ├── project.json
-│   │   └── src
-│   │       ├── app
-│   │       │   ├── app.element.css
-│   │       │   ├── preload.js
-│   │       │   ├── renderer.js
-│   │       │   └── views
-│   │       │       ├── inicio.html
-│   │       │       └── users.html
-│   │       ├── assets
-│   │       ├── favicon.ico
-│   │       ├── index.html
-│   │       ├── main.js
-│   │       ├── styles.css
-│   │       └── test-setup.ts
 │   ├── desktop-main
 │   │   ├── electron-builder.json
 │   │   ├── project.json
@@ -484,7 +466,6 @@
 │   │   │   │   ├── app.scss
 │   │   │   │   ├── app.spec.ts
 │   │   │   │   ├── app.ts
-│   │   │   │   ├── nx-welcome.ts
 │   │   │   │   ├── services
 │   │   │   │   │   ├── electron-service.spec.ts
 │   │   │   │   │   └── electron-service.ts
@@ -542,22 +523,6 @@
 │   │   │   │   │   │   ├── audio-stream-player.component.html
 │   │   │   │   │   │   ├── audio-stream-player.component.spec.ts
 │   │   │   │   │   │   └── audio-stream-player.component.ts
-│   │   │   │   │   ├── dictionary
-│   │   │   │   │   │   ├── dictionary.css
-│   │   │   │   │   │   ├── dictionary.html
-│   │   │   │   │   │   ├── dictionary.spec.ts
-│   │   │   │   │   │   └── dictionary.ts
-│   │   │   │   │   ├── ebook-reader
-│   │   │   │   │   │   ├── ebook-reader.component.css
-│   │   │   │   │   │   ├── ebook-reader.component.html
-│   │   │   │   │   │   ├── ebook-reader.component.spec.ts
-│   │   │   │   │   │   ├── ebook-reader.component.ts
-│   │   │   │   │   │   └── pagination.ts
-│   │   │   │   │   ├── media-content-shelf
-│   │   │   │   │   │   ├── media-content-shelf.component.css
-│   │   │   │   │   │   ├── media-content-shelf.component.html
-│   │   │   │   │   │   ├── media-content-shelf.component.spec.ts
-│   │   │   │   │   │   └── media-content-shelf.component.ts
 │   │   │   │   │   ├── reader
 │   │   │   │   │   │   ├── audio.ts
 │   │   │   │   │   │   ├── helper.ts
@@ -572,12 +537,69 @@
 │   │   │   │   │       ├── top-app-bar.component.html
 │   │   │   │   │       ├── top-app-bar.component.spec.ts
 │   │   │   │   │       └── top-app-bar.component.ts
-│   │   │   │   ├── guards
-│   │   │   │   │   ├── auth-guard.spec.ts
-│   │   │   │   │   └── auth-guard.ts
-│   │   │   │   ├── interceptors
-│   │   │   │   │   ├── auth-interceptor.spec.ts
-│   │   │   │   │   └── auth-interceptor.ts
+│   │   │   │   ├── core
+│   │   │   │   │   ├── auth
+│   │   │   │   │   │   ├── auth-guard.spec.ts
+│   │   │   │   │   │   ├── auth-guard.ts
+│   │   │   │   │   │   ├── auth-interceptor.spec.ts
+│   │   │   │   │   │   ├── auth-interceptor.ts
+│   │   │   │   │   │   ├── auth-service.spec.ts
+│   │   │   │   │   │   └── auth-service.ts
+│   │   │   │   │   ├── constants
+│   │   │   │   │   │   └── api-paths.ts
+│   │   │   │   │   └── http
+│   │   │   │   ├── features
+│   │   │   │   │   ├── audio
+│   │   │   │   │   │   └── data-access
+│   │   │   │   │   │       ├── speech-service.spec.ts
+│   │   │   │   │   │       └── speech-service.ts
+│   │   │   │   │   ├── auth
+│   │   │   │   │   │   └── login
+│   │   │   │   │   │       ├── login.css
+│   │   │   │   │   │       ├── login.html
+│   │   │   │   │   │       ├── login.spec.ts
+│   │   │   │   │   │       └── login.ts
+│   │   │   │   │   ├── dictionary
+│   │   │   │   │   │   └── dictionary
+│   │   │   │   │   │       ├── dictionary.css
+│   │   │   │   │   │       ├── dictionary.html
+│   │   │   │   │   │       ├── dictionary.spec.ts
+│   │   │   │   │   │       └── dictionary.ts
+│   │   │   │   │   ├── library
+│   │   │   │   │   │   ├── components
+│   │   │   │   │   │   │   └── media-content-shelf
+│   │   │   │   │   │   │       ├── media-content-shelf.component.css
+│   │   │   │   │   │   │       ├── media-content-shelf.component.html
+│   │   │   │   │   │   │       ├── media-content-shelf.component.spec.ts
+│   │   │   │   │   │   │       └── media-content-shelf.component.ts
+│   │   │   │   │   │   ├── data-access
+│   │   │   │   │   │   └── library
+│   │   │   │   │   │       ├── library.css
+│   │   │   │   │   │       ├── library.html
+│   │   │   │   │   │       ├── library.spec.ts
+│   │   │   │   │   │       └── library.ts
+│   │   │   │   │   ├── progress
+│   │   │   │   │   │   └── dashboard
+│   │   │   │   │   │       ├── dashboard.css
+│   │   │   │   │   │       ├── dashboard.html
+│   │   │   │   │   │       ├── dashboard.spec.ts
+│   │   │   │   │   │       └── dashboard.ts
+│   │   │   │   │   ├── reader
+│   │   │   │   │   │   ├── ebook
+│   │   │   │   │   │   │   ├── ebook-page.component.css
+│   │   │   │   │   │   │   ├── ebook-page.component.html
+│   │   │   │   │   │   │   ├── ebook-page.component.spec.ts
+│   │   │   │   │   │   │   └── ebook-page.component.ts
+│   │   │   │   │   │   └── ebook-reader
+│   │   │   │   │   │       ├── ebook-reader.component.css
+│   │   │   │   │   │       ├── ebook-reader.component.html
+│   │   │   │   │   │       ├── ebook-reader.component.spec.ts
+│   │   │   │   │   │       ├── ebook-reader.component.ts
+│   │   │   │   │   │       └── pagination.ts
+│   │   │   │   │   └── vocabulary
+│   │   │   │   │       └── data-access
+│   │   │   │   │           ├── learning-service.spec.ts
+│   │   │   │   │           └── learning-service.ts
 │   │   │   │   ├── layouts
 │   │   │   │   │   └── main-layout
 │   │   │   │   │       ├── main-layout.component.css
@@ -587,53 +609,34 @@
 │   │   │   │   ├── models
 │   │   │   │   │   ├── ebook.model.ts
 │   │   │   │   │   └── media-content.model.ts
-│   │   │   │   ├── nx-welcome.ts
 │   │   │   │   ├── pages
-│   │   │   │   │   ├── dashboard
-│   │   │   │   │   │   ├── dashboard.css
-│   │   │   │   │   │   ├── dashboard.html
-│   │   │   │   │   │   ├── dashboard.spec.ts
-│   │   │   │   │   │   └── dashboard.ts
-│   │   │   │   │   ├── ebook
-│   │   │   │   │   │   ├── ebook-page.component.css
-│   │   │   │   │   │   ├── ebook-page.component.html
-│   │   │   │   │   │   ├── ebook-page.component.spec.ts
-│   │   │   │   │   │   └── ebook-page.component.ts
 │   │   │   │   │   ├── lector
 │   │   │   │   │   │   ├── lector.css
 │   │   │   │   │   │   ├── lector.html
 │   │   │   │   │   │   ├── lector.spec.ts
 │   │   │   │   │   │   └── lector.ts
-│   │   │   │   │   ├── library
-│   │   │   │   │   │   ├── library.css
-│   │   │   │   │   │   ├── library.html
-│   │   │   │   │   │   ├── library.spec.ts
-│   │   │   │   │   │   └── library.ts
-│   │   │   │   │   ├── login
-│   │   │   │   │   │   ├── login.css
-│   │   │   │   │   │   ├── login.html
-│   │   │   │   │   │   ├── login.spec.ts
-│   │   │   │   │   │   └── login.ts
 │   │   │   │   │   └── settings
 │   │   │   │   │       ├── settings.css
 │   │   │   │   │       ├── settings.html
 │   │   │   │   │       ├── settings.spec.ts
 │   │   │   │   │       └── settings.ts
-│   │   │   │   └── services
-│   │   │   │       ├── analyze-text.spec.ts
-│   │   │   │       ├── analyze-text.ts
-│   │   │   │       ├── auth-service.spec.ts
-│   │   │   │       ├── auth-service.ts
-│   │   │   │       ├── epub-service.spec.ts
-│   │   │   │       ├── epub-service.ts
-│   │   │   │       ├── file-omw-service.spec.ts
-│   │   │   │       ├── file-omw-service.ts
-│   │   │   │       ├── learning-service.spec.ts
-│   │   │   │       ├── learning-service.ts
-│   │   │   │       ├── progress-omw-service.spec.ts
-│   │   │   │       ├── progress-omw-service.ts
-│   │   │   │       ├── speech-service.spec.ts
-│   │   │   │       └── speech-service.ts
+│   │   │   │   ├── services
+│   │   │   │   │   ├── analyze-text.spec.ts
+│   │   │   │   │   ├── analyze-text.ts
+│   │   │   │   │   ├── epub-service.spec.ts
+│   │   │   │   │   ├── epub-service.ts
+│   │   │   │   │   ├── file-omw-service.spec.ts
+│   │   │   │   │   ├── file-omw-service.ts
+│   │   │   │   │   ├── progress-omw-service.spec.ts
+│   │   │   │   │   └── progress-omw-service.ts
+│   │   │   │   └── shared
+│   │   │   │       ├── components
+│   │   │   │       ├── directives
+│   │   │   │       ├── models
+│   │   │   │       └── pipes
+│   │   │   ├── environments
+│   │   │   │   ├── environment.development.ts
+│   │   │   │   └── environment.ts
 │   │   │   ├── index.html
 │   │   │   ├── main.ts
 │   │   │   ├── polyfills-global.js
@@ -652,7 +655,6 @@
 ├── build.log
 ├── docker-compose.yml
 ├── eslint.config.mjs
-├── estructura.txt
 ├── gradle
 │   ├── libs.versions.toml
 │   └── wrapper
@@ -680,4 +682,4 @@
 ├── structure.txt
 └── tsconfig.base.json
 
-228 directories, 453 files
+243 directories, 440 files

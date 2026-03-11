@@ -1,10 +1,13 @@
 import { Component, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpEventType, HttpResponse } from '@angular/common/http';
-import { ProgressOmwService } from '../../services/progress-omw-service';
-import { FileOmwService } from '../../services/file-omw-service';
+/* import { ProgressOmwService } from '../../services/progress-omw-service';
+import { FileOmwService } from '../../services/file-omw-service'; */
 import { RouterModule } from '@angular/router';
-import { AuthService } from '../../core/auth/auth-service';
+import { FileOmwService } from '../../../services/file-omw-service';
+import { AuthService } from '../../../core/auth/auth-service';
+import { ProgressOmwService } from '../../../services/progress-omw-service';
+//import { AuthService } from '../../core/auth/auth-service';
 @Component({
   selector: 'app-dashboard',
   imports: [CommonModule, RouterModule],

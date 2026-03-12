@@ -1,3 +1,4 @@
+Hello
 npx nx serve web --configuration=production
 
 # genera structura de carpetas y archivos para analisis

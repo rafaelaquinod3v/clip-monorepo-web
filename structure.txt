@@ -670,23 +670,77 @@
 ├── jest.config.ts
 ├── jest.preset.js
 ├── libs
+│   ├── content
+│   │   ├── README.md
+│   │   ├── eslint.config.mjs
+│   │   ├── jest.config.cts
+│   │   ├── project.json
+│   │   ├── src
+│   │   │   ├── index.ts
+│   │   │   ├── lib
+│   │   │   │   └── content
+│   │   │   │       ├── content.css
+│   │   │   │       ├── content.html
+│   │   │   │       ├── content.spec.ts
+│   │   │   │       └── content.ts
+│   │   │   └── test-setup.ts
+│   │   ├── tsconfig.json
+│   │   ├── tsconfig.lib.json
+│   │   └── tsconfig.spec.json
+│   ├── dictionary
+│   │   ├── README.md
+│   │   ├── eslint.config.mjs
+│   │   ├── jest.config.cts
+│   │   ├── project.json
+│   │   ├── src
+│   │   │   ├── index.ts
+│   │   │   ├── lib
+│   │   │   │   └── dictionary
+│   │   │   │       ├── dictionary.css
+│   │   │   │       ├── dictionary.html
+│   │   │   │       ├── dictionary.spec.ts
+│   │   │   │       └── dictionary.ts
+│   │   │   └── test-setup.ts
+│   │   ├── tsconfig.json
+│   │   ├── tsconfig.lib.json
+│   │   └── tsconfig.spec.json
 │   └── learning
-│       ├── README.md
-│       ├── eslint.config.mjs
-│       ├── jest.config.cts
-│       ├── project.json
-│       ├── src
-│       │   ├── index.ts
-│       │   ├── lib
-│       │   │   └── learning
-│       │   │       ├── learning.css
-│       │   │       ├── learning.html
-│       │   │       ├── learning.spec.ts
-│       │   │       └── learning.ts
-│       │   └── test-setup.ts
-│       ├── tsconfig.json
-│       ├── tsconfig.lib.json
-│       └── tsconfig.spec.json
+│       ├── data-access
+│       │   ├── README.md
+│       │   ├── eslint.config.mjs
+│       │   ├── jest.config.cts
+│       │   ├── project.json
+│       │   ├── src
+│       │   │   ├── index.ts
+│       │   │   ├── lib
+│       │   │   │   └── data-access
+│       │   │   │       ├── data-access.css
+│       │   │   │       ├── data-access.html
+│       │   │   │       ├── data-access.spec.ts
+│       │   │   │       └── data-access.ts
+│       │   │   └── test-setup.ts
+│       │   ├── tsconfig.json
+│       │   ├── tsconfig.lib.json
+│       │   └── tsconfig.spec.json
+│       └── domain
+│           ├── README.md
+│           ├── eslint.config.mjs
+│           ├── jest.config.cts
+│           ├── project.json
+│           ├── src
+│           │   ├── index.ts
+│           │   ├── lib
+│           │   │   └── domain
+│           │   │       ├── commands
+│           │   │       ├── entities
+│           │   │       ├── events
+│           │   │       ├── queries
+│           │   │       ├── repositories
+│           │   │       └── value-objects
+│           │   └── test-setup.ts
+│           ├── tsconfig.json
+│           ├── tsconfig.lib.json
+│           └── tsconfig.spec.json
 ├── nginx.conf
 ├── nx.json
 ├── package-lock.json
@@ -704,4 +758,4 @@
 ├── structure.txt
 └── tsconfig.base.json
 
-248 directories, 457 files
+267 directories, 492 files

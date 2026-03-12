@@ -15,9 +15,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@clip-monorepo/learning": ["libs/learning/src/index.ts"],
-      "@clip-monorepo/content": ["libs/content/src/index.ts"],
-      "@clip-monorepo/dictionary": ["libs/dictionary/src/index.ts"]
+      "@clip/learning/domain": ["libs/learning/domain/src/index.ts"],
+      "@clip/learning/data-access": ["libs/learning/data-access/src/index.ts"],
+      "@clip/content/data-access": ["libs/content/data-access/src/index.ts"],
+      "@clip-monorepo/content-domain": ["libs/content/domain/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
